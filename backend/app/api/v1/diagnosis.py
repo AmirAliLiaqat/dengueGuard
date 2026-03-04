@@ -25,19 +25,30 @@ async def diagnose_symptoms(symptoms: Dict[str, Any]):
     facts = symptoms.copy()
     facts.update({"ml_prediction": ml_result["stage_name"]})
     
-    kbs_result = kbs_engine.infer(facts)
+    kbs_result, applied_rules = kbs_engine.infer(facts)
     
     # Extract only new facts (conclusions) from kbs_result
     conclusions = {k: v for k, v in kbs_result.items() if k not in symptoms}
     
-    # Compile report
+    # Default values in case no rules fire
+    disease_detection = conclusions.get("disease_detection", "Inconclusive / Pending Clinical Review")
+    risk_classification = conclusions.get("risk_classification", "Unknown")
+    clinical_recommendations = conclusions.get("clinical_recommendations", "Please consult a healthcare professional for a physical examination and medical advice.")
+    alert_system = conclusions.get("alert_system", "Routine Evaluation")
+
+    if not applied_rules:
+        applied_rules.append("No specific risk rules triggered based on provided symptoms.")
+
+    # Compile report matching requested structure exactly
     report = {
         "status": "success",
         "diagnosis": {
-            "ml_model_result": ml_result,
-            "kbs_logic_result": conclusions,
-            "final_conclusion": conclusions.get("dengue_stage") or ml_result.get("stage_name"),
-            "recommendation": conclusions.get("recommendation", "Please see a doctor for formal diagnosis.")
+            "disease_detection": disease_detection,
+            "risk_classification": risk_classification,
+            "explainable_reasoning": applied_rules,
+            "clinical_recommendations": clinical_recommendations,
+            "alert_system": alert_system,
+            "ml_model_result": ml_result # Keep original ML model result intact for context
         }
     }
     

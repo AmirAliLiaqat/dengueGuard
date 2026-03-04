@@ -84,8 +84,20 @@ class DenguePredictor:
         if self.model is None:
             return {"error": "Model not loaded. Please train first."}
         
-        # Ensure features match X columns
-        input_df = pd.DataFrame([features])
+        # Map frontend payload keys to model feature columns
+        model_input = {
+            'fever_duration': 5 if features.get('fever') else 0, # Approx if fever is present
+            'platelet_count': features.get('platelet_count') or 150000.0, # Normal average baseline
+            'wbc_count': features.get('white_blood_cell_count') or 6000.0,
+            'hematocrit_level': features.get('hematocrit_level') or 42.0,
+            'headache': 1 if features.get('headache') else 0,
+            'vomiting': 1 if features.get('vomiting') or features.get('persistent_vomiting') else 0,
+            'muscle_pain': 1 if features.get('muscle_pain') else 0,
+            'rash': 1 if features.get('skin_rash') else 0,
+            'bleeding': 1 if features.get('mucosal_bleeding') or features.get('severe_bleeding') else 0,
+        }
+        
+        input_df = pd.DataFrame([model_input])
         prediction = self.model.predict(input_df)[0]
         probabilities = self.model.predict_proba(input_df)[0]
         

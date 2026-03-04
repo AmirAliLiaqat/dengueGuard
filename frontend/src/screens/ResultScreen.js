@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { CheckCircle, Info, FileText, Brain, ChevronLeft } from 'lucide-react-native';
+import { CheckCircle, Info, FileText, Brain, ChevronLeft, AlertCircle } from 'lucide-react-native';
+import { generateAndSharePDF } from '../utils/pdfGenerator';
 
 const ResultScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -12,17 +13,55 @@ const ResultScreen = ({ route, navigation }) => {
   
   const styles = createStyles(theme, isRTL);
 
-  const dummyResult = {
-    stage: 'Mild Dengue',
-    probability: 68,
-    explanation: 'Based on your fever duration (4 days) and presence of muscle pain, the system detects early stage symptoms.',
-    recommendation: 'Rest, increase fluid intake (ORC/Water), and monitor platelet count daily. Consult a doctor if vomiting persists.',
-    severity: 'Medium'
+  const diagnosis = route.params?.data || {};
+
+  const stage = diagnosis.disease_detection || 'Complete';
+  const risk = diagnosis.risk_classification || 'Unknown';
+  const explanation = (diagnosis.explainable_reasoning || []).join('\n\n');
+  const recommendation = diagnosis.clinical_recommendations || 'Please consult a doctor.';
+  const alertText = diagnosis.alert_system;
+  let probability = 0;
+  if(diagnosis.ml_model_result && typeof diagnosis.ml_model_result.probability === 'number'){
+     probability = (diagnosis.ml_model_result.probability * 100).toFixed(0);
+  }
+
+  // Determine colors based on risk
+  let riskColor = colors.primary;
+  if (risk === 'Moderate') riskColor = colors.warning || '#FFA500';
+  if (risk === 'High') riskColor = colors.accent || '#FF6B6B';
+  if (risk === 'Critical') riskColor = '#D32F2F';
+
+  const formatList = (text) => {
+    if (Array.isArray(text)) return text;
+    if (!text) return [];
+    if (text.includes('\n')) {
+      return text.split('\n').filter(i => i.trim().length > 0);
+    }
+    return text.split(/\.\s+/).filter(i => i.trim().length > 0).map(i => i.endsWith('.') ? i : i + '.');
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     setIsDownloading(true);
-    setTimeout(() => setIsDownloading(false), 2000);
+    try {
+      const reportData = {
+        id: 'SYS-' + Math.floor(Math.random() * 100000),
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        result: risk,
+        status: stage,
+        score: probability,
+        alertText: alertText,
+        symptoms: ['Diagnosis input verified via engine logic.'], // Real symptoms not in payload context here directly, use general
+        recommendations: formatList(recommendation),
+        reasoning: diagnosis.explainable_reasoning || []
+      };
+      
+      await generateAndSharePDF(reportData);
+    } catch (err) {
+      console.log('Error downloading PDF:', err);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -31,36 +70,72 @@ const ResultScreen = ({ route, navigation }) => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Main')}>
           <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('diagnosis_result')}</Text>
+        <Text style={styles.headerTitle}>{t('diagnosis_result') || "Result"}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.content}>
-        <View style={styles.resultCard}>
-          <View style={styles.iconContainer}>
-            <CheckCircle color={colors.primary} size={64} />
+        
+        {alertText && (
+          <View style={[styles.section, { borderColor: riskColor, backgroundColor: riskColor + '1A' }]}>
+            <View style={styles.sectionHeader}>
+              <AlertCircle color={riskColor} size={20} />
+              <Text style={[styles.sectionText, { color: riskColor, fontWeight: 'bold' }]}>{alertText}</Text>
+            </View>
           </View>
-          <Text style={styles.percentageText}>{dummyResult.probability}%</Text>
-          <Text style={styles.probabilityLabel}>{t('probability')}</Text>
-          <View style={[styles.badge, { backgroundColor: colors.primary + '1A' }]}>
-            <Text style={[styles.badgeText, { color: colors.primary }]}>{dummyResult.stage}</Text>
-          </View>
-        </View>
+        )}
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Brain color={colors.accent} size={20} />
-            <Text style={styles.sectionTitle}>{t('logic_explanation')}</Text>
+        <View style={styles.resultCard}>
+          <View style={[styles.iconContainer, { backgroundColor: riskColor + '1A' }]}>
+            <CheckCircle color={riskColor} size={64} />
           </View>
-          <Text style={styles.sectionText}>{dummyResult.explanation}</Text>
+          <Text style={styles.percentageText}>{probability}%</Text>
+          <Text style={styles.probabilityLabel}>ML Probability</Text>
+          <View style={[styles.badge, { backgroundColor: riskColor + '1A', marginTop: 10 }]}>
+            <Text style={[styles.badgeText, { color: riskColor, fontSize: 16, textAlign: 'center' }]}>{stage}</Text>
+          </View>
+          <View style={[styles.badge, { backgroundColor: '#E0E0E0', marginTop: 10 }]}>
+            <Text style={[styles.badgeText, { color: '#555' }]}>Risk: {risk}</Text>
+          </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Info color={colors.info} size={20} />
-            <Text style={styles.sectionTitle}>{t('medical_advice')}</Text>
+            <Text style={styles.sectionTitle}>{t('medical_advice') || "Recommendations"}</Text>
           </View>
-          <Text style={styles.sectionText}>{dummyResult.recommendation}</Text>
+          {formatList(recommendation).map((item, index) => (
+            <View key={index} style={{ flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 10, alignItems: 'flex-start' }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, marginTop: 8, marginRight: isRTL ? 0 : 10, marginLeft: isRTL ? 10 : 0 }} />
+              <Text style={[styles.sectionText, { flex: 1, marginBottom: 0 }]}>{item.replace(/^[-*•]\s*/, '').trim()}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Brain color={colors.primary} size={20} />
+            <Text style={styles.sectionTitle}>{t('logic_explanation') || "AI Logic & Reasoning"}</Text>
+          </View>
+          {(diagnosis.explainable_reasoning && diagnosis.explainable_reasoning.length > 0) ? (
+            <View style={styles.reasoningContainer}>
+              {diagnosis.explainable_reasoning.map((reason, index) => (
+                <View key={index} style={styles.reasoningStep}>
+                  <View style={styles.timelineColumn}>
+                    <View style={[styles.timelineDot, { backgroundColor: colors.primary, borderColor: colors.primary + '40' }]} />
+                    {index < diagnosis.explainable_reasoning.length - 1 && (
+                      <View style={[styles.timelineLine, { backgroundColor: colors.primary + '30' }]} />
+                    )}
+                  </View>
+                  <View style={[styles.reasoningCard, { backgroundColor: colors.primary + '0D', borderColor: colors.primary + '26' }]}>
+                    <Text style={styles.reasoningText}>{reason}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.sectionText}>No reasoning details available.</Text>
+          )}
         </View>
 
         <TouchableOpacity 
@@ -70,9 +145,11 @@ const ResultScreen = ({ route, navigation }) => {
         >
           <FileText color={colors.background} size={20} style={{ marginHorizontal: 8 }} />
           <Text style={styles.downloadButtonText}>
-            {isDownloading ? t('generating_pdf') : t('download_pdf')}
+            {isDownloading ? (t('generating_pdf') || 'Wait...') : (t('download_pdf') || 'Download')}
           </Text>
         </TouchableOpacity>
+        
+        <View style={{height: 20}} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -128,7 +205,6 @@ const createStyles = (theme, isRTL) => {
       width: 100,
       height: 100,
       borderRadius: 50,
-      backgroundColor: colors.primary + '1A',
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: spacing.m,
@@ -177,6 +253,8 @@ const createStyles = (theme, isRTL) => {
       color: colors.textMuted,
       lineHeight: 22,
       textAlign,
+      marginRight: 10,
+      marginLeft: 10,
     },
     downloadButton: {
       backgroundColor: colors.primary,
@@ -185,7 +263,7 @@ const createStyles = (theme, isRTL) => {
       borderRadius: 16,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: spacing.xl * 2,
+      marginBottom: spacing.xl,
       shadowColor: colors.primary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
@@ -196,6 +274,52 @@ const createStyles = (theme, isRTL) => {
       color: colors.background,
       fontSize: 16,
       fontWeight: 'bold',
+    },
+    reasoningContainer: {
+      marginTop: spacing.s,
+    },
+    reasoningStep: {
+      flexDirection,
+      marginBottom: 0, 
+    },
+    timelineColumn: {
+      alignItems: 'center',
+      width: 24,
+      marginRight: isRTL ? 0 : spacing.m,
+      marginLeft: isRTL ? spacing.m : 0,
+    },
+    timelineDot: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      marginTop: spacing.m + 2,
+      borderWidth: 3,
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    timelineLine: {
+      width: 2,
+      flex: 1,
+      minHeight: 20,
+      marginTop: 4,
+      marginBottom: -16,
+    },
+    reasoningCard: {
+      flex: 1,
+      padding: spacing.m,
+      borderRadius: 12,
+      borderWidth: 1,
+      marginBottom: spacing.m,
+    },
+    reasoningText: {
+      ...typography.body,
+      color: colors.text,
+      fontSize: 13,
+      lineHeight: 20,
+      textAlign,
     },
   });
 };

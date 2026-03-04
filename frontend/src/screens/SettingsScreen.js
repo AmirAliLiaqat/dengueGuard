@@ -14,10 +14,8 @@ import {
   ChevronLeft,
   Bell,
   Moon,
-  Info,
   ChevronRight,
   Check,
-  HelpCircle,
 } from 'lucide-react-native';
 
 const SettingsScreen = ({ navigation }) => {
@@ -89,31 +87,6 @@ const SettingsScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitleText}>{t('support')}</Text>
-          
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => navigation.navigate('HelpSupport')}
-          >
-            <View style={styles.itemIconContainer}>
-              <HelpCircle color={colors.primary} size={20} />
-            </View>
-            <Text style={styles.itemLabel}>{t('help_faq')}</Text>
-            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingItem}
-            onPress={() => navigation.navigate('About')}
-          >
-            <View style={styles.itemIconContainer}>
-              <Info color={colors.primary} size={20} />
-            </View>
-            <Text style={styles.itemLabel}>{t('about_app')}</Text>
-            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
-          </TouchableOpacity>
-        </View>
 
         <View style={styles.footer}>
           <Text style={styles.versionText}>{t('app_version')}: 1.0.0 (Build 124)</Text>

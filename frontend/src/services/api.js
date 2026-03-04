@@ -1,9 +1,12 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
+// Use your computer's local network IP for physical device / Expo Go access
+const API_BASE_URL = 'http://192.168.1.100:8000/api/v1';
+
 export const denguApi = createApi({
   reducerPath: 'denguApi',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: 'http://localhost:8000/api/v1',
+    baseUrl: API_BASE_URL,
     prepareHeaders: (headers) => {
       return headers;
     },

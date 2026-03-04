@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   View,
   Text,
@@ -9,7 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText } from 'lucide-react-native';
+import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText, HelpCircle, Info, Stethoscope } from 'lucide-react-native';
 
 const ProfileScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -26,8 +25,7 @@ const ProfileScreen = ({ navigation }) => {
   const menuItems = [
     { icon: User, label: t('edit_profile_btn'), onPress: () => navigation.navigate('EditProfile') },
     { icon: Bell, label: t('notifications_toggle'), onPress: () => navigation.navigate('Notifications') },
-    { icon: Shield, label: t('privacy_security'), onPress: () => navigation.navigate('PrivacyAndSecurity') },
-    { icon: FileText, label: t('terms_conditions'), onPress: () => navigation.navigate('TermsAndConditions') },
+    { icon: Stethoscope, label: t('doctor_panel') || 'Doctor Panel', onPress: () => navigation.navigate('Doctor') },
     { icon: Settings, label: t('settings'), onPress: () => navigation.navigate('Settings') },
   ];
 
@@ -70,6 +68,38 @@ const ProfileScreen = ({ navigation }) => {
               <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
             </TouchableOpacity>
           ))}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('support')}</Text>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('PrivacyAndSecurity')}>
+            <View style={styles.menuIconContainer}>
+              <Shield color={colors.primary} size={22} />
+            </View>
+            <Text style={styles.menuLabel}>{t('privacy_security')}</Text>
+            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('TermsAndConditions')}>
+            <View style={styles.menuIconContainer}>
+              <FileText color={colors.primary} size={22} />
+            </View>
+            <Text style={styles.menuLabel}>{t('terms_conditions')}</Text>
+            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('HelpSupport')}>
+            <View style={styles.menuIconContainer}>
+              <HelpCircle color={colors.primary} size={22} />
+            </View>
+            <Text style={styles.menuLabel}>{t('help_faq')}</Text>
+            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('About')}>
+            <View style={styles.menuIconContainer}>
+              <Info color={colors.primary} size={22} />
+            </View>
+            <Text style={styles.menuLabel}>{t('about_app')}</Text>
+            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Login')}>

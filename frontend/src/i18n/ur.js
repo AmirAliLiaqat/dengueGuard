@@ -8,7 +8,7 @@ export const ur = {
   back: "پیچھے",
 
   // Auth
-  welcome_title: "خوش آمدید،",
+  welcome_title: "خوش آمدید",
   welcome_subtitle: "AI سے چلنے والی بیماریوں کی تشخیص",
   login_subtitle: "اپنا سفر جاری رکھنے کے لیے سائن ان کریں",
   signup_subtitle: "اپنی صحت پر نظر رکھنے کے لیے اپنا اکاؤنٹ بنائیں",
@@ -32,7 +32,7 @@ export const ur = {
   join_us: "ہمارے ساتھ شامل ہوں",
 
   // Home
-  welcome_back: "خوش آمدید،",
+  welcome_back: "خوش آمدید",
   precaution_alert: "احتیاطی الرٹ",
   dengue_alert_desc: "آپ کے مطقے میں ڈینگی کے کیسز زیادہ رپورٹ ہوئے ہیں۔ مچھر بھگانے والی ادویات استمال کریں اور پانی کے برتنوں کو ڈھانپیں۔",
   quick_actions: "فوری اقدامات",
@@ -53,6 +53,47 @@ export const ur = {
   nausea: "متلی/الٹیاں",
   visible_bleeding: "ظاہر ہونیوالی خون بہنا",
   analyze_ai: "AI اور KBS کے ساتھ تجزیہ کریں",
+  analyze_now: "ابھی تجزیہ کریں",
+
+  // Detailed Symptoms and Signs
+  warning_signs: "انتباہی علامات",
+  severe_criteria: "شدید معیار",
+  phase_home_care: "مرحلہ اور گھریلو دیکھ بھال",
+  fever: "بخار",
+  headache: "سر درد",
+  joint_pain: "جوڑوں کا درد",
+  vomiting: "الٹی",
+  skin_rash: "جلد پر دانے",
+  positive_tourniquet_test: "مثبت ٹورنیکیٹ ٹیسٹ",
+  abdominal_pain_or_tenderness: "پیٹ میں درد یا نرمی",
+  persistent_vomiting: "مسلسل الٹی",
+  clinical_fluid_accumulation: "کلینیکل سیال کا جمع ہونا",
+  mucosal_bleeding: "میوکوسل خون بہنا",
+  lethargy_or_restlessness: "سستی یا بے چینی",
+  "liver_enlargement_>_2_cm": "جگر کا بڑھنا > 2 سینٹی میٹر",
+  severe_plasma_leakage: "شدید پلازما کا رساؤ",
+  "shock_(DSS)": "شاک (DSS)",
+  respiratory_distress: "سانس کی تکلیف",
+  severe_bleeding: "شدید خون بہنا",
+  "liver_AST/ALT_>=_1000": "جگر کا AST/ALT >= 1000",
+  impaired_consciousness: "شعور کی خرابی",
+  heart_involvement: "دل کی شمولیت",
+  "fever_drops_(Defervescence)": "بخار کا گرنا (Defervescence)",
+  hematocrit_rapidly_increases: "ہیماٹوکریٹ میں تیزی سے اضافہ",
+  platelet_rapidly_decreases: "پلیٹلیٹ میں تیزی سے کمی",
+  tolerates_adequate_oral_fluids: "مناسب زبانی سیال برداشت کرتا ہے",
+  urinating_at_least_every_6_hours: "کم از کم ہر 6 گھنٹے بعد پیشاب آنا",
+  vital_signs: "اہم علامات",
+  body_temperature: "جسم کا درجہ حرارت",
+  blood_pressure: "بلڈ پریشر",
+  heart_rate: "دل کی دھڑکن",
+  white_blood_cell_count: "خون کے سفید خلیوں کی تعداد",
+  hematocrit_level: "ہیماٹوکریٹ لیول",
+  risk_factors: "خطرے کے عوامل",
+  "recent_travel_/_endemic_area": "حالیہ سفر / مقامی علاقہ",
+  local_dengue_outbreak: "مقامی ڈینگی کا پھیلاؤ",
+  mosquito_exposure: "مچھر کا سامنا",
+  rainy_season: "برسات کا موسم",
 
   // Results
   report_details: "رپورٹ کی تفصیلات",
@@ -99,6 +140,7 @@ export const ur = {
   visibility: "پروفائل کی نمائش",
   data_policy: "ڈیٹا پالیسی",
   request_deletion: "ڈیٹا ختم کرنے کی درخواست",
+  doctor_panel: "ڈیٹر پنل",
 
   // Notifications
   no_notifications: "کوئی اطلاع نہیں ملی",

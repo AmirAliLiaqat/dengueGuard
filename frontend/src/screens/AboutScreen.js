@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, Info, ShieldCheck, Activity } from 'lucide-react-native';
@@ -22,7 +22,11 @@ const AboutScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.logoSection}>
           <View style={styles.logoCircle}>
-            <Activity color={colors.primary} size={60} />
+            <Image 
+              source={require('../assets/icon.png')} 
+              style={styles.logoImage} 
+              resizeMode="cover"
+            />
           </View>
           <Text style={styles.appName}>{t('app_name')}</Text>
           <Text style={styles.version}>{t('app_version')}: 1.0.0</Text>
@@ -112,13 +116,18 @@ const createStyles = (theme, isRTL) => {
     logoCircle: {
       width: 120,
       height: 120,
-      borderRadius: 60,
+      borderRadius: 24,
       backgroundColor: colors.card,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: spacing.m,
       borderWidth: 2,
       borderColor: colors.primary + '33',
+      overflow: 'hidden',
+    },
+    logoImage: {
+      width: '100%',
+      height: '100%',
     },
     appName: {
       ...typography.h1,

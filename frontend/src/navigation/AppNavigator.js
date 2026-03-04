@@ -7,7 +7,7 @@ import { Home, ClipboardList, User } from 'lucide-react-native';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import HomeScreen from '../screens/HomeScreen';
-import SymptomScreen from '../screens/SymptomScreen';
+import DiagnosisFormScreen from '../screens/DiagnosisFormScreen';
 import ResultScreen from '../screens/ResultScreen';
 import DoctorPanel from '../screens/DoctorPanel';
 import HistoryScreen from '../screens/HistoryScreen';
@@ -73,7 +73,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
-      <Stack.Screen name="Diagnose" component={SymptomScreen} />
+      <Stack.Screen name="Diagnose" component={DiagnosisFormScreen} />
       <Stack.Screen name="Result" component={ResultScreen} />
       <Stack.Screen name="Notifications" component={NotificationScreen} />
       <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} />
