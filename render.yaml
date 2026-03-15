@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: dengue-kbs-backend
+    name: dengue-diagnose-backend
     env: python
     # Specify the directory where the backend is located
     rootDirectory: backend
