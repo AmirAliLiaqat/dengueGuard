@@ -1,7 +1,9 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Replace with your local machine's IP address for Expo Go or 10.0.2.2 for Emulator
-const API_BASE_URL = 'http://192.168.1.103:8000/api/v1';
+// Development URL (Your local IP) vs Production URL (Render.com)
+const API_BASE_URL = __DEV__ 
+  ? 'http://192.168.1.103:8000/api/v1' 
+  : 'https://dengue-dignose.onrender.com/api/v1'; // <-- Replace with your actual Render URL
 
 export const denguApi = createApi({
   reducerPath: 'denguApi',
