@@ -8,31 +8,75 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  SafeAreaView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Mail, Lock, User, Phone, UserPlus } from 'lucide-react-native';
+import { Mail, Lock, User, Phone, UserPlus, Eye, EyeOff } from 'lucide-react-native';
+import { useAlert } from '../context/AlertContext';
+
+import { useSignupMutation } from '../services/api';
 
 const SignupScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
+  const [signup, { isLoading }] = useSignupMutation();
+  const { showAlert } = useAlert();
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     password: '',
-    confirmPassword: '',
+    phone: '',
   });
 
   const styles = createStyles(theme, isRTL);
 
-  const handleSignup = () => {
-    console.log('Signup data:', formData);
-    navigation.replace('Main');
+  const handleSignup = async () => {
+    if (!formData.email || !formData.password || !formData.name) {
+      showAlert({
+        title: "Error",
+        message: "Please fill all fields",
+        type: "error"
+      });
+      return;
+    }
+    
+    try {
+      await signup({
+        email: formData.email,
+        password: formData.password,
+        full_name: formData.name,
+        phone: formData.phone,
+      }).unwrap();
+      
+      navigation.navigate('Verification', { email: formData.email });
+    } catch (error) {
+      console.log('Signup error details:', error);
+      let errorMessage = "Something went wrong";
+      
+      if (error.data?.detail) {
+        if (Array.isArray(error.data.detail)) {
+          errorMessage = error.data.detail.map(err => err.msg).join(', ');
+        } else {
+          errorMessage = error.data.detail;
+        }
+      } else if (error.error) {
+        errorMessage = "Network error. Check your connection or server.";
+      } else if (error.status === 'FETCH_ERROR') {
+        errorMessage = "Server unreachable. Make sure the backend is running.";
+      }
+
+      showAlert({
+        title: "Signup Failed",
+        message: errorMessage,
+        type: "error"
+      });
+    }
   };
 
   return (
@@ -83,13 +127,14 @@ const SignupScreen = ({ navigation }) => {
               </View>
             </View>
 
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>{t('phone_number')}</Text>
               <View style={styles.inputWrapper}>
                 <Phone color={colors.textMuted} size={20} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="+92 300 0000000"
+                  placeholder="+1 234 567 890"
                   placeholderTextColor={colors.textMuted}
                   value={formData.phone}
                   onChangeText={(text) => setFormData({ ...formData, phone: text })}
@@ -109,14 +154,32 @@ const SignupScreen = ({ navigation }) => {
                   placeholderTextColor={colors.textMuted}
                   value={formData.password}
                   onChangeText={(text) => setFormData({ ...formData, password: text })}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   textAlign={isRTL ? 'right' : 'left'}
                 />
+                <TouchableOpacity 
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
+                >
+                  {showPassword ? (
+                    <EyeOff color={colors.textMuted} size={20} />
+                  ) : (
+                    <Eye color={colors.textMuted} size={20} />
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
 
-            <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-              <Text style={styles.signupButtonText}>{t('signup_btn')}</Text>
+            <TouchableOpacity 
+              style={[styles.signupButton, isLoading && { opacity: 0.8 }]} 
+              onPress={handleSignup}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={colors.background} />
+              ) : (
+                <Text style={styles.signupButtonText}>{t('signup_btn')}</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -210,6 +273,9 @@ const createStyles = (theme, isRTL) => {
       height: 56,
       color: colors.text,
       ...typography.body,
+    },
+    eyeIcon: {
+      padding: spacing.s,
     },
     signupButton: {
       backgroundColor: colors.primary,

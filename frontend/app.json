@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Dengue KBS",
-    "description": "Dengue KBS is a mobile application for early detection of dengue fever using artificial intelligence.",
-    "slug": "dengue-kbs",
+    "name": "Dengue Diagnose",
+    "description": "Dengue Diagnose is a mobile application for early detection of dengue fever using artificial intelligence.",
+    "slug": "dengue-diagnose",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -20,7 +20,7 @@
         "foregroundImage": "./src/assets/android-icon-foreground.png",
         "backgroundColor": "#0F172A"
       },
-      "package": "com.dengue.kbs"
+      "package": "com.dengue.diagnose"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"

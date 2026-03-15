@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: dengue-kbs-backend
+    env: python
+    # Specify the directory where the backend is located
+    rootDirectory: backend
+    buildCommand: pip install -r requirements.txt
+    # Use gunicorn for production
+    startCommand: gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.5

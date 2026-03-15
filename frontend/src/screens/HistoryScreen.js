@@ -3,31 +3,37 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   FlatList,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ClipboardList, ChevronRight, FileText } from 'lucide-react-native';
+
+import { useGetHistoryQuery } from '../services/api';
 
 const HistoryScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
   const styles = createStyles(theme, isRTL);
-
-  const historyData = [
-    { id: '1', date: 'Oct 24, 2023', result: 'High Risk', status: 'Infected', score: 85 },
-    { id: '2', date: 'Oct 15, 2023', result: 'Low Risk', status: 'Healthy', score: 12 },
-    { id: '3', date: 'Sep 28, 2023', result: 'Medium Risk', status: 'Suspicious', score: 45 },
-  ];
+  
+  const { data: historyData, refetch, isFetching } = useGetHistoryQuery(50); // Fetch up to 50
 
   const renderItem = ({ item }) => {
-    const statusColor = item.status === 'Infected' ? colors.error : 
-                        item.status === 'Healthy' ? colors.success : 
+    const risk = item.kbs_recommendation?.risk_classification || 'Unknown';
+    const statusColor = risk === 'High' || risk === 'Critical' ? colors.error : 
+                        risk === 'Low' ? colors.success : 
                         colors.warning;
     
+    const dateStr = new Date(item.created_at).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+
     return (
       <TouchableOpacity 
         style={styles.card}
@@ -38,16 +44,16 @@ const HistoryScreen = ({ navigation }) => {
             <FileText color={colors.primary} size={24} />
           </View>
           <View style={styles.cardMain}>
-            <Text style={styles.cardTitle}>{item.result}</Text>
-            <Text style={styles.cardSubtitle}>{item.date}</Text>
+            <Text style={styles.cardTitle}>{item.kbs_recommendation?.disease_detection || 'Diagnosis'}</Text>
+            <Text style={styles.cardSubtitle}>{dateStr}</Text>
           </View>
           <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </View>
         <View style={styles.cardFooter}>
           <View style={[styles.statusBadge, { backgroundColor: statusColor + '1A' }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>{item.status}</Text>
+            <Text style={[styles.statusText, { color: statusColor }]}>{risk} Risk</Text>
           </View>
-          <Text style={styles.scoreText}>Severity: {item.score}%</Text>
+          <Text style={styles.scoreText}>ML Prob: {(item.ml_prediction?.probability * 100).toFixed(0)}%</Text>
         </View>
       </TouchableOpacity>
     );
@@ -65,6 +71,8 @@ const HistoryScreen = ({ navigation }) => {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
+        refreshing={isFetching}
+        onRefresh={refetch}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <ClipboardList color={colors.textMuted} size={60} />

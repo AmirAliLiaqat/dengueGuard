@@ -1,10 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PlusCircle, History, Bell, ChevronRight, AlertTriangle } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
+
+import { useGetHistoryQuery, useGetMeQuery } from '../services/api';
+import { scheduleDailyReminder } from '../services/NotificationService';
+import { useEffect } from 'react';
 
 const HomeScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -12,13 +17,35 @@ const HomeScreen = ({ navigation }) => {
   const { t, isRTL } = useLanguage();
   const styles = createStyles(theme, isRTL);
 
+  const { data: userData, refetch: refetchMe, isFetching: isFetchingMe } = useGetMeQuery();
+  const { data: historyData, refetch: refetchHistory, isFetching: isFetchingHistory } = useGetHistoryQuery(3); // Fetch 3 latest
+
+  const onRefresh = React.useCallback(() => {
+    refetchMe();
+    refetchHistory();
+  }, [refetchMe, refetchHistory]);
+
+  useEffect(() => {
+    scheduleDailyReminder();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetchingMe || isFetchingHistory}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+      >
       <View style={styles.header}>
         <View style={{ alignItems: isRTL ? 'flex-end' : 'flex-start' }}>
           <Text style={styles.welcomeText}>{t('welcome_back')}</Text>
-          <Text style={styles.nameText}>Patient John</Text>
+          <Text style={styles.nameText}>{userData?.full_name || 'Patient'}</Text>
         </View>
         <TouchableOpacity 
           style={styles.iconButton}
@@ -74,19 +101,27 @@ const HomeScreen = ({ navigation }) => {
       </Text>
 
       <View style={styles.reportList}>
-        {[1, 2].map((item) => (
-          <TouchableOpacity 
-            key={item} 
-            style={styles.reportItem}
-            onPress={() => navigation.navigate('ReportDetails', { reportId: item.toString() })}
-          >
-            <View style={styles.reportInfo}>
-              <Text style={styles.reportTitle}>Diagnosis #{item}234</Text>
-              <Text style={styles.reportSubtitle}>Oct 12, 2023 • Normal</Text>
-            </View>
-            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
-          </TouchableOpacity>
-        ))}
+        {historyData?.length > 0 ? (
+          historyData.map((report) => (
+            <TouchableOpacity 
+              key={report.id} 
+              style={styles.reportItem}
+              onPress={() => navigation.navigate('ReportDetails', { reportId: report.id })}
+            >
+              <View style={styles.reportInfo}>
+                <Text style={styles.reportTitle}>Diagnosis #{report.id.slice(-4).toUpperCase()}</Text>
+                <Text style={styles.reportSubtitle}>
+                  {new Date(report.created_at).toLocaleDateString()} • {report.kbs_recommendation?.risk_classification || "Unknown"}
+                </Text>
+              </View>
+              <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={[styles.statusDescription, { textAlign: 'center', opacity: 0.6 }]}>
+            No recent reports found. Start a new diagnosis!
+          </Text>
+        )}
       </View>
       </ScrollView>
     </SafeAreaView>

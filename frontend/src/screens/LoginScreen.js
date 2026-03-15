@@ -8,12 +8,18 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  SafeAreaView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Mail, Lock, LogIn, UserPlus } from 'lucide-react-native';
+import { Mail, Lock, LogIn, UserPlus, Eye, EyeOff } from 'lucide-react-native';
+import { useAlert } from '../context/AlertContext';
+
+import { useLoginMutation, useGetMeQuery } from '../services/api';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../redux/authSlice';
 
 const LoginScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -21,12 +27,67 @@ const LoginScreen = ({ navigation }) => {
   const { t, isRTL } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [login, { isLoading }] = useLoginMutation();
+  const dispatch = useDispatch();
+  const { showAlert } = useAlert();
 
   const styles = createStyles(theme, isRTL);
 
-  const handleLogin = () => {
-    // Navigate to main app (tabs)
-    navigation.replace('Main');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      showAlert({
+        title: "Error",
+        message: "Please enter email and password",
+        type: "error"
+      });
+      return;
+    }
+
+    try {
+      const result = await login({ email, password }).unwrap();
+      
+      // After login, we need to fetch user profile to populate Redux
+      // But for now, we'll store the token and navigate. 
+      // Ideally, the backend should return user info with token.
+      dispatch(setCredentials({ 
+        access_token: result.access_token,
+        user: { email } // Placeholder, will be updated by getMe
+      }));
+    } catch (error) {
+      if (error.status === 401) {
+        showAlert({
+          title: "Not Verified",
+          message: "Please verify your email first.",
+          type: "warning",
+          buttons: [
+            { text: "Verify Now", onPress: () => navigation.navigate('Verification', { email }) },
+            { text: "Cancel", style: "cancel" }
+          ]
+        });
+      } else {
+        console.log('Login error details:', error);
+        let errorMessage = "Invalid credentials";
+        
+        if (error.data?.detail) {
+          if (Array.isArray(error.data.detail)) {
+            errorMessage = error.data.detail.map(err => err.msg).join(', ');
+          } else {
+            errorMessage = error.data.detail;
+          }
+        } else if (error.error) {
+          errorMessage = "Network error. Check your connection or server.";
+        } else if (error.status === 'FETCH_ERROR') {
+          errorMessage = "Server unreachable. Make sure the backend is running.";
+        }
+
+        showAlert({
+          title: "Login Failed",
+          message: errorMessage,
+          type: "error"
+        });
+      }
+    }
   };
 
   return (
@@ -72,9 +133,19 @@ const LoginScreen = ({ navigation }) => {
                   placeholderTextColor={colors.textMuted}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   textAlign={isRTL ? 'right' : 'left'}
                 />
+                <TouchableOpacity 
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
+                >
+                  {showPassword ? (
+                    <EyeOff color={colors.textMuted} size={20} />
+                  ) : (
+                    <Eye color={colors.textMuted} size={20} />
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -82,8 +153,16 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.forgotPasswordText}>{t('forgot_password')}</Text>
             </TouchableOpacity> */}
 
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>{t('login_btn')}</Text>
+            <TouchableOpacity 
+              style={[styles.loginButton, isLoading && { opacity: 0.8 }]} 
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color={colors.background} />
+              ) : (
+                <Text style={styles.loginButtonText}>{t('login_btn')}</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -177,6 +256,9 @@ const createStyles = (theme, isRTL) => {
       height: 56,
       color: colors.text,
       ...typography.body,
+    },
+    eyeIcon: {
+      padding: spacing.s,
     },
     forgotPassword: {
       alignSelf: isRTL ? 'flex-start' : 'flex-end',

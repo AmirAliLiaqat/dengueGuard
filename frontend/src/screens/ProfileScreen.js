@@ -1,25 +1,40 @@
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Image,
+  RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText, HelpCircle, Info, Stethoscope } from 'lucide-react-native';
+import { useGetMeQuery, useGetStatsQuery } from '../services/api';
+import { useDispatch } from 'react-redux';
+import { logout } from '../redux/authSlice';
 
 const ProfileScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
+  const dispatch = useDispatch();
+  
+  const { data: userData, refetch: refetchMe, isFetching: isFetchingMe } = useGetMeQuery();
+  const { data: statsData, refetch: refetchStats, isFetching: isFetchingStats } = useGetStatsQuery();
+
+  const onRefresh = React.useCallback(() => {
+    refetchMe();
+    refetchStats();
+  }, [refetchMe, refetchStats]);
+
   const styles = createStyles(theme, isRTL);
 
-  const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 234 567 890',
+  const handleLogout = () => {
+    dispatch(logout());
+    navigation.replace('Login');
   };
 
   const menuItems = [
@@ -31,28 +46,46 @@ const ProfileScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetchingMe || isFetchingStats}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+      >
         <View style={styles.header}>
           <View style={styles.imageContainer}>
             <View style={styles.placeholderImage}>
-              <User color={colors.primary} size={60} />
+              {userData?.profile_picture ? (
+                <Image source={{ uri: userData.profile_picture }} style={styles.avatarImage} />
+              ) : (
+                <User color={colors.primary} size={60} />
+              )}
             </View>
           </View>
-          <Text style={styles.nameText}>{user.name}</Text>
-          <Text style={styles.emailText}>{user.email}</Text>
+          <Text style={styles.nameText}>{userData?.full_name || 'User'}</Text>
+          <Text style={styles.emailText}>{userData?.email}</Text>
         </View>
 
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={styles.statValue}>12</Text>
+            <Text style={styles.statValue}>{statsData?.total_diagnoses || 0}</Text>
             <Text style={styles.statLabel}>{t('stats_tests')}</Text>
           </View>
           <View style={[styles.statBox, styles.statBorder]}>
-            <Text style={styles.statValue}>Normal</Text>
+            <Text style={styles.statValue}>
+              {statsData?.risk_summary?.["Low"] ? "Safe" : "N/A"}
+            </Text>
             <Text style={styles.statLabel}>{t('stats_status')}</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statValue}>High</Text>
+            <Text style={styles.statValue}>
+              {Object.keys(statsData?.risk_summary || {}).filter(k => k !== "Low").length > 0 ? "Detected" : "None"}
+            </Text>
             <Text style={styles.statLabel}>{t('stats_risk')}</Text>
           </View>
         </View>
@@ -102,7 +135,7 @@ const ProfileScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut color={colors.error} size={22} />
           <Text style={styles.logoutText}>{t('logout')}</Text>
         </TouchableOpacity>
@@ -141,6 +174,12 @@ const createStyles = (theme, isRTL) => {
       alignItems: 'center',
       borderWidth: 2,
       borderColor: colors.glassBorder,
+      overflow: 'hidden',
+    },
+    avatarImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
     },
     nameText: {
       ...typography.h2,

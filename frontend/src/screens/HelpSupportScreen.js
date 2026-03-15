@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, Plus, Minus, Mail, Phone, MessageSquare } from 'lucide-react-native';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+// setLayoutAnimationEnabledExperimental is a no-op in New Architecture
+// if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+//   UIManager.setLayoutAnimationEnabledExperimental(true);
+// }
 
 const HelpSupportScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -44,8 +46,8 @@ const HelpSupportScreen = ({ navigation }) => {
   };
 
   const contactOptions = [
-    { icon: Mail, label: 'Email Support', info: 'support@denguekbs.com' },
-    { icon: Phone, label: t('phone_number'), info: '+92 300 1234567' },
+    { icon: Mail, label: 'Email Support', info: 'support@denguediagnose.com' },
+    { icon: Phone, label: t('phone_number'), info: '+92 309 08865818' },
     { icon: MessageSquare, label: 'Live Chat', info: 'Available 24/7' },
   ];
 

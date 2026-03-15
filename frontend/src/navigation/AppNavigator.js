@@ -2,10 +2,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../context/ThemeContext';
 import { Home, ClipboardList, User } from 'lucide-react-native';
+import { useSelector } from 'react-redux';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
+import VerificationScreen from '../screens/VerificationScreen';
 import HomeScreen from '../screens/HomeScreen';
 import DiagnosisFormScreen from '../screens/DiagnosisFormScreen';
 import ResultScreen from '../screens/ResultScreen';
@@ -68,22 +70,32 @@ const MainTabs = () => {
 };
 
 const AppNavigator = () => {
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Signup" component={SignupScreen} />
-      <Stack.Screen name="Main" component={MainTabs} />
-      <Stack.Screen name="Diagnose" component={DiagnosisFormScreen} />
-      <Stack.Screen name="Result" component={ResultScreen} />
-      <Stack.Screen name="Notifications" component={NotificationScreen} />
-      <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} />
-      <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
-      <Stack.Screen name="PrivacyAndSecurity" component={PrivacyAndSecurityScreen} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
-      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
-      <Stack.Screen name="About" component={AboutScreen} />
-      <Stack.Screen name="Doctor" component={DoctorPanel} />
+      {!isAuthenticated ? (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+          <Stack.Screen name="Verification" component={VerificationScreen} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen name="Diagnose" component={DiagnosisFormScreen} />
+          <Stack.Screen name="Result" component={ResultScreen} />
+          <Stack.Screen name="Notifications" component={NotificationScreen} />
+          <Stack.Screen name="ReportDetails" component={ReportDetailsScreen} />
+          <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
+          <Stack.Screen name="PrivacyAndSecurity" component={PrivacyAndSecurityScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
+          <Stack.Screen name="Doctor" component={DoctorPanel} />
+        </>
+      )}
     </Stack.Navigator>
   );
 };

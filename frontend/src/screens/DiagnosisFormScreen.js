@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Switch, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, ChevronRight, Activity, Stethoscope, AlertTriangle, Droplet, Heart, Home } from 'lucide-react-native';
+import { useAlert } from '../context/AlertContext';
 import { useDiagnoseSymptomsMutation } from '../services/api';
 
 const DiagnosisFormScreen = ({ navigation }) => {
@@ -12,6 +14,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
   const styles = createStyles(theme, isRTL);
 
   const [diagnoseSymptoms, { isLoading }] = useDiagnoseSymptomsMutation();
+  const { showAlert } = useAlert();
 
   const [symptoms, setSymptoms] = useState({
     // Standard Probable Dengue Criteria
@@ -91,11 +94,19 @@ const DiagnosisFormScreen = ({ navigation }) => {
       if (result?.diagnosis) {
          navigation.navigate('Result', { data: result.diagnosis });
       } else {
-         alert('Analysis failed, no explicit diagnosis returned.');
+         showAlert({
+           title: "Analysis Failed",
+           message: "No explicit diagnosis returned from the engine.",
+           type: "warning"
+         });
       }
     } catch (e) {
       console.error(e);
-      alert('Network or server error occurred. Please try again.');
+      showAlert({
+        title: "Error",
+        message: "Network or server error occurred. Please try again.",
+        type: "error"
+      });
     }
   };
 
@@ -144,7 +155,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         
-        {/* Step 1: Standard Symptoms */}
+        {/* Standard Symptoms */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Stethoscope color={colors.accent} size={20} />
@@ -160,7 +171,29 @@ const DiagnosisFormScreen = ({ navigation }) => {
           {renderSwitch('positive_tourniquet_test', 'positive_tourniquet_test')}
         </View>
 
-        {/* Step 2: Warning Signs */}
+        {/* Vital Signs Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Activity color={colors.info} size={20} />
+            <Text style={styles.sectionTitle}>{t('vital_signs') || "Vital Signs"}</Text>
+          </View>
+          {renderInput('body_temperature', 'body_temperature', 'e.g. 39.0')}
+          {renderInput('blood_pressure', 'blood_pressure', 'e.g. 110/70', 'default')}
+          {renderInput('heart_rate', 'heart_rate', 'e.g. 95 BPM')}
+        </View>
+
+        {/* Lab Tests Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Droplet color={colors.primary} size={20} />
+            <Text style={styles.sectionTitle}>{t('blood_report_data') || "Laboratory Tests"}</Text>
+          </View>
+          {renderInput('platelet_count', 'platelet_count', 'e.g. 150000')}
+          {renderInput('white_blood_cell_count', 'white_blood_cell_count', 'e.g. 4000')}
+          {renderInput('hematocrit_level', 'hematocrit_level', 'e.g. 42.0')}
+        </View>
+
+        {/* Warning Signs */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <AlertTriangle color={colors.warning || '#FFA500'} size={20} />
@@ -174,7 +207,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
           {renderSwitch('liver_enlargement', 'liver_enlargement_>_2_cm')}
         </View>
 
-        {/* Step 3: Severe Criteria */}
+        {/* Severe Criteria */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Heart color={'#D32F2F'} size={20} />
@@ -200,28 +233,6 @@ const DiagnosisFormScreen = ({ navigation }) => {
           {renderSwitch('platelet_decreases', 'platelet_rapidly_decreases')}
           {renderSwitch('tolerates_oral_fluids', 'tolerates_adequate_oral_fluids')}
           {renderSwitch('urinating_regularly', 'urinating_at_least_every_6_hours')}
-        </View>
-
-        {/* Vital Signs Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Activity color={colors.info} size={20} />
-            <Text style={styles.sectionTitle}>{t('vital_signs') || "Vital Signs"}</Text>
-          </View>
-          {renderInput('body_temperature', 'body_temperature', 'e.g. 39.0')}
-          {renderInput('blood_pressure', 'blood_pressure', 'e.g. 110/70', 'default')}
-          {renderInput('heart_rate', 'heart_rate', 'e.g. 95 BPM')}
-        </View>
-
-        {/* Lab Tests Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Droplet color={colors.primary} size={20} />
-            <Text style={styles.sectionTitle}>{t('blood_report_data') || "Laboratory Tests"}</Text>
-          </View>
-          {renderInput('platelet_count', 'platelet_count', 'e.g. 150000')}
-          {renderInput('white_blood_cell_count', 'white_blood_cell_count', 'e.g. 4000')}
-          {renderInput('hematocrit_level', 'hematocrit_level', 'e.g. 42.0')}
         </View>
 
         {/* Risk Factors Section */}

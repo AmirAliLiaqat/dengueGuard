@@ -1,34 +1,155 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   ScrollView,
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { User, Mail, Phone, ChevronLeft, Camera } from 'lucide-react-native';
+import { User, Mail, Phone, ChevronLeft, Camera, Image as ImageIcon, X } from 'lucide-react-native';
+import { useAlert } from '../context/AlertContext';
+import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
+import { ActivityIndicator } from 'react-native';
+import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import * as ImagePicker from 'expo-image-picker';
 
 const EditProfileScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
+  const { showAlert } = useAlert();
   const styles = createStyles(theme, isRTL);
+  
+  const { data: user, isLoading: isFetching } = useGetMeQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const token = useSelector(state => state.auth.token);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 234 567 890',
+    name: '',
+    email: '',
+    phone: '',
+    profile_picture: '',
   });
 
-  const handleSave = () => {
-    console.log('Saving profile:', formData);
-    navigation.goBack();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.full_name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        profile_picture: user.profile_picture || '',
+      });
+    }
+  }, [user]);
+
+  const handleUpload = async (imageUri) => {
+    const filename = imageUri.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename);
+    const type = match ? `image/${match[1]}` : `image`;
+
+    const formData = new FormData();
+    formData.append('file', {
+      uri: imageUri,
+      name: filename,
+      type,
+    });
+
+    try {
+      setIsUploading(true);
+      // Replace with your actual API URL
+      const API_URL = 'http://192.168.1.103:8000/api/v1';
+      
+      const response = await fetch(`${API_URL}/auth/upload-profile-picture`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.detail || "Upload failed");
+      }
+      
+      return result.url;
+    } catch (error) {
+      console.error('Upload error:', error);
+      showAlert({ 
+        title: "Upload Failed", 
+        message: error.message || "Could not upload image", 
+        type: "error" 
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const pickImage = async (useCamera = false) => {
+    setIsModalVisible(false);
+    
+    const permissionResult = useCamera 
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      showAlert({ title: "Permission Denied", message: `We need access to your ${useCamera ? 'camera' : 'gallery'} to change profile picture.`, type: "error" });
+      return;
+    }
+
+    const result = useCamera
+      ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.5 })
+      : await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.5 });
+
+    if (!result.canceled) {
+      const uploadedUrl = await handleUpload(result.assets[0].uri);
+      if (uploadedUrl) {
+        setFormData({ ...formData, profile_picture: uploadedUrl });
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    if (!formData.name) {
+      showAlert({ title: "Error", message: "Name cannot be empty", type: "error" });
+      return;
+    }
+
+    try {
+      await updateProfile({
+        full_name: formData.name,
+        phone: formData.phone,
+        profile_picture: formData.profile_picture,
+      }).unwrap();
+
+      showAlert({
+        title: "Success",
+        message: "Your profile has been updated successfully.",
+        type: "success"
+      });
+      navigation.goBack();
+    } catch (error) {
+      showAlert({
+        title: "Update Failed",
+        message: error.data?.detail || "Something went wrong",
+        type: "error"
+      });
+    }
   };
 
   return (
@@ -42,22 +163,70 @@ const EditProfileScreen = ({ navigation }) => {
             <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('edit_profile_btn')}</Text>
-          <TouchableOpacity onPress={handleSave}>
-            <Text style={styles.saveText}>Save</Text>
+          <TouchableOpacity onPress={handleSave} disabled={isUpdating}>
+            {isUpdating ? (
+              <ActivityIndicator color={colors.primary} size="small" />
+            ) : (
+              <Text style={styles.saveText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.imageSection}>
-            <View style={styles.imageContainer}>
+            <TouchableOpacity 
+              style={styles.imageContainer} 
+              onPress={() => setIsModalVisible(true)}
+              disabled={isUploading}
+            >
               <View style={styles.placeholderImage}>
-                <User color={colors.primary} size={60} />
+                {isUploading ? (
+                  <ActivityIndicator color={colors.primary} size="large" />
+                ) : formData.profile_picture ? (
+                  <Image source={{ uri: formData.profile_picture }} style={styles.profileImage} />
+                ) : (
+                  <User color={colors.primary} size={60} />
+                )}
               </View>
-              <TouchableOpacity style={styles.cameraButton}>
+              <View style={styles.cameraButton}>
                 <Camera color={colors.background} size={20} />
-              </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableOpacity>
           </View>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isModalVisible}
+            onRequestClose={() => setIsModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Update Profile Picture</Text>
+                  <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                    <X color={colors.text} size={24} />
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.modalOptions}>
+                  <TouchableOpacity style={styles.modalOption} onPress={() => pickImage(true)}>
+                    <View style={[styles.optionIcon, { backgroundColor: colors.primary + '20' }]}>
+                      <Camera color={colors.primary} size={24} />
+                    </View>
+                    <Text style={styles.optionText}>Take Photo</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.modalOption} onPress={() => pickImage(false)}>
+                    <View style={[styles.optionIcon, { backgroundColor: colors.success + '20' }]}>
+                      <ImageIcon color={colors.success} size={24} />
+                    </View>
+                    <Text style={styles.optionText}>Choose from Gallery</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
 
           <View style={styles.form}>
             <Text style={styles.label}>Full Name</Text>
@@ -74,12 +243,12 @@ const EditProfileScreen = ({ navigation }) => {
             </View>
 
             <Text style={styles.label}>Email Address</Text>
-            <View style={styles.inputGroup}>
+            <View style={[styles.inputGroup, { opacity: 0.7, backgroundColor: colors.background }]}>
               <Mail color={colors.textMuted} size={20} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.textMuted }]}
                 value={formData.email}
-                onChangeText={(text) => setFormData({ ...formData, email: text })}
+                editable={false}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.textMuted}
                 keyboardType="email-address"
@@ -212,6 +381,55 @@ const createStyles = (theme, isRTL) => {
       color: colors.text,
       fontSize: 16,
       textAlign,
+    },
+    profileImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'flex-end',
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 30,
+      borderTopRightRadius: 30,
+      padding: spacing.xl,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.xl,
+    },
+    modalTitle: {
+      ...typography.h2,
+      color: colors.text,
+    },
+    modalOptions: {
+      flexDirection,
+      justifyContent: 'space-around',
+      marginBottom: spacing.l,
+    },
+    modalOption: {
+      alignItems: 'center',
+    },
+    optionIcon: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: spacing.s,
+    },
+    optionText: {
+      ...typography.body,
+      color: colors.text,
+      fontWeight: '600',
     },
   });
 };

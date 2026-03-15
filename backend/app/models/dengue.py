@@ -1,45 +1,47 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, JSON, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-from app.db.base_class import Base
+from datetime import datetime
+from typing import Optional, List, Dict, Any
+from beanie import Document, Indexed
+from pydantic import EmailStr, Field
 
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    full_name = Column(String)
-    role = Column(String, default="user")  # user, doctor, admin
-    is_active = Column(Boolean, default=True)
-    diagnosis_history = relationship("DiagnosisHistory", back_populates="owner")
-
-class DiagnosisHistory(Base):
-    __tablename__ = "diagnosis_history"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+class User(Document):
+    email: Indexed(EmailStr, unique=True)
+    hashed_password: str
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    profile_picture: Optional[str] = None # Base64 or URL
+    role: str = "user" # user, doctor, admin
+    is_active: bool = True
+    is_verified: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     
-    # Symptom data stored as JSON
-    symptoms = Column(JSON)  # {"fever": 4, "platelets": 100000, ...}
-    
-    # Results from ML and KBS
-    ml_prediction = Column(JSON)  # {"stage": "Mild", "prob": 0.85}
-    kbs_recommendation = Column(JSON) # {"recommendation": "Rest", "explanation": "..."}
-    
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    owner = relationship("User", back_populates="diagnosis_history")
+    class Settings:
+        name = "users"
 
-class KnowledgeRule(Base):
-    __tablename__ = "knowledge_rules"
-    id = Column(Integer, primary_key=True, index=True)
-    rule_name = Column(String)
-    conditions = Column(JSON) # {"fever": ">3", "platelets": "<150000"}
-    results = Column(JSON)    # {"probability": "high", "stage": "warning"}
-    priority = Column(Integer, default=1)
+class OTPRecord(Document):
+    email: Indexed(EmailStr)
+    otp_code: str
+    purpose: str # signup, login, reset
+    expires_at: datetime
+    
+    class Settings:
+        name = "otp_records"
 
-class DoctorProfile(Base):
-    __tablename__ = "doctor_profiles"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True)
-    specialization = Column(String)
-    verified = Column(Boolean, default=False)
-    user = relationship("User")
+class DiagnosisReport(Document):
+    user_id: Indexed(str) # String representation of User ID
+    symptoms: Dict[str, Any]
+    ml_prediction: Dict[str, Any]
+    kbs_recommendation: Dict[str, Any]
+    doctor_notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Settings:
+        name = "diagnosis_reports"
+
+class RuleDocument(Document):
+    rule_name: str
+    conditions: Dict[str, Any]
+    results: Dict[str, Any]
+    priority: int = 1
+    
+    class Settings:
+        name = "knowledge_rules"

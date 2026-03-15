@@ -1,33 +1,55 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Use your computer's local network IP for physical device / Expo Go access
-const API_BASE_URL = 'http://192.168.1.100:8000/api/v1';
+// Replace with your local machine's IP address for Expo Go or 10.0.2.2 for Emulator
+const API_BASE_URL = 'http://192.168.1.103:8000/api/v1';
 
 export const denguApi = createApi({
   reducerPath: 'denguApi',
   baseQuery: fetchBaseQuery({ 
     baseUrl: API_BASE_URL,
-    prepareHeaders: (headers) => {
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth.token;
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
       return headers;
     },
   }),
+  tagTypes: ['User', 'History', 'Stats'],
   endpoints: (builder) => ({
+    // Diagnosis
     diagnoseSymptoms: builder.mutation({
       query: (symptoms) => ({
         url: '/diagnose/symptoms',
         method: 'POST',
         body: symptoms,
       }),
+      invalidatesTags: ['History', 'Stats'],
     }),
-    getKbsRules: builder.query({
-      query: () => '/diagnose/rules',
+    getHistory: builder.query({
+      query: (limit = 10) => `/diagnose/history?limit=${limit}`,
+      providesTags: ['History'],
     }),
+    getStats: builder.query({
+      query: () => '/diagnose/stats',
+      providesTags: ['Stats'],
+    }),
+    getReportDetail: builder.query({
+      query: (id) => `/diagnose/report/${id}`,
+    }),
+
+    // Auth
     login: builder.mutation({
-      query: (credentials) => ({
-        url: '/auth/login',
-        method: 'POST',
-        body: credentials,
-      }),
+      query: (credentials) => {
+        const formData = new FormData();
+        formData.append('username', credentials.email);
+        formData.append('password', credentials.password);
+        return {
+          url: '/auth/login',
+          method: 'POST',
+          body: formData,
+        };
+      },
     }),
     signup: builder.mutation({
       query: (userData) => ({
@@ -36,12 +58,45 @@ export const denguApi = createApi({
         body: userData,
       }),
     }),
+    verifyOtp: builder.mutation({
+      query: (data) => ({
+        url: '/auth/verify-otp',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    getMe: builder.query({
+      query: () => '/auth/me',
+      providesTags: ['User'],
+    }),
+    updateProfile: builder.mutation({
+      query: (data) => ({
+        url: '/auth/me',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+    uploadProfilePicture: builder.mutation({
+      query: (formData) => ({
+        url: '/auth/upload-profile-picture',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
 export const { 
   useDiagnoseSymptomsMutation, 
-  useGetKbsRulesQuery,
+  useGetHistoryQuery,
+  useGetStatsQuery,
+  useGetReportDetailQuery,
   useLoginMutation,
-  useSignupMutation
+  useSignupMutation,
+  useVerifyOtpMutation,
+  useGetMeQuery,
+  useUpdateProfileMutation,
+  useUploadProfilePictureMutation
 } = denguApi;

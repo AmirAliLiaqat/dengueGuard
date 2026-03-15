@@ -1,13 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1 import router as api_router
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
+from app.models.dengue import User, OTPRecord, DiagnosisReport, RuleDocument
 from app.core.config import settings
+from app.api.v1 import router as api_router
 
 app = FastAPI(
     title="Dengue KBS API",
     description="Backend for AI-Based Dengue Detection and Knowledge-Based Expert System",
     version="1.0.0"
 )
+
+@app.on_event("startup")
+async def startup_event():
+    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    await init_beanie(
+        database=client.get_default_database(),
+        document_models=[User, OTPRecord, DiagnosisReport, RuleDocument]
+    )
 
 # Set all CORS enabled origins
 app.add_middleware(

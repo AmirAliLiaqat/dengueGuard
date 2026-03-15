@@ -26,3 +26,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+
+def generate_otp() -> str:
+    import random
+    return "".join([str(random.randint(0, 9)) for _ in range(6)])
