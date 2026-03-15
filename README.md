@@ -44,61 +44,48 @@ A professional, high-end AI-Based Dengue Detection and Knowledge-Based Expert Sy
    ```
    *Note: Using `--host 0.0.0.0` is required for your mobile device to connect to your computer's IP.*
 
-### 2. Frontend Setup (React Native)
-1. **Navigate to frontend**:
-   ```powershell
-   cd frontend
-   ```
-2. **Install dependencies**:
-   ```powershell
-   npm install
-   ```
-3. **Set API IP**: Open `src/services/api.js` and update `API_BASE_URL` to your computer's local IPv4 address (found via `ipconfig`).
-4. **Run the app**:
-   ```powershell
-   npx expo start
-   ```
+### Frontend Setup (Expo)
+1. **Navigate to frontend**: `cd frontend`
+2. **Install dependencies**: `npm install`
+3. **Run the app**: `npx expo start`
 
 ---
 
-## 🌍 Deployment on Render.com
+## 🏗️ System Architecture
 
-Follow these steps to deploy the **Python Backend** only:
+### 1. AI Diagnosis Module
+Uses a **Random Forest Classifier** trained on hematological data (Platelets, WBC, Hematocrit) and symptom frequency (Fever, Headache, etc.).
+- Location: `backend/app/ml/model.py`
 
-1. **GitHub Repository**: Push your code to a GitHub repository.
-2. **Create Web Service**:
-   - Log in to [Render.com](https://render.com).
-   - Click **New +** -> **Web Service**.
-   - Connect your GitHub repository.
-3. **Configure Settings**:
-   - **Runtime**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: 
-     ```bash
-     gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
-     ```
-4. **Environment Variables**:
-   Add the following in the **Environment** tab:
-   - `MONGODB_URL`: Your MongoDB Atlas connection string.
-   - `SECRET_KEY`: A secure random string for JWT.
-   - `SMTP_HOST`: `smtp.gmail.com`
-   - `SMTP_PORT`: `587`
-   - `SMTP_USER`: Your Gmail address.
-   - `SMTP_PASSWORD`: Your Gmail App Password.
-   - `EMAILS_FROM_EMAIL`: Your Gmail address.
+### 2. Knowledge-Based System (KBS)
+Implements a **Forward Chaining Inference Engine** to apply medical rules to patient symptoms and ML outputs.
+- Location: `backend/app/engine/inference.py`
+
+### 3. Mobile Application
+Built with **React Native (Expo)** using a premium dark-mode design system.
+- State Management: **Redux Toolkit + RTK Query**
+- Icons: **Lucide React Native**
+- Navigation: **React Navigation**
 
 ---
 
-## 📊 Database (MongoDB)
-The system uses MongoDB Atlas with Beanie ODM:
-- `users`: Stores account data, authentication tokens, and **phone numbers**.
-- `otp_records`: Temporary storage for signup and password reset verification codes.
-- `diagnosis_reports`: History of AI predictions and symptoms for each user.
-- `knowledge_rules`: Rules repository for the KBS inference engine.
+## 📊 Database Schema
+The system uses PostgreSQL with the following tables:
+- `users`: User authentication and roles.
+- `diagnosis_history`: Stores past symptom logs and AI results.
+- `knowledge_rules`: Dynamic repository for the KBS engine.
+- `doctor_profiles`: Verification and specialization data for medical staff.
 
 ---
 
-## 🛡️ Security & Privacy
-- **Bcrypt Hashing**: Passwords stored using secure hashing.
-- **JWT Protection**: All private endpoints require a valid bearer token.
-- **STARTTLS**: Email communication is encrypted for maximum security.
+## 🛡️ Security
+- **JWT Authentication** for all private API routes.
+- **Passlib (Bcrypt)** for password hashing.
+- **RBAC** for Admin, Doctor, and User roles.
+
+---
+
+## 🛠️ Tech Stack
+- **Frontend**: React Native, JavaScript, Redux, Expo, Axios.
+- **Backend**: Python, FastAPI, SQLAlchemy, PostgreSQL, Scikit-Learn.
+- **AI**: Random Forest Classification + Forward Chaining Engine.
