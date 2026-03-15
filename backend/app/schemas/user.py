@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     role: Optional[str] = "user"
     phone: Optional[str] = None
     profile_picture: Optional[str] = None
+    notifications_enabled: Optional[bool] = True
 
 class UserCreate(UserBase):
     email: EmailStr
@@ -19,6 +20,7 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     profile_picture: Optional[str] = None
     password: Optional[str] = None
+    notifications_enabled: Optional[bool] = None
 
 class UserResponse(UserBase):
     id: str

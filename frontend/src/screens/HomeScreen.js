@@ -7,7 +7,7 @@ import { PlusCircle, History, Bell, ChevronRight, AlertTriangle, HeartPulse, Glo
 
 const { width } = Dimensions.get('window');
 
-import { useGetHistoryQuery, useGetMeQuery } from '../services/api';
+import { useGetHistoryQuery, useGetMeQuery, useSyncRemindersMutation, useGetNotificationsQuery } from '../services/api';
 import { scheduleDailyReminder } from '../services/NotificationService';
 import { useEffect } from 'react';
 
@@ -19,6 +19,12 @@ const HomeScreen = ({ navigation }) => {
 
   const { data: userData, refetch: refetchMe, isFetching: isFetchingMe } = useGetMeQuery();
   const { data: historyData, refetch: refetchHistory, isFetching: isFetchingHistory } = useGetHistoryQuery(3); // Fetch 3 latest
+  const { data: notifications } = useGetNotificationsQuery(undefined, {
+    pollingInterval: 30000, // Check for new notifications every 30 seconds
+  });
+  const [syncReminders] = useSyncRemindersMutation();
+
+  const unreadCount = notifications?.filter(n => !n.is_read).length || 0;
 
   const onRefresh = React.useCallback(() => {
     refetchMe();
@@ -27,7 +33,8 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     scheduleDailyReminder();
-  }, []);
+    syncReminders();
+  }, [syncReminders]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -52,7 +59,11 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('Notifications')}
         >
           <Bell color={colors.text} size={24} />
-          <View style={styles.badge} />
+          {unreadCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -190,14 +201,22 @@ const createStyles = (theme, isRTL) => {
     },
     badge: {
       position: 'absolute',
-      top: 12,
-      right: 12,
-      width: 10,
-      height: 10,
-      borderRadius: 5,
+      top: 10,
+      right: 10,
+      minWidth: 18,
+      height: 18,
+      borderRadius: 9,
       backgroundColor: colors.accent,
       borderWidth: 2,
       borderColor: colors.card,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 2,
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 8,
+      fontWeight: 'bold',
     },
     statusCard: {
       margin: spacing.l,

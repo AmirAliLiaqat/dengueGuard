@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from app.models.dengue import User, OTPRecord, DiagnosisReport, RuleDocument
+from app.models.dengue import User, OTPRecord, DiagnosisReport, RuleDocument, Notification
 from app.core.config import settings
 from app.api.v1 import router as api_router
 
@@ -17,7 +17,7 @@ async def startup_event():
     client = AsyncIOMotorClient(settings.MONGODB_URL)
     await init_beanie(
         database=client.get_default_database(),
-        document_models=[User, OTPRecord, DiagnosisReport, RuleDocument]
+        document_models=[User, OTPRecord, DiagnosisReport, RuleDocument, Notification]
     )
 
 # Set all CORS enabled origins

@@ -15,8 +15,43 @@ export const denguApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['User', 'History', 'Stats'],
+  tagTypes: ['User', 'History', 'Stats', 'Notification'],
   endpoints: (builder) => ({
+    // Notifications
+    getNotifications: builder.query({
+      query: () => '/notifications/',
+      providesTags: ['Notification'],
+    }),
+    markAsRead: builder.mutation({
+      query: (id) => ({
+        url: `/notifications/${id}/read`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Notification'],
+    }),
+    deleteNotification: builder.mutation({
+      query: (id) => ({
+        url: `/notifications/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Notification'],
+    }),
+    syncReminders: builder.mutation({
+      query: () => ({
+        url: '/notifications/sync-reminders',
+        method: 'POST',
+      }),
+      invalidatesTags: ['Notification'],
+    }),
+    recordAction: builder.mutation({
+      query: (data) => ({
+        url: '/notifications/action',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Notification'],
+    }),
+
     // Diagnosis
     diagnoseSymptoms: builder.mutation({
       query: (symptoms) => ({
@@ -24,7 +59,7 @@ export const denguApi = createApi({
         method: 'POST',
         body: symptoms,
       }),
-      invalidatesTags: ['History', 'Stats'],
+      invalidatesTags: ['History', 'Stats', 'Notification'],
     }),
     getHistory: builder.query({
       query: (limit = 10) => `/diagnose/history?limit=${limit}`,
@@ -75,7 +110,7 @@ export const denguApi = createApi({
         method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['User', 'Notification'],
     }),
     uploadProfilePicture: builder.mutation({
       query: (formData) => ({
@@ -83,7 +118,7 @@ export const denguApi = createApi({
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['User', 'Notification'],
     }),
   }),
 });
@@ -98,5 +133,10 @@ export const {
   useVerifyOtpMutation,
   useGetMeQuery,
   useUpdateProfileMutation,
-  useUploadProfilePictureMutation
+  useUploadProfilePictureMutation,
+  useGetNotificationsQuery,
+  useMarkAsReadMutation,
+  useDeleteNotificationMutation,
+  useSyncRemindersMutation,
+  useRecordActionMutation
 } = denguApi;

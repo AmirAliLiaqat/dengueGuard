@@ -53,7 +53,8 @@ const HistoryScreen = ({ navigation }) => {
                         risk === 'Low' ? colors.success : 
                         colors.warning;
     
-    const dateStr = new Date(item.created_at).toLocaleDateString('en-US', {
+    const utcString = item.created_at.endsWith('Z') ? item.created_at : item.created_at + 'Z';
+    const dateStr = new Date(utcString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'

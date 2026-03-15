@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText, HelpCircle, Info, Stethoscope } from 'lucide-react-native';
+import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText, HelpCircle, Info, Stethoscope, Activity } from 'lucide-react-native';
 import { useGetMeQuery, useGetStatsQuery } from '../services/api';
 import { useDispatch } from 'react-redux';
 import { logout } from '../redux/authSlice';
@@ -77,16 +77,26 @@ const ProfileScreen = ({ navigation }) => {
             <Text style={styles.statLabel}>{t('stats_tests')}</Text>
           </View>
           <View style={[styles.statBox, styles.statBorder]}>
-            <Text style={styles.statValue}>
-              {statsData?.risk_summary?.["Low"] ? "Safe" : "N/A"}
-            </Text>
-            <Text style={styles.statLabel}>{t('stats_status')}</Text>
+            <View style={{ flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center' }}>
+              <View style={{ 
+                width: 8, 
+                height: 8, 
+                borderRadius: 4, 
+                backgroundColor: userData?.is_active ? '#2ECC71' : colors.textMuted,
+                marginRight: isRTL ? 0 : 6,
+                marginLeft: isRTL ? 6 : 0
+              }} />
+              <Text style={styles.statValue}>
+                {userData?.is_active ? t('status_active') : t('status_offline')}
+              </Text>
+            </View>
+            <Text style={styles.statLabel}>{t('account_status')}</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statValue}>
-              {Object.keys(statsData?.risk_summary || {}).filter(k => k !== "Low").length > 0 ? "Detected" : "None"}
+            <Text style={[styles.statValue, { color: Object.keys(statsData?.risk_summary || {}).filter(k => k !== "Low").length > 0 ? colors.accent : colors.primary }]}>
+              {Object.keys(statsData?.risk_summary || {}).filter(k => k !== "Low").length > 0 ? t('status_at_risk') : t('status_safe')}
             </Text>
-            <Text style={styles.statLabel}>{t('stats_risk')}</Text>
+            <Text style={styles.statLabel}>{t('health_status')}</Text>
           </View>
         </View>
 
@@ -131,6 +141,13 @@ const ProfileScreen = ({ navigation }) => {
               <Info color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t('about_app')}</Text>
+            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('DengueInfo')}>
+            <View style={styles.menuIconContainer}>
+              <Activity color={colors.primary} size={22} />
+            </View>
+            <Text style={styles.menuLabel}>Dengue Encyclopedia</Text>
             <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
           </TouchableOpacity>
         </View>

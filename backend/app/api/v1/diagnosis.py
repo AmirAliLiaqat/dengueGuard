@@ -3,7 +3,7 @@ from typing import Dict, Any, List
 from app.ml.model import DenguePredictor
 from app.engine.inference import ForwardChainingEngine, DENGUE_RULES
 from app.api.v1.auth import get_current_user
-from app.models.dengue import User, DiagnosisReport
+from app.models.dengue import User, DiagnosisReport, Notification
 from app.schemas.diagnosis import DiagnosisResponse, UserStats
 from datetime import datetime
 
@@ -25,7 +25,10 @@ async def diagnose_symptoms(symptoms: Dict[str, Any], current_user: User = Depen
 
     # KBS Inference
     facts = symptoms.copy()
-    facts.update({"ml_prediction": ml_result.get("stage_name", "Unknown")})
+    facts.update({
+        "ml_prediction": ml_result.get("stage_name", "Unknown"),
+        "ml_probability": ml_result.get("probability", 0.0)
+    })
     
     kbs_result, applied_rules = kbs_engine.infer(facts)
     
@@ -48,6 +51,16 @@ async def diagnose_symptoms(symptoms: Dict[str, Any], current_user: User = Depen
         kbs_recommendation=diagnosis_summary
     )
     await report.insert()
+    
+    # Send Notification
+    if current_user.notifications_enabled:
+        await Notification(
+            user_id=str(current_user.id),
+            title="Analysis Complete",
+            message=f"New health report generated: {diagnosis_summary['disease_detection']}",
+            type="warning" if diagnosis_summary['risk_classification'] in ['High', 'Critical'] else "success",
+            related_id=str(report.id)
+        ).insert()
     
     return {
         "status": "success",

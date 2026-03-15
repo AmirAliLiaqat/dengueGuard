@@ -241,7 +241,6 @@ export const generateAndSharePDF = async (reportData) => {
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
-        dialogTitle: 'Download Medical Report',
         UTI: 'com.adobe.pdf'
       });
     } else {
@@ -249,6 +248,30 @@ export const generateAndSharePDF = async (reportData) => {
     }
   } catch (error) {
     console.error('Error generating PDF:', error);
+    throw error;
+  }
+};
+
+export const generateAndSavePDF = async (reportData) => {
+  try {
+    const html = createHtmlContent(reportData);
+    const { uri } = await Print.printToFileAsync({ html });
+    
+    // In mobile, "Download" is often handled via Sharing with "Save to Files"
+    // However, on Android, we can try to use SAF if needed.
+    // For now, we use Sharing but with a specific title to guide the user.
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, {
+        mimeType: 'application/pdf',
+        dialogTitle: 'Save Medical Report to Device',
+        UTI: 'com.adobe.pdf'
+      });
+    } else {
+      alert('File saving is not supported on this device version.');
+    }
+    return true;
+  } catch (error) {
+    console.error('Error saving PDF:', error);
     throw error;
   }
 };

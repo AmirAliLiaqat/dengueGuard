@@ -66,14 +66,19 @@ class ForwardChainingEngine:
         self._preprocess_facts(derived_facts)
 
         changed = True
+        set_by_priority = {} # Track priority of rules that set each key
+        
         while changed:
             changed = False
             for rule in self.ruleset:
                 if rule.id not in applied_rules_ids and rule.evaluate(derived_facts):
                     for key, val in rule.results.items():
-                        if derived_facts.get(key) != val:
-                            derived_facts[key] = val
-                            changed = True
+                        # Only set if key hasn't been set by a higher priority rule
+                        if key not in set_by_priority or rule.priority >= set_by_priority[key]:
+                            if derived_facts.get(key) != val:
+                                derived_facts[key] = val
+                                set_by_priority[key] = rule.priority
+                                changed = True
                     applied_rules_ids.add(rule.id)
                     applied_rules_log.append(f"Rule {rule.id}: {rule.description}")
         
@@ -145,80 +150,166 @@ class ForwardChainingEngine:
             facts["eligible_home_care"] = True
 
 DENGUE_RULES = [
-    # ---- 1. PROBABLE DENGUE RULE ----
+    # ---- 1. CLINICAL EMERGENCY RULES (TOP PRIORITY) ----
+    # Clinical evidence always outweighs AI if life-threatening signs are present
     KnowledgeRule(
-        "R_PROBABLE_DENGUE", "Patient lives in/travelled to endemic area, has fever, and at least 2 classic symptoms/signs.",
-        {"endemic_or_travel": True, "has_fever": True, "rule1_symptoms_met": True},
-        {
-            "disease_detection": "Probable Dengue Infection", 
-            "risk_classification": "Moderate", 
-            "clinical_recommendations": "Rest, adequate oral hydration. Check daily CBC.", 
-            "alert_system": "Standard Evaluation - Probable Dengue"
-        },
-        priority=1
-    ),
-    
-    # ---- 5. HOME CARE RULE ----
-    KnowledgeRule(
-        "R_HOME_MANAGEMENT", "No warning signs, tolerates fluids, regular urination.",
-        {"eligible_home_care": True, "disease_detection": "Probable Dengue Infection"},
-        {
-            "disease_detection": "Group A: Probable Dengue for Home Management", 
-            "risk_classification": "Low - Moderate", 
-            "clinical_recommendations": "Safe for home care. Hydrate, rest, take paracetamol (no NSAIDs). Return immediately if warning signs develop.", 
-            "alert_system": "Routine - Home Care Advised"
-        },
-        priority=2
-    ),
-
-    # ---- 2. WARNING SIGNS RULE ----
-    KnowledgeRule(
-        "R_WARNING_SIGNS", "Patient exhibits confirmed WHO Warning Signs.",
-        {"has_warning_signs": True},
-        {
-            "disease_detection": "Dengue with Warning Signs", 
-            "risk_classification": "High", 
-            "clinical_recommendations": "Strict observation needed. Admit to hospital. Intravenous (IV) fluid replacement and hemodynamics monitoring required.", 
-            "alert_system": "Amber Alert - Urgent Hospitalization!"
-        },
-        priority=3
-    ),
-    
-    # ---- 4. CRITICAL PHASE RULE ----
-    KnowledgeRule(
-        "R_CRITICAL_PHASE", "Defervescence phase with rising hematocrit and dropping platelets.",
-        {"entering_critical_phase": True},
-        {
-            "disease_detection": "Dengue Critical Phase (Risk of Plasma Leakage)", 
-            "risk_classification": "High", 
-            "clinical_recommendations": "Close monitoring required. Patient is entering the critical phase; high risk for plasma leakage. Monitor hematocrit and IV fluids carefully.", 
-            "alert_system": "Amber/Red Alert - Critical Phase Initiated!"
-        },
-        priority=4
-    ),
-
-    # ---- 3. SEVERE DENGUE RULE ----
-    KnowledgeRule(
-        "R_SEVERE_DENGUE", "Severe plasma leakage, bleeding, or organ involvement.",
+        "R_SEVERE_DENGUE_CLINICAL", "WHO Severe Dengue signs (Leakage, Bleeding, Organs).",
         {"severe_dengue_signs": True},
         {
             "disease_detection": "Severe Dengue", 
             "risk_classification": "Critical", 
-            "clinical_recommendations": "EMERGENCY: Immediate admission to Intensive Care Unit (ICU). Resuscitation with IV fluids/colloids or blood products. Organ support may be needed.", 
-            "alert_system": "RED ALERT - Medical Emergency / ICU Admission Required!"
+            "clinical_recommendations": "EMERGENCY: Immediate ICU admission required. Intravenous resuscitation.", 
+            "alert_system": "RED ALERT - Clinical Emergency"
         },
-        priority=5
+        priority=100
     ),
     
-    # ---- NO RISK RULE ----
+    # ---- 2. AI HIGH CONFIDENCE RULES (VERY HIGH PRIORITY: 75-100%) ----
     KnowledgeRule(
-        "R_NO_RISK", "No major dengue criteria met",
-        {"has_fever": False, "rule1_symptoms_met": False, "has_warning_signs": False, "severe_dengue_signs": False},
+        "R_AI_SEVERE_VHIGH", "AI Prediction: Severe Dengue (85-100% confidence).",
+        {"ml_prediction": "Severe Dengue", "ml_probability": ">=0.85"},
         {
-            "disease_detection": "Unlikely Dengue / Normal", 
+            "disease_detection": "Severe Dengue (AI High Confidence)", 
+            "risk_classification": "Critical", 
+            "clinical_recommendations": "Urgent hospitalization and IV fluid management advised based on high-risk prediction.", 
+            "alert_system": "RED ALERT - High Confidence Prediction"
+        },
+        priority=90
+    ),
+
+    KnowledgeRule(
+        "R_AI_WARNING_VHIGH", "AI Prediction: Warning Stage (75-100% confidence).",
+        {"ml_prediction": "Dengue Warning Stage", "ml_probability": ">=0.75"},
+        {
+            "disease_detection": "Dengue Warning Stage (AI High Confidence)", 
+            "risk_classification": "High", 
+            "clinical_recommendations": "In-patient monitoring advised. Monitor for signs of plasma leakage.", 
+            "alert_system": "AMBER ALERT - High Confidence Prediction"
+        },
+        priority=80
+    ),
+
+    # ---- 3. CLINICAL WARNING RULES (HIGH PRIORITY) ----
+    KnowledgeRule(
+        "R_WARNING_SIGNS_CLINICAL", "WHO Warning Signs (Abdominal pain, fluid, lethargy).",
+        {"has_warning_signs": True},
+        {
+            "disease_detection": "Dengue with Warning Signs", 
+            "risk_classification": "High", 
+            "clinical_recommendations": "Admit to hospital. Start IV fluids. Monitor vital signs closely.", 
+            "alert_system": "AMBER ALERT - Clinical Warning"
+        },
+        priority=70
+    ),
+
+    KnowledgeRule(
+        "R_CRITICAL_PHASE_CLINICAL", "Entering Critical Phase (Fever drops, Hct increases).",
+        {"entering_critical_phase": True},
+        {
+            "disease_detection": "Critical Phase Initiated", 
+            "risk_classification": "High", 
+            "clinical_recommendations": "Stay alert! Sudden drop in fever with rising blood pressure/Hct is a high-risk transition.", 
+            "alert_system": "AMBER ALERT - Phase Transition"
+        },
+        priority=60
+    ),
+
+    # ---- 4. AI MEDIUM CONFIDENCE RULES (MODERATE-HIGH PRIORITY: 40-75%) ----
+    KnowledgeRule(
+        "R_AI_SEVERE_MED", "AI Prediction: Severe Dengue (50-84% confidence).",
+        {"ml_prediction": "Severe Dengue", "ml_probability": ">=0.50"},
+        {
+            "disease_detection": "Risk of Severe Dengue (AI Predicted)", 
+            "risk_classification": "High", 
+            "clinical_recommendations": "Consult physician immediately for CBC and clinical assessment. High risk predicted.", 
+            "alert_system": "AMBER ALERT - AI Risk Prediction"
+        },
+        priority=55
+    ),
+
+    KnowledgeRule(
+        "R_AI_WARNING_MED", "AI Prediction: Warning Stage (40-74% confidence).",
+        {"ml_prediction": "Dengue Warning Stage", "ml_probability": ">=0.40"},
+        {
+            "disease_detection": "Potential Warning Stage (AI Predicted)", 
+            "risk_classification": "Moderate", 
+            "clinical_recommendations": "Monitor patient closely for any new warning signs (vomiting, pain). Follow-up in 24 hours.", 
+            "alert_system": "Standard Evaluation - AI Alert"
+        },
+        priority=45
+    ),
+
+    # ---- 5. STANDARD CLINICAL RULES (MODERATE PRIORITY) ----
+    KnowledgeRule(
+        "R_PROBABLE_DENGUE_CLINICAL", "Classic clinical Dengue symptoms met.",
+        {"endemic_or_travel": True, "has_fever": True, "rule1_symptoms_met": True},
+        {
+            "disease_detection": "Probable Dengue Infection", 
+            "risk_classification": "Moderate", 
+            "clinical_recommendations": "Rest and hydration. Daily blood tests (CBC) are recommended.", 
+            "alert_system": "Standard Evaluation"
+        },
+        priority=30
+    ),
+
+    KnowledgeRule(
+        "R_HOME_MANAGEMENT_CLINICAL", "Probable dengue, safe for home care.",
+        {"eligible_home_care": True, "disease_detection": "Probable Dengue Infection"},
+        {
+            "disease_detection": "Probable Dengue (Home Management)", 
             "risk_classification": "Low", 
-            "clinical_recommendations": "Monitor patient. If symptoms persist or fever develops, re-evaluate.", 
+            "clinical_recommendations": "Tolerates fluids and urinating regularly. Safe for home hydration. Use Paracetamol only.", 
+            "alert_system": "Routine - Home Care Advised"
+        },
+        priority=35 # Priority between probable and AI alerts to refine recommendation
+    ),
+
+    # ---- 6. AI LOW CONFIDENCE / MILD RULES (LOW PRIORITY: 1-40%) ----
+    KnowledgeRule(
+        "R_AI_SEVERE_LOW", "AI Prediction: Severe Dengue (1-49% confidence).",
+        {"ml_prediction": "Severe Dengue", "ml_probability": ">0.0"},
+        {
+            "disease_detection": "Possible Severe Risk (Low Confidence AI)", 
+            "risk_classification": "Moderate", 
+            "clinical_recommendations": "AI suggests potential risk despite low confidence. Clinical review recommended.", 
+            "alert_system": "Standard Monitoring"
+        },
+        priority=25
+    ),
+
+    KnowledgeRule(
+        "R_AI_MILD_ANY", "AI Predicted: Mild Dengue (any percentage).",
+        {"ml_prediction": "Mild Dengue", "ml_probability": ">0.0"},
+        {
+            "disease_detection": "Mild Dengue (AI Predicted)", 
+            "risk_classification": "Low", 
+            "clinical_recommendations": "Maintain hydration. Rest. Monitor for any worsening symptoms.", 
             "alert_system": "Routine Evaluation"
+        },
+        priority=20
+    ),
+
+    KnowledgeRule(
+        "R_AI_NO_DENGUE", "AI Predicted: No Dengue (any percentage).",
+        {"ml_prediction": "No Dengue", "ml_probability": ">0.0"},
+        {
+            "disease_detection": "Dengue Unlikely (AI Predicted)", 
+            "risk_classification": "Low", 
+            "clinical_recommendations": "Symptoms may be due to other viral infections. Rest and re-evaluate if fever persists.", 
+            "alert_system": "Routine Evaluation"
+        },
+        priority=10
+    ),
+
+    # ---- 7. DEFAULT NO RISK RULE ----
+    KnowledgeRule(
+        "R_NO_RISK_FALLBACK", "No major criteria met (Default).",
+        {"has_fever": False, "rule1_symptoms_met": False, "has_warning_signs": False},
+        {
+            "disease_detection": "Inconclusive / Other Viral Fever", 
+            "risk_classification": "Low", 
+            "clinical_recommendations": "Observe for next 24-48 hours. Use mosquito nets. Seek care if warning signs appear.", 
+            "alert_system": "Routine"
         },
         priority=0
     )

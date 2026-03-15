@@ -17,12 +17,22 @@ import {
   ChevronRight,
   Check,
 } from 'lucide-react-native';
+import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
 
 const SettingsScreen = ({ navigation }) => {
   const { isDark, toggleTheme, theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { language, changeLanguage, t, isRTL } = useLanguage();
-  const [isPushNotifications, setIsPushNotifications] = React.useState(true);
+  const { data: userData } = useGetMeQuery();
+  const [updateProfile] = useUpdateProfileMutation();
+
+  const handleToggleNotifications = async (value) => {
+    try {
+      await updateProfile({ notifications_enabled: value }).unwrap();
+    } catch (err) {
+      console.log('Failed to update notifications:', err);
+    }
+  };
 
   const styles = createStyles(theme, isRTL);
 
@@ -79,10 +89,10 @@ const SettingsScreen = ({ navigation }) => {
             </View>
             <Text style={styles.itemLabel}>{t('notifications_toggle')}</Text>
             <Switch
-              value={isPushNotifications}
-              onValueChange={() => setIsPushNotifications(!isPushNotifications)}
+              value={userData?.notifications_enabled ?? true}
+              onValueChange={handleToggleNotifications}
               trackColor={{ false: colors.glassBorder, true: colors.primary }}
-              thumbColor={isPushNotifications ? '#FFFFFF' : colors.textMuted}
+              thumbColor={(userData?.notifications_enabled ?? true) ? '#FFFFFF' : colors.textMuted}
             />
           </View>
         </View>

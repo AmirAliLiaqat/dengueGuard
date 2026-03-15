@@ -9,7 +9,10 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Bell, Info, ShieldAlert, CheckCircle, ChevronLeft } from 'lucide-react-native';
+import { Bell, Info, ShieldAlert, CheckCircle, ChevronLeft, User, Share2, Download } from 'lucide-react-native';
+
+import { useGetNotificationsQuery, useMarkAsReadMutation } from '../services/api';
+import { RefreshControl, ActivityIndicator } from 'react-native';
 
 const NotificationScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -17,38 +20,74 @@ const NotificationScreen = ({ navigation }) => {
   const { t, isRTL } = useLanguage();
   const styles = createStyles(theme, isRTL);
 
-  const notifications = [
-    { id: '1', title: 'New History Added', message: 'Your diagnostic result of 24 Oct, 2023 is ready.', type: 'info', date: '2 hours ago' },
-    { id: '2', title: 'High Risk Alert', message: 'Several dengue cases reported in your area. Stay safe!', type: 'alert', date: 'Yesterday' },
-    { id: '3', title: 'Health Update', message: 'New preventive measures added to the system.', type: 'update', date: 'Oct 20, 2023' },
-  ];
+  const { data: notifications = [], isLoading, refetch, isFetching } = useGetNotificationsQuery();
+  const [markAsRead] = useMarkAsReadMutation();
+
+  const handleNotificationPress = (item) => {
+    markAsRead(item.id);
+    navigation.navigate('NotificationDetail', { notification: item });
+  };
+
+  const getTimeAgo = (dateString) => {
+    // Force UTC parsing by ensuring 'Z' exists
+    const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+    const date = new Date(utcString.replace('Z', '') + 'Z'); 
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    return date.toLocaleDateString();
+  };
 
   const renderItem = ({ item }) => {
     let Icon = Info;
     let iconColor = colors.info;
-    if (item.type === 'alert') {
+    
+    if (item.type === 'warning' || item.type === 'alert') {
       Icon = ShieldAlert;
       iconColor = colors.error;
-    } else if (item.type === 'update') {
+    } else if (item.type === 'success') {
       Icon = CheckCircle;
       iconColor = colors.success;
+    } else if (item.type === 'profile') {
+      Icon = User;
+      iconColor = '#8E44AD'; // Purple
+    } else if (item.type === 'share') {
+      Icon = Share2;
+      iconColor = colors.primary;
+    } else if (item.type === 'download') {
+      Icon = Download;
+      iconColor = '#2ECC71'; // Green
     }
 
     return (
-      <View style={styles.notificationItem}>
+      <TouchableOpacity 
+        style={[styles.notificationItem, !item.is_read && styles.unreadItem]}
+        onPress={() => handleNotificationPress(item)}
+      >
         <View style={[styles.iconContainer, { backgroundColor: iconColor + '1A' }]}>
           <Icon color={iconColor} size={24} />
         </View>
         <View style={styles.contentContainer}>
           <View style={styles.itemHeader}>
-            <Text style={styles.itemTitle}>{item.title}</Text>
-            <Text style={styles.itemDate}>{item.date}</Text>
+            <Text style={[styles.itemTitle, !item.is_read && { fontWeight: 'bold' }]}>{item.title}</Text>
+            <Text style={styles.itemDate}>{getTimeAgo(item.created_at)}</Text>
           </View>
-          <Text style={styles.itemMessage}>{item.message}</Text>
+          <Text style={styles.itemMessage} numberOfLines={2}>{item.message}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -65,6 +104,9 @@ const NotificationScreen = ({ navigation }) => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl refreshing={isFetching} onRefresh={refetch} tintColor={colors.primary} />
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Bell color={colors.textMuted} size={64} />
@@ -121,6 +163,10 @@ const createStyles = (theme, isRTL) => {
       marginBottom: spacing.m,
       borderWidth: 1,
       borderColor: colors.glassBorder,
+    },
+    unreadItem: {
+      backgroundColor: colors.primary + '0A',
+      borderColor: colors.primary + '33',
     },
     iconContainer: {
       width: 48,

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Body, File, Uploa
 import cloudinary
 import cloudinary.uploader
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from jose import jwt, JWTError
 
@@ -10,7 +10,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.email import send_otp_email
 from app.schemas.user import UserCreate, UserResponse, Token, VerifyOTP, UserUpdate, TokenPayload
-from app.models.dengue import User, OTPRecord
+from app.models.dengue import User, OTPRecord, Notification
 
 router = APIRouter()
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
@@ -58,7 +58,7 @@ async def signup(user_in: UserCreate):
         email=user_in.email,
         otp_code=otp,
         purpose="signup",
-        expires_at=datetime.utcnow() + timedelta(minutes=10)
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
     )
     await otp_record.insert()
     
@@ -84,7 +84,7 @@ async def verify_otp(data: VerifyOTP):
         OTPRecord.email == data.email,
         OTPRecord.otp_code == data.otp_code,
         OTPRecord.purpose == data.purpose,
-        OTPRecord.expires_at > datetime.utcnow()
+        OTPRecord.expires_at > datetime.now(timezone.utc)
     )
     if not record:
         raise HTTPException(status_code=400, detail="Invalid or expired OTP")
@@ -129,7 +129,8 @@ async def get_me(current_user: User = Depends(get_current_user)):
         role=current_user.role,
         is_verified=current_user.is_verified,
         is_active=current_user.is_active,
-        profile_picture=current_user.profile_picture
+        profile_picture=current_user.profile_picture,
+        notifications_enabled=current_user.notifications_enabled
     )
 
 @router.put("/me", response_model=UserResponse)
@@ -142,8 +143,19 @@ async def update_me(update: UserUpdate, current_user: User = Depends(get_current
         current_user.profile_picture = update.profile_picture
     if update.password is not None:
         current_user.hashed_password = security.get_password_hash(update.password)
+    if update.notifications_enabled is not None:
+        current_user.notifications_enabled = update.notifications_enabled
     
     await current_user.save()
+    
+    # Send Notification
+    if current_user.notifications_enabled:
+        await Notification(
+            user_id=str(current_user.id),
+            title="Profile Updated",
+            message="Your profile details have been successfully updated.",
+            type="profile"
+        ).insert()
     return await get_me(current_user)
 
 @router.post("/upload-profile-picture")
@@ -174,6 +186,15 @@ async def upload_profile_picture(
         # Optionally update user automatically
         current_user.profile_picture = image_url
         await current_user.save()
+        
+        # Send Notification
+        if current_user.notifications_enabled:
+            await Notification(
+                user_id=str(current_user.id),
+                title="Profile Picture Changed",
+                message="Your profile picture has been updated successfully.",
+                type="profile"
+            ).insert()
         
         return {"url": image_url}
     except Exception as e:

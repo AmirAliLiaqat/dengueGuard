@@ -24,6 +24,8 @@ import HelpSupportScreen from '../screens/HelpSupportScreen';
 import AboutScreen from '../screens/AboutScreen';
 import HealthTipsScreen from '../screens/HealthTipsScreen';
 import WHOGuidelinesScreen from '../screens/WHOGuidelinesScreen';
+import NotificationDetailScreen from '../screens/NotificationDetailScreen';
+import DengueInfoScreen from '../screens/DengueInfoScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -98,6 +100,8 @@ const AppNavigator = () => {
           <Stack.Screen name="Doctor" component={DoctorPanel} />
           <Stack.Screen name="HealthTips" component={HealthTipsScreen} />
           <Stack.Screen name="WHOGuidelines" component={WHOGuidelinesScreen} />
+          <Stack.Screen name="NotificationDetail" component={NotificationDetailScreen} />
+          <Stack.Screen name="DengueInfo" component={DengueInfoScreen} />
         </>
       )}
     </Stack.Navigator>
