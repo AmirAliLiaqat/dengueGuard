@@ -3,6 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../context/ThemeContext';
 import { Home, ClipboardList, User } from 'lucide-react-native';
 import { useSelector } from 'react-redux';
+import { Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -33,19 +35,37 @@ const Tab = createBottomTabNavigator();
 const MainTabs = () => {
   const { theme } = useTheme();
   const { colors } = theme;
+  const insets = useSafeAreaInsets();
   
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.glassBorder,
-          height: 60,
-          paddingBottom: 8,
+          height: Platform.OS === 'android' ? 70 + insets.bottom : 88,
+          paddingBottom: Platform.OS === 'android' ? (insets.bottom > 0 ? insets.bottom + 5 : 12) : 30,
+          paddingTop: 12,
+          borderTopWidth: 1,
+          elevation: 15,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+          marginBottom: Platform.OS === 'android' ? 5 : 0,
+          marginTop: 2,
+        },
+        tabBarIconStyle: {
+          marginTop: 2,
+        }
       }}
     >
       <Tab.Screen

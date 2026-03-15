@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dengue Diagnose",
     "description": "Dengue Diagnose is a mobile application for early detection of dengue fever using artificial intelligence.",
-    "slug": "dengue-diagnose",
+    "slug": "dengue-kbs",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
@@ -20,7 +20,12 @@
         "foregroundImage": "./src/assets/android-icon-foreground.png",
         "backgroundColor": "#0F172A"
       },
-      "package": "com.dengue.diagnose"
+      "package": "com.dengue.kbs",
+      "softwareKeyboardLayoutMode": "pan",
+      "navigationBar": {
+        "barStyle": "light-content",
+        "backgroundColor": "#0F172A"
+      }
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
