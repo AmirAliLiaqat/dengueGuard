@@ -52,7 +52,13 @@ async def diagnose_symptoms(symptoms: Dict[str, Any], current_user: User = Depen
     return {
         "status": "success",
         "report_id": str(report.id),
-        "diagnosis": diagnosis_summary
+        "report": {
+            "id": str(report.id),
+            "symptoms": report.symptoms,
+            "ml_prediction": report.ml_prediction,
+            "kbs_recommendation": report.kbs_recommendation,
+            "created_at": report.created_at.isoformat() if hasattr(report.created_at, 'isoformat') else report.created_at
+        }
     }
 
 @router.get("/history", response_model=List[DiagnosisResponse])
@@ -61,9 +67,14 @@ async def get_history(
     current_user: User = Depends(get_current_user)
 ):
     """Returns recent diagnosis reports for the current user."""
-    reports = await DiagnosisReport.find(
+    query = DiagnosisReport.find(
         DiagnosisReport.user_id == str(current_user.id)
-    ).sort("-created_at").limit(limit).to_list()
+    ).sort("-created_at")
+    
+    if limit > 0:
+        query = query.limit(limit)
+        
+    reports = await query.to_list()
     
     return [
         DiagnosisResponse(

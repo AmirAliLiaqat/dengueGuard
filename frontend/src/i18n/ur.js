@@ -41,6 +41,10 @@ export const ur = {
   health_history: "صحت کی تاریخ",
   view_reports: "رپورٹس دیکھیں",
   recent_reports: "حالیہ رپورٹس",
+  health_tips: "صحت کے مشورے",
+  preventive_measures: "محفوظ رہیں",
+  who_guidelines: "WHO رہنمائی",
+  official_medical_advice: "سرکاری مشورہ",
 
   // Diagnosis Form
   diagnosis_form: "تشخیصی فارم",
@@ -49,8 +53,8 @@ export const ur = {
   platelet_count: "پلیٹلیٹ کی تعداد (cells/mcL)",
   physical_symptoms: "جسمانی علامات",
   severe_headache: "شدید سر درد",
-  muscle_pain: "پٹھوں/جوڑوں کا درد",
-  nausea: "متلی/الٹیاں",
+  muscle_pain: "پٹھوں کا درد",
+  nausea: "متلی",
   visible_bleeding: "ظاہر ہونیوالی خون بہنا",
   analyze_ai: "AI اور KBS کے ساتھ تجزیہ کریں",
   analyze_now: "ابھی تجزیہ کریں",

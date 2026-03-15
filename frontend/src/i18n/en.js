@@ -41,6 +41,10 @@ export const en = {
   health_history: "Health History",
   view_reports: "View Reports",
   recent_reports: "Recent Reports",
+  health_tips: "Health Tips",
+  preventive_measures: "Stay Safe",
+  who_guidelines: "WHO Guides",
+  official_medical_advice: "Official Advice",
 
   // Diagnosis Form
   diagnosis_form: "Diagnosis Form",
@@ -49,8 +53,8 @@ export const en = {
   platelet_count: "Platelet Count (cells/mcL)",
   physical_symptoms: "Physical Symptoms",
   severe_headache: "Severe Headache",
-  muscle_pain: "Muscle/Joint Pain",
-  nausea: "Nausea/Vomiting",
+  muscle_pain: "Muscle Pain",
+  nausea: "Nausea",
   visible_bleeding: "Visible Bleeding",
   analyze_ai: "Analyze with AI & KBS",
   analyze_now: "Analyze Now",

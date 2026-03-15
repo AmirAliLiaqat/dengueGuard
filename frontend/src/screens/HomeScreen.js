@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Refre
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { PlusCircle, History, Bell, ChevronRight, AlertTriangle } from 'lucide-react-native';
+import { PlusCircle, History, Bell, ChevronRight, AlertTriangle, HeartPulse, Globe } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -93,6 +93,28 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <Text style={styles.actionTitle}>{t('health_history')}</Text>
           <Text style={styles.actionSubtitle}>{t('view_reports')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionCard}
+          onPress={() => navigation.navigate('HealthTips')} 
+        >
+          <View style={[styles.actionIcon, { backgroundColor: '#10B981' + '1A' }]}>
+            <HeartPulse color={'#10B981'} size={32} />
+          </View>
+          <Text style={styles.actionTitle}>{t('health_tips')}</Text>
+          <Text style={styles.actionSubtitle}>{t('preventive_measures')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionCard}
+          onPress={() => navigation.navigate('WHOGuidelines')} 
+        >
+          <View style={[styles.actionIcon, { backgroundColor: '#8E44AD' + '1A' }]}>
+            <Globe color={'#8E44AD'} size={32} />
+          </View>
+          <Text style={styles.actionTitle}>{t('who_guidelines')}</Text>
+          <Text style={styles.actionSubtitle}>{t('official_medical_advice')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -218,6 +240,7 @@ const createStyles = (theme, isRTL) => {
     },
     actionGrid: {
       flexDirection,
+      flexWrap: 'wrap',
       paddingHorizontal: spacing.l,
       justifyContent: 'space-between',
     },
@@ -226,6 +249,7 @@ const createStyles = (theme, isRTL) => {
       backgroundColor: colors.card,
       borderRadius: 20,
       padding: spacing.m,
+      marginBottom: spacing.m,
       borderWidth: 1,
       borderColor: colors.glassBorder,
       alignItems: isRTL ? 'flex-end' : 'flex-start',
@@ -233,7 +257,7 @@ const createStyles = (theme, isRTL) => {
     actionIcon: {
       width: 56,
       height: 56,
-      borderRadius: 16,
+      borderRadius: 28,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: spacing.m,

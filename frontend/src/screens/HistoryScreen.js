@@ -1,16 +1,16 @@
-import React from 'react';
+import { useState, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  RefreshControl,
+  ScrollView as RNScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { ClipboardList, ChevronRight, FileText } from 'lucide-react-native';
+import { ClipboardList, ChevronRight, FileText, Filter, ListFilter, SortAsc, SortDesc } from 'lucide-react-native';
 
 import { useGetHistoryQuery } from '../services/api';
 
@@ -20,7 +20,32 @@ const HistoryScreen = ({ navigation }) => {
   const { t, isRTL } = useLanguage();
   const styles = createStyles(theme, isRTL);
   
-  const { data: historyData, refetch, isFetching } = useGetHistoryQuery(50); // Fetch up to 50
+  const [riskFilter, setRiskFilter] = useState('All');
+  const [sortOrder, setSortOrder] = useState('newest');
+
+  const { data: historyData, refetch, isFetching } = useGetHistoryQuery(0); 
+
+  const processedData = useMemo(() => {
+    if (!historyData) return [];
+    
+    let filtered = [...historyData];
+    
+    if (riskFilter !== 'All') {
+      filtered = filtered.filter(item => 
+        item.kbs_recommendation?.risk_classification === riskFilter
+      );
+    }
+    
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.created_at);
+      const dateB = new Date(b.created_at);
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+    
+    return filtered;
+  }, [historyData, riskFilter, sortOrder]);
+
+  const riskLevels = ['All', 'Critical', 'High', 'Moderate', 'Low'];
 
   const renderItem = ({ item }) => {
     const risk = item.kbs_recommendation?.risk_classification || 'Unknown';
@@ -66,8 +91,44 @@ const HistoryScreen = ({ navigation }) => {
         <Text style={styles.subtitle}>{t('view_reports')}</Text>
       </View>
 
+      <View style={styles.filterSection}>
+        <View style={styles.sortToggleRow}>
+           <Text style={styles.filterLabel}>Filter by Risk:</Text>
+           <TouchableOpacity 
+             style={styles.sortButton} 
+             onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+           >
+             {sortOrder === 'newest' ? <SortDesc color={colors.primary} size={18} /> : <SortAsc color={colors.primary} size={18} />}
+             <Text style={styles.sortButtonText}>{sortOrder === 'newest' ? 'Newest' : 'Oldest'}</Text>
+           </TouchableOpacity>
+        </View>
+        
+        <RNScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.filterScroll}
+          contentContainerStyle={styles.filterScrollContent}
+        >
+          {riskLevels.map((risk) => (
+            <TouchableOpacity
+              key={risk}
+              style={[
+                styles.filterChip,
+                riskFilter === risk && styles.activeFilterChip
+              ]}
+              onPress={() => setRiskFilter(risk)}
+            >
+              <Text style={[
+                styles.filterChipText,
+                riskFilter === risk && styles.activeFilterChipText
+              ]}>{risk}</Text>
+            </TouchableOpacity>
+          ))}
+        </RNScrollView>
+      </View>
+
       <FlatList
-        data={historyData}
+        data={processedData}
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
@@ -76,7 +137,7 @@ const HistoryScreen = ({ navigation }) => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <ClipboardList color={colors.textMuted} size={60} />
-            <Text style={styles.emptyText}>{t('no_notifications')}</Text>
+            <Text style={styles.emptyText}>No reports match your filters.</Text>
           </View>
         }
       />
@@ -140,6 +201,69 @@ const createStyles = (theme, isRTL) => {
     cardMain: {
       flex: 1,
       alignItems: isRTL ? 'flex-end' : 'flex-start',
+    },
+    filterSection: {
+      marginBottom: spacing.m,
+    },
+    sortToggleRow: {
+      flexDirection,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: spacing.l,
+      marginBottom: spacing.s,
+    },
+    filterLabel: {
+      ...typography.caption,
+      color: colors.textMuted,
+      fontWeight: 'bold',
+    },
+    sortButton: {
+      flexDirection,
+      alignItems: 'center',
+      backgroundColor: colors.glass,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    sortButtonText: {
+      ...typography.caption,
+      color: colors.primary,
+      fontWeight: 'bold',
+      marginLeft: isRTL ? 0 : 6,
+      marginRight: isRTL ? 6 : 0,
+    },
+    filterScroll: {
+      paddingLeft: isRTL ? 0 : spacing.l,
+      paddingRight: isRTL ? spacing.l : 0,
+    },
+    filterScrollContent: {
+      paddingRight: isRTL ? 0 : spacing.xl,
+      paddingLeft: isRTL ? spacing.xl : 0,
+      paddingVertical: 4,
+    },
+    filterChip: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: colors.card,
+      marginRight: isRTL ? 0 : 8,
+      marginLeft: isRTL ? 8 : 0,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    activeFilterChip: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    },
+    filterChipText: {
+      fontSize: 12,
+      color: colors.textMuted,
+      fontWeight: '600',
+    },
+    activeFilterChipText: {
+      color: colors.background,
     },
     cardTitle: {
       ...typography.h3,

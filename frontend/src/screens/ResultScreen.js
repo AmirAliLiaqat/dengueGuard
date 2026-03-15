@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { CheckCircle, Info, FileText, Brain, ChevronLeft, AlertCircle } from 'lucide-react-native';
+import { CheckCircle, Info, FileText, Brain, ChevronLeft, AlertCircle, List, Download } from 'lucide-react-native';
 import { generateAndSharePDF } from '../utils/pdfGenerator';
 
 const ResultScreen = ({ route, navigation }) => {
@@ -14,16 +14,19 @@ const ResultScreen = ({ route, navigation }) => {
   
   const styles = createStyles(theme, isRTL);
 
-  const diagnosis = route.params?.data || {};
-
+  const reportData = route.params?.data || {};
+  const diagnosis = reportData.kbs_recommendation || {};
+  
   const stage = diagnosis.disease_detection || 'Complete';
   const risk = diagnosis.risk_classification || 'Unknown';
-  const explanation = (diagnosis.explainable_reasoning || []).join('\n\n');
   const recommendation = diagnosis.clinical_recommendations || 'Please consult a doctor.';
   const alertText = diagnosis.alert_system;
   let probability = 0;
-  if(diagnosis.ml_model_result && typeof diagnosis.ml_model_result.probability === 'number'){
-     probability = (diagnosis.ml_model_result.probability * 100).toFixed(0);
+  if(reportData.ml_prediction && typeof reportData.ml_prediction.probability === 'number'){
+     probability = (reportData.ml_prediction.probability * 100).toFixed(0);
+  } else if (reportData.ml_model_result && typeof reportData.ml_model_result.probability === 'number') {
+     // fallback for old format if any
+     probability = (reportData.ml_model_result.probability * 100).toFixed(0);
   }
 
   // Determine colors based on risk
@@ -35,29 +38,36 @@ const ResultScreen = ({ route, navigation }) => {
   const formatList = (text) => {
     if (Array.isArray(text)) return text;
     if (!text) return [];
-    if (text.includes('\n')) {
+    if (typeof text === 'string' && text.includes('\n')) {
       return text.split('\n').filter(i => i.trim().length > 0);
     }
-    return text.split(/\.\s+/).filter(i => i.trim().length > 0).map(i => i.endsWith('.') ? i : i + '.');
+    return String(text).split(/\.\s+/).filter(i => i.trim().length > 0).map(i => i.endsWith('.') ? i : i + '.');
+  };
+
+  const getSymptomsList = () => {
+    if (!reportData.symptoms) return [];
+    return Object.entries(reportData.symptoms)
+      .filter(([_, val]) => val === true || val === "true")
+      .map(([key, _]) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
   };
 
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      const reportData = {
-        id: 'SYS-' + Math.floor(Math.random() * 100000),
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
+      const pdfData = {
+        ...reportData,
+        date: new Date(reportData.created_at).toLocaleDateString(),
+        time: new Date(reportData.created_at).toLocaleTimeString(),
         result: risk,
         status: stage,
         score: probability,
         alertText: alertText,
-        symptoms: ['Diagnosis input verified via engine logic.'], // Real symptoms not in payload context here directly, use general
+        symptoms: getSymptomsList(),
         recommendations: formatList(recommendation),
         reasoning: diagnosis.explainable_reasoning || []
       };
       
-      await generateAndSharePDF(reportData);
+      await generateAndSharePDF(pdfData);
     } catch (err) {
       console.log('Error downloading PDF:', err);
     } finally {
@@ -72,7 +82,9 @@ const ResultScreen = ({ route, navigation }) => {
           <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('diagnosis_result') || "Result"}</Text>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity style={styles.headerButton} onPress={handleDownload} disabled={isDownloading}>
+          <Download color={colors.primary} size={24} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
@@ -87,6 +99,11 @@ const ResultScreen = ({ route, navigation }) => {
         )}
 
         <View style={styles.resultCard}>
+          {reportData.created_at && (
+            <Text style={styles.dateText}>
+              {new Date(reportData.created_at).toLocaleDateString()} • {new Date(reportData.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+          )}
           <View style={[styles.iconContainer, { backgroundColor: riskColor + '1A' }]}>
             <CheckCircle color={riskColor} size={64} />
           </View>
@@ -99,6 +116,21 @@ const ResultScreen = ({ route, navigation }) => {
             <Text style={[styles.badgeText, { color: '#555' }]}>Risk: {risk}</Text>
           </View>
         </View>
+
+        {getSymptomsList().length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <List color={colors.warning} size={20} />
+              <Text style={styles.sectionTitle}>Detected Symptoms</Text>
+            </View>
+            {getSymptomsList().map((item, index) => (
+              <View key={index} style={{ flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 10, alignItems: 'center' }}>
+                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.warning, marginRight: isRTL ? 0 : 10, marginLeft: isRTL ? 10 : 0 }} />
+                 <Text style={[styles.sectionText, { flex: 1, marginBottom: 0 }]}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -186,6 +218,16 @@ const createStyles = (theme, isRTL) => {
       borderWidth: 1,
       borderColor: colors.glassBorder,
     },
+    headerButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.glass,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
     headerTitle: {
       ...typography.h2,
       color: colors.text,
@@ -201,6 +243,11 @@ const createStyles = (theme, isRTL) => {
       marginBottom: spacing.l,
       borderWidth: 1,
       borderColor: colors.glassBorder,
+    },
+    dateText: {
+      ...typography.caption,
+      color: colors.textMuted,
+      marginBottom: spacing.xs,
     },
     iconContainer: {
       width: 100,
@@ -240,7 +287,7 @@ const createStyles = (theme, isRTL) => {
     sectionHeader: {
       flexDirection,
       alignItems: 'center',
-      marginBottom: spacing.s,
+      marginBottom: 0,
     },
     sectionTitle: {
       ...typography.body,

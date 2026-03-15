@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, Download, CheckCircle, Info, AlertCircle, List, Brain, FileText } from 'lucide-react-native';
 import { generateAndSharePDF } from '../utils/pdfGenerator';
+import { useGetReportDetailQuery } from '../services/api';
+import { ActivityIndicator } from 'react-native';
 
 const ReportDetailsScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -19,58 +21,82 @@ const ReportDetailsScreen = ({ route, navigation }) => {
   const styles = createStyles(theme, isRTL);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const { reportId } = route.params || { reportId: '1' };
-
-  // Extended mock data to match ML Result data schema
-  const report = {
-    id: reportId,
-    date: 'Oct 24, 2023',
-    time: '10:30 AM',
-    result: 'High Risk',
-    status: 'Severe Dengue',
-    score: 85,
-    alertText: 'Critical phase detected based on dropping platelet counts.',
-    symptoms: [
-      'High Fever (102°F)',
-      'Severe Headache',
-      'Joint & Muscle Pain',
-      'Nausea',
-      'Fatigue'
-    ],
-    recommendations: [
-      'Immediate hospital admission is recommended.',
-      'Begin intravenous fluid replacement therapy quickly.',
-      'Constantly monitor hematocrit and platelet counts.',
-      'Do not administer ibuprofen or aspirin.'
-    ],
-    reasoning: [
-      'Patient exhibits > 3 days of high fever and severe muscle pain mapping to Dengue symptoms.',
-      'Warning phase indicated by rapid onset of fatigue and nausea.',
-      'Drop in platelet count triggered Severe Dengue classification rule.'
-    ]
-  };
-
-  // Determine colors based on risk/score
-  let riskColor = colors.primary;
-  if (report.score > 40) riskColor = colors.warning || '#FFA500';
-  if (report.score > 75) riskColor = colors.accent || '#FF6B6B';
-  if (report.result === 'Critical') riskColor = '#D32F2F';
-
-  const formatList = (textArray) => {
-    if (!textArray) return [];
-    return textArray;
-  };
+  const { reportId } = route.params || {};
+  const { data: reportData, isLoading, isError } = useGetReportDetailQuery(reportId);
 
   const handleDownload = async () => {
+    if (!reportData) return;
     setIsDownloading(true);
     try {
-      await generateAndSharePDF(report);
+      const pdfData = {
+        ...reportData,
+        date: new Date(reportData.created_at).toLocaleDateString(),
+        time: new Date(reportData.created_at).toLocaleTimeString(),
+        result: reportData.kbs_recommendation?.risk_classification || 'Unknown',
+        status: reportData.kbs_recommendation?.disease_detection || 'Diagnosis',
+        score: (reportData.ml_prediction?.probability * 100).toFixed(0),
+        recommendations: formatList(reportData.kbs_recommendation?.clinical_recommendations),
+        reasoning: reportData.kbs_recommendation?.explainable_reasoning || [],
+        symptoms: getSymptomsList()
+      };
+      await generateAndSharePDF(pdfData);
     } catch (err) {
       console.log('Error downloading PDF:', err);
     } finally {
       setIsDownloading(false);
     }
   };
+
+  const formatList = (text) => {
+    if (Array.isArray(text)) return text;
+    if (!text) return [];
+    if (typeof text === 'string' && text.includes('\n')) {
+      return text.split('\n').filter(i => i.trim().length > 0);
+    }
+    return String(text).split(/\.\s+/).filter(i => i.trim().length > 0).map(i => i.endsWith('.') ? i : i + '.');
+  };
+
+  const getSymptomsList = () => {
+    if (!reportData?.symptoms) return [];
+    return Object.entries(reportData.symptoms)
+      .filter(([_, val]) => val === true || val === "true")
+      .map(([key, _]) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
+  if (isError || !reportData) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: colors.text }}>Error loading report details.</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginTop: 20 }}>
+          <Text style={{ color: colors.primary }}>Go Back</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  const diagnosis = reportData.kbs_recommendation || {};
+  const stage = diagnosis.disease_detection || 'Diagnosis';
+  const risk = diagnosis.risk_classification || 'Unknown';
+  const recommendations = diagnosis.clinical_recommendations || '';
+  const alertText = diagnosis.alert_system;
+  let probability = 0;
+  if(reportData.ml_prediction && typeof reportData.ml_prediction.probability === 'number'){
+     probability = (reportData.ml_prediction.probability * 100).toFixed(0);
+  }
+
+  // Determine colors based on risk
+  let riskColor = colors.primary;
+  if (risk === 'Moderate') riskColor = colors.warning || '#FFA500';
+  if (risk === 'High') riskColor = colors.accent || '#FF6B6B';
+  if (risk === 'Critical') riskColor = '#D32F2F';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -79,59 +105,63 @@ const ReportDetailsScreen = ({ route, navigation }) => {
           <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('report_details') || 'Report Details'}</Text>
-        <TouchableOpacity style={styles.downloadButton} onPress={handleDownload} disabled={isDownloading}>
+        <TouchableOpacity style={styles.headerButton} onPress={handleDownload} disabled={isDownloading}>
           <Download color={colors.primary} size={24} />
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
         
-        {report.alertText && (
-          <View style={[styles.section, { borderColor: riskColor, backgroundColor: riskColor + '1A', paddingBottom: spacing.m }]}>
+        {alertText && (
+          <View style={[styles.section, { borderColor: riskColor, backgroundColor: riskColor + '1A' }]}>
             <View style={styles.sectionHeader}>
               <AlertCircle color={riskColor} size={20} />
-              <Text style={[styles.sectionText, { color: riskColor, fontWeight: 'bold' }]}>{report.alertText}</Text>
+              <Text style={[styles.sectionText, { color: riskColor, fontWeight: 'bold' }]}>{alertText}</Text>
             </View>
           </View>
         )}
 
         <View style={styles.resultCard}>
-          <Text style={styles.dateText}>{report.date} • {report.time}</Text>
-          <View style={[styles.iconContainer, { backgroundColor: riskColor + '1A', marginTop: spacing.s }]}>
+          <Text style={styles.dateText}>
+            {new Date(reportData.created_at).toLocaleDateString()} • {new Date(reportData.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+          <View style={[styles.iconContainer, { backgroundColor: riskColor + '1A' }]}>
             <CheckCircle color={riskColor} size={64} />
           </View>
-          <Text style={styles.percentageText}>{report.score}%</Text>
+          <Text style={styles.percentageText}>{probability}%</Text>
           <Text style={styles.probabilityLabel}>Recorded Probability</Text>
           <View style={[styles.badge, { backgroundColor: riskColor + '1A', marginTop: 10 }]}>
-            <Text style={[styles.badgeText, { color: riskColor, fontSize: 16, textAlign: 'center' }]}>{report.status}</Text>
+            <Text style={[styles.badgeText, { color: riskColor, fontSize: 16, textAlign: 'center' }]}>{stage}</Text>
           </View>
           <View style={[styles.badge, { backgroundColor: '#E0E0E0', marginTop: 10 }]}>
-            <Text style={[styles.badgeText, { color: '#555' }]}>Risk: {report.result}</Text>
+            <Text style={[styles.badgeText, { color: '#555' }]}>Risk: {risk}</Text>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <List color={colors.warning} size={20} />
-            <Text style={styles.sectionTitle}>Detected Symptoms</Text>
-          </View>
-          {formatList(report.symptoms).map((item, index) => (
-            <View key={index} style={{ flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 10, alignItems: 'center' }}>
-               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.warning, marginRight: isRTL ? 0 : 10, marginLeft: isRTL ? 10 : 0 }} />
-               <Text style={[styles.sectionText, { flex: 1, marginBottom: 0 }]}>{item}</Text>
+        {getSymptomsList().length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <List color={colors.warning} size={20} />
+              <Text style={styles.sectionTitle}>Detected Symptoms</Text>
             </View>
-          ))}
-        </View>
+            {getSymptomsList().map((item, index) => (
+              <View key={index} style={{ flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 10, alignItems: 'center' }}>
+                 <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.warning, marginRight: isRTL ? 0 : 10, marginLeft: isRTL ? 10 : 0 }} />
+                 <Text style={[styles.sectionText, { flex: 1, marginBottom: 0 }]}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Info color={colors.info} size={20} />
             <Text style={styles.sectionTitle}>{t('medical_advice') || 'Recommendations'}</Text>
           </View>
-           {formatList(report.recommendations).map((item, index) => (
+           {formatList(recommendations).map((item, index) => (
             <View key={index} style={{ flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 10, alignItems: 'flex-start' }}>
               <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, marginTop: 8, marginRight: isRTL ? 0 : 10, marginLeft: isRTL ? 10 : 0 }} />
-              <Text style={[styles.sectionText, { flex: 1, marginBottom: 0 }]}>{item}</Text>
+              <Text style={[styles.sectionText, { flex: 1, marginBottom: 0 }]}>{item.replace(/^[-*•]\s*/, '').trim()}</Text>
             </View>
           ))}
         </View>
@@ -141,13 +171,13 @@ const ReportDetailsScreen = ({ route, navigation }) => {
             <Brain color={colors.primary} size={20} />
             <Text style={styles.sectionTitle}>{t('logic_explanation') || "AI Logic & Reasoning"}</Text>
           </View>
-          {report.reasoning && report.reasoning.length > 0 ? (
+          {diagnosis.explainable_reasoning && diagnosis.explainable_reasoning.length > 0 ? (
             <View style={styles.reasoningContainer}>
-              {report.reasoning.map((reason, index) => (
+              {diagnosis.explainable_reasoning.map((reason, index) => (
                 <View key={index} style={styles.reasoningStep}>
                   <View style={styles.timelineColumn}>
                     <View style={[styles.timelineDot, { backgroundColor: colors.primary, borderColor: colors.primary + '40' }]} />
-                    {index < report.reasoning.length - 1 && (
+                    {index < diagnosis.explainable_reasoning.length - 1 && (
                       <View style={[styles.timelineLine, { backgroundColor: colors.primary + '30' }]} />
                     )}
                   </View>
@@ -200,6 +230,16 @@ const createStyles = (theme, isRTL) => {
       borderBottomColor: colors.glassBorder,
     },
     backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.glass,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    headerButton: {
       width: 40,
       height: 40,
       borderRadius: 20,
@@ -268,7 +308,7 @@ const createStyles = (theme, isRTL) => {
     sectionHeader: {
       flexDirection,
       alignItems: 'center',
-      marginBottom: spacing.s,
+      marginBottom: 0,
     },
     sectionTitle: {
       ...typography.body,

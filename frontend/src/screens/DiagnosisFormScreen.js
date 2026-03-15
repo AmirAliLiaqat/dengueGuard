@@ -91,8 +91,8 @@ const DiagnosisFormScreen = ({ navigation }) => {
 
       const result = await diagnoseSymptoms(payload).unwrap();
       
-      if (result?.diagnosis) {
-         navigation.navigate('Result', { data: result.diagnosis });
+      if (result?.report) {
+         navigation.navigate('Result', { data: result.report });
       } else {
          showAlert({
            title: "Analysis Failed",
@@ -316,7 +316,7 @@ const createStyles = (theme, isRTL) => {
     sectionHeader: {
       flexDirection,
       alignItems: 'center',
-      marginBottom: spacing.l,
+      marginBottom: 0,
     },
     sectionTitle: {
       ...typography.h3,

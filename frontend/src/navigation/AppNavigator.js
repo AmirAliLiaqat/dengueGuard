@@ -22,6 +22,8 @@ import SettingsScreen from '../screens/SettingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import HelpSupportScreen from '../screens/HelpSupportScreen';
 import AboutScreen from '../screens/AboutScreen';
+import HealthTipsScreen from '../screens/HealthTipsScreen';
+import WHOGuidelinesScreen from '../screens/WHOGuidelinesScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -94,6 +96,8 @@ const AppNavigator = () => {
           <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
           <Stack.Screen name="About" component={AboutScreen} />
           <Stack.Screen name="Doctor" component={DoctorPanel} />
+          <Stack.Screen name="HealthTips" component={HealthTipsScreen} />
+          <Stack.Screen name="WHOGuidelines" component={WHOGuidelinesScreen} />
         </>
       )}
     </Stack.Navigator>
