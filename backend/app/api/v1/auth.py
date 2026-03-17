@@ -3,14 +3,14 @@ import cloudinary
 import cloudinary.uploader
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, List
 from jose import jwt, JWTError
 
 from app.core import security
 from app.core.config import settings
 from app.core.email import send_otp_email
 from app.schemas.user import UserCreate, UserResponse, Token, VerifyOTP, UserUpdate, TokenPayload
-from app.models.dengue import User, OTPRecord, Notification
+from app.models.dengue import User, OTPRecord, Notification, DiagnosisReport
 
 router = APIRouter()
 reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
@@ -131,7 +131,10 @@ async def get_me(current_user: User = Depends(get_current_user)):
         is_active=current_user.is_active,
         profile_picture=current_user.profile_picture,
         notifications_enabled=current_user.notifications_enabled,
-        daily_reminders=current_user.daily_reminders
+        daily_reminders=current_user.daily_reminders,
+        biometric_enabled=current_user.biometric_enabled,
+        two_factor_enabled=current_user.two_factor_enabled,
+        is_public=current_user.is_public
     )
 
 @router.put("/me", response_model=UserResponse)
@@ -148,6 +151,12 @@ async def update_me(update: UserUpdate, current_user: User = Depends(get_current
         current_user.notifications_enabled = update.notifications_enabled
     if update.daily_reminders is not None:
         current_user.daily_reminders = update.daily_reminders
+    if update.biometric_enabled is not None:
+        current_user.biometric_enabled = update.biometric_enabled
+    if update.two_factor_enabled is not None:
+        current_user.two_factor_enabled = update.two_factor_enabled
+    if update.is_public is not None:
+        current_user.is_public = update.is_public
     
     await current_user.save()
     
@@ -203,3 +212,51 @@ async def upload_profile_picture(
     except Exception as e:
         print(f"Cloudinary upload error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
+
+@router.get("/public-profiles", response_model=List[UserResponse])
+async def get_public_profiles():
+    public_users = await User.find(User.is_public == True).to_list()
+    return [
+        UserResponse(
+            id=str(u.id),
+            email=u.email,
+            full_name=u.full_name,
+            phone=u.phone,
+            role=u.role,
+            is_verified=u.is_verified,
+            is_active=u.is_active,
+            profile_picture=u.profile_picture,
+            notifications_enabled=u.notifications_enabled,
+            daily_reminders=u.daily_reminders,
+            biometric_enabled=u.biometric_enabled,
+            two_factor_enabled=u.two_factor_enabled,
+            is_public=u.is_public
+        ) for u in public_users
+    ]
+
+@router.get("/public-profile/{user_id}")
+async def get_public_profile_detail(user_id: str):
+    user = await User.get(user_id)
+    if not user or not user.is_public:
+        raise HTTPException(status_code=404, detail="Public profile not found")
+    
+    reports = await DiagnosisReport.find(DiagnosisReport.user_id == user_id).to_list()
+    
+    return {
+        "user": UserResponse(
+            id=str(user.id),
+            email=user.email,
+            full_name=user.full_name,
+            phone=user.phone,
+            role=user.role,
+            is_verified=user.is_verified,
+            is_active=user.is_active,
+            profile_picture=user.profile_picture,
+            notifications_enabled=user.notifications_enabled,
+            daily_reminders=user.daily_reminders,
+            biometric_enabled=user.biometric_enabled,
+            two_factor_enabled=user.two_factor_enabled,
+            is_public=user.is_public
+        ),
+        "reports": reports
+    }

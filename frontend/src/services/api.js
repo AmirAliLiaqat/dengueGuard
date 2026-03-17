@@ -2,8 +2,8 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Development URL (Your local IP) vs Production URL (Render.com)
 const API_BASE_URL = __DEV__ 
-  ? 'http://192.168.1.103:8000/api/v1' 
-  : 'https://dengue-dignose.onrender.com/api/v1'; // <-- Replace with your actual Render URL
+  ? 'http://192.168.18.28:8000/api/v1' 
+  : 'https://dengue-dignose.onrender.com/api/v1'; 
 
 export const denguApi = createApi({
   reducerPath: 'denguApi',
@@ -27,6 +27,13 @@ export const denguApi = createApi({
     markAsRead: builder.mutation({
       query: (id) => ({
         url: `/notifications/${id}/read`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Notification'],
+    }),
+    markAllAsRead: builder.mutation({
+      query: () => ({
+        url: '/notifications/read-all',
         method: 'PUT',
       }),
       invalidatesTags: ['Notification'],
@@ -106,6 +113,13 @@ export const denguApi = createApi({
       query: () => '/auth/me',
       providesTags: ['User'],
     }),
+    getPublicProfiles: builder.query({
+      query: () => '/auth/public-profiles',
+      providesTags: ['User'],
+    }),
+    getPublicProfileDetail: builder.query({
+      query: (id) => `/auth/public-profile/${id}`,
+    }),
     updateProfile: builder.mutation({
       query: (data) => ({
         url: '/auth/me',
@@ -138,7 +152,10 @@ export const {
   useUploadProfilePictureMutation,
   useGetNotificationsQuery,
   useMarkAsReadMutation,
+  useMarkAllAsReadMutation,
   useDeleteNotificationMutation,
   useSyncRemindersMutation,
-  useRecordActionMutation
+  useRecordActionMutation,
+  useGetPublicProfilesQuery,
+  useGetPublicProfileDetailQuery
 } = denguApi;

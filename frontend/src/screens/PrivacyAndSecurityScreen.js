@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,89 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, ShieldCheck, Lock, Eye, Fingerprint } from 'lucide-react-native';
+import { useAlert } from '../context/AlertContext';
+import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
 
 const PrivacyAndSecurityScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
+  const { showAlert } = useAlert();
   const styles = createStyles(theme, isRTL);
 
-  const [isFaceID, setIsFaceID] = React.useState(true);
-  const [isTwoFactor, setIsTwoFactor] = React.useState(false);
-  const [isVisible, setIsVisible] = React.useState(true);
+  const { data: userData } = useGetMeQuery();
+  const [updateProfile] = useUpdateProfileMutation();
+
+  const [isFaceID, setIsFaceID] = useState(false);
+  const [isTwoFactor, setIsTwoFactor] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (userData) {
+      setIsFaceID(userData.biometric_enabled ?? false);
+      setIsTwoFactor(userData.two_factor_enabled ?? false);
+      setIsVisible(userData.is_public ?? false);
+    }
+  }, [userData]);
+
+  const toggleSetting = async (id, currentValue) => {
+    const newValue = !currentValue;
+
+    // Special handling for visibility - confirm when turning OFF
+    if (id === 'visibility' && currentValue === true) {
+      showAlert({
+        title: "Make Profile Private?",
+        message: "Your profile and reports will no longer be visible in the public gallery. Are you sure?",
+        type: 'warning',
+        buttons: [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Yes, Make Private",
+            onPress: () => processToggle(id, currentValue, newValue),
+          }
+        ]
+      });
+      return;
+    }
+
+    processToggle(id, currentValue, newValue);
+  };
+
+  const processToggle = async (id, currentValue, newValue) => {
+    // Optimistic Update
+    if (id === 'biometric') setIsFaceID(newValue);
+    if (id === '2fa') setIsTwoFactor(newValue);
+    if (id === 'visibility') setIsVisible(newValue);
+
+    try {
+      const updateData = {};
+      if (id === 'biometric') updateData.biometric_enabled = newValue;
+      if (id === '2fa') updateData.two_factor_enabled = newValue;
+      if (id === 'visibility') updateData.is_public = newValue;
+
+      await updateProfile(updateData).unwrap();
+
+      if (id === 'visibility' && newValue) {
+        showAlert({
+          title: t('visibility'),
+          message: "Your profile is now public. Other users can view your health stats and reports.",
+          type: 'success'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to update privacy setting:', err);
+      // Revert on error
+      if (id === 'biometric') setIsFaceID(currentValue);
+      if (id === '2fa') setIsTwoFactor(currentValue);
+      if (id === 'visibility') setIsVisible(currentValue);
+
+      showAlert({
+        title: "Error",
+        message: "Could not update setting. Please try again.",
+        type: 'error'
+      });
+    }
+  };
 
   const securitySettings = [
     {
@@ -29,7 +102,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       subtitle: 'Use FaceID or Fingerprint to login',
       icon: Fingerprint,
       value: isFaceID,
-      onToggle: () => setIsFaceID(!isFaceID)
+      onToggle: () => toggleSetting('biometric', isFaceID)
     },
     {
       id: '2fa',
@@ -37,15 +110,15 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       subtitle: 'Require secondary code for logins',
       icon: Lock,
       value: isTwoFactor,
-      onToggle: () => setIsTwoFactor(!isTwoFactor)
+      onToggle: () => toggleSetting('2fa', isTwoFactor)
     },
     {
       id: 'visibility',
       title: t('visibility'),
-      subtitle: 'Show your diagnostics to doctors',
+      subtitle: 'Make your profile & reports public to others',
       icon: Eye,
       value: isVisible,
-      onToggle: () => setIsVisible(!isVisible)
+      onToggle: () => toggleSetting('visibility', isVisible)
     }
   ];
 
@@ -95,7 +168,14 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.deleteButton}>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => showAlert({
+            title: "Request Sent",
+            message: "Our data protection officer will contact you within 48 hours.",
+            type: 'info'
+          })}
+        >
           <Text style={styles.deleteText}>{t('request_deletion')}</Text>
         </TouchableOpacity>
       </ScrollView>

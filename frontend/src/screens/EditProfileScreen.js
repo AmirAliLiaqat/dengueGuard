@@ -16,7 +16,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { User, Mail, Phone, ChevronLeft, Camera, Image as ImageIcon, X } from 'lucide-react-native';
 import { useAlert } from '../context/AlertContext';
-import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
+import { useGetMeQuery, useUpdateProfileMutation, useUploadProfilePictureMutation } from '../services/api';
 import { ActivityIndicator } from 'react-native';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -31,6 +31,7 @@ const EditProfileScreen = ({ navigation }) => {
   
   const { data: user, isLoading: isFetching } = useGetMeQuery();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [uploadProfilePicture] = useUploadProfilePictureMutation();
   const token = useSelector(state => state.auth.token);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -68,30 +69,13 @@ const EditProfileScreen = ({ navigation }) => {
 
     try {
       setIsUploading(true);
-      // Replace with your actual API URL
-      const API_URL = 'http://192.168.1.103:8000/api/v1';
-      
-      const response = await fetch(`${API_URL}/auth/upload-profile-picture`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.detail || "Upload failed");
-      }
-      
+      const result = await uploadProfilePicture(formData).unwrap();
       return result.url;
     } catch (error) {
       console.error('Upload error:', error);
       showAlert({ 
         title: "Upload Failed", 
-        message: error.message || "Could not upload image", 
+        message: error.data?.detail || "Could not upload image", 
         type: "error" 
       });
       return null;
@@ -120,6 +104,11 @@ const EditProfileScreen = ({ navigation }) => {
       const uploadedUrl = await handleUpload(result.assets[0].uri);
       if (uploadedUrl) {
         setFormData({ ...formData, profile_picture: uploadedUrl });
+        showAlert({
+          title: "Profile Picture Updated",
+          message: "Your new profile picture looks great! Don't forget to save changes.",
+          type: "success"
+        });
       }
     }
   };

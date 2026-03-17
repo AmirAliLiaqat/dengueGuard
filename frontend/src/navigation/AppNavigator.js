@@ -28,6 +28,8 @@ import HealthTipsScreen from '../screens/HealthTipsScreen';
 import WHOGuidelinesScreen from '../screens/WHOGuidelinesScreen';
 import NotificationDetailScreen from '../screens/NotificationDetailScreen';
 import DengueInfoScreen from '../screens/DengueInfoScreen';
+import PublicProfilesScreen from '../screens/PublicProfilesScreen';
+import UserProfileDetailScreen from '../screens/UserProfileDetailScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -122,6 +124,8 @@ const AppNavigator = () => {
           <Stack.Screen name="WHOGuidelines" component={WHOGuidelinesScreen} />
           <Stack.Screen name="NotificationDetail" component={NotificationDetailScreen} />
           <Stack.Screen name="DengueInfo" component={DengueInfoScreen} />
+          <Stack.Screen name="PublicProfiles" component={PublicProfilesScreen} />
+          <Stack.Screen name="UserProfileDetail" component={UserProfileDetailScreen} />
         </>
       )}
     </Stack.Navigator>

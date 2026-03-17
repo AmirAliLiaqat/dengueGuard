@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText, HelpCircle, Info, Stethoscope, Activity } from 'lucide-react-native';
+import { User, Settings, LogOut, ChevronRight, Shield, Bell, FileText, HelpCircle, Info, Stethoscope, Activity, Globe } from 'lucide-react-native';
 import { useGetMeQuery, useGetStatsQuery } from '../services/api';
 import { useDispatch } from 'react-redux';
 import { logout } from '../redux/authSlice';
@@ -40,7 +40,8 @@ const ProfileScreen = ({ navigation }) => {
   const menuItems = [
     { icon: User, label: t('edit_profile_btn'), onPress: () => navigation.navigate('EditProfile') },
     { icon: Bell, label: t('notifications_toggle'), onPress: () => navigation.navigate('Notifications') },
-    { icon: Stethoscope, label: t('doctor_panel') || 'Doctor Panel', onPress: () => navigation.navigate('Doctor') },
+    { icon: Shield, label: t('privacy_security'), onPress: () => navigation.navigate('PrivacyAndSecurity') },
+    { icon: Globe, label: t('public_profiles_gallery') || 'Public Profiles Gallery', onPress: () => navigation.navigate('PublicProfiles') },
     { icon: Settings, label: t('settings'), onPress: () => navigation.navigate('Settings') },
   ];
 
@@ -115,13 +116,6 @@ const ProfileScreen = ({ navigation }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('support')}</Text>
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('PrivacyAndSecurity')}>
-            <View style={styles.menuIconContainer}>
-              <Shield color={colors.primary} size={22} />
-            </View>
-            <Text style={styles.menuLabel}>{t('privacy_security')}</Text>
-            <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
-          </TouchableOpacity>
           <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('TermsAndConditions')}>
             <View style={styles.menuIconContainer}>
               <FileText color={colors.primary} size={22} />
@@ -147,7 +141,7 @@ const ProfileScreen = ({ navigation }) => {
             <View style={styles.menuIconContainer}>
               <Activity color={colors.primary} size={22} />
             </View>
-            <Text style={styles.menuLabel}>Dengue Encyclopedia</Text>
+            <Text style={styles.menuLabel}>{t('dengue_encyclopedia')}</Text>
             <ChevronRight color={colors.textMuted} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
           </TouchableOpacity>
         </View>

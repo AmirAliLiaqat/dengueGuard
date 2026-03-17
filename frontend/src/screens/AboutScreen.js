@@ -54,7 +54,7 @@ const AboutScreen = ({ navigation }) => {
 
         <View style={styles.card}>
           <View style={styles.cardIcon}>
-            <Info color={colors.info} size={24} />
+            <Info color={colors.primary} size={24} />
           </View>
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>KBS Engine</Text>

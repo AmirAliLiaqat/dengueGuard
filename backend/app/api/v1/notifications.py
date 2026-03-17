@@ -108,6 +108,14 @@ async def get_notifications(current_user: User = Depends(get_current_user)):
         ) for n in notifications
     ]
 
+@router.put("/read-all")
+async def mark_all_as_read(current_user: User = Depends(get_current_user)):
+    await Notification.find(
+        Notification.user_id == str(current_user.id),
+        Notification.is_read == False
+    ).update({"$set": {"is_read": True}})
+    return {"status": "success"}
+
 @router.put("/{notification_id}/read")
 async def mark_as_read(notification_id: str, current_user: User = Depends(get_current_user)):
     notification = await Notification.get(notification_id)

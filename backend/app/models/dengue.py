@@ -14,6 +14,9 @@ class User(Document):
     is_verified: bool = False
     notifications_enabled: bool = True
     daily_reminders: bool = True
+    biometric_enabled: bool = False
+    two_factor_enabled: bool = False
+    is_public: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:

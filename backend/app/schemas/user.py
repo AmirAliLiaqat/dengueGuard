@@ -11,6 +11,9 @@ class UserBase(BaseModel):
     profile_picture: Optional[str] = None
     notifications_enabled: Optional[bool] = True
     daily_reminders: Optional[bool] = True
+    biometric_enabled: Optional[bool] = False
+    two_factor_enabled: Optional[bool] = False
+    is_public: Optional[bool] = False
 
 class UserCreate(UserBase):
     email: EmailStr
@@ -23,6 +26,9 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     notifications_enabled: Optional[bool] = None
     daily_reminders: Optional[bool] = None
+    biometric_enabled: Optional[bool] = None
+    two_factor_enabled: Optional[bool] = None
+    is_public: Optional[bool] = None
 
 class UserResponse(UserBase):
     id: str

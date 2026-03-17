@@ -1,6 +1,6 @@
 export const en = {
   // General
-  app_name: "Dengue KBS",
+  app_name: "Dengue Diagnose",
   secure_platform: "Secure Medical Grade Platform",
   save: "Save",
   done: "Done",
@@ -45,7 +45,7 @@ export const en = {
   preventive_measures: "Stay Safe",
   who_guidelines: "WHO Guides",
   official_medical_advice: "Official Advice",
-  dengue_encyclopedia: "Encyclopedia",
+  dengue_encyclopedia: "Dengue Encyclopedia",
   learn_all_about: "Learn All About It",
   daily_reminders: "Reminders",
   get_daily_tips: "Stay notified daily",
@@ -135,7 +135,7 @@ export const en = {
   notifications_toggle: "Notifications",
   app_version: "App Version",
   help_faq: "Help & FAQ",
-  about_app: "About Dengue KBS",
+  about_app: "About App",
   support: "Support",
   contact_us: "Contact Us",
   app_info: "App Info",
@@ -163,4 +163,15 @@ export const en = {
 
   // Notifications
   no_notifications: "No notifications found",
+  mark_all_read: "Mark all as read",
+  public_profiles_gallery: "Public Profiles Gallery",
+  public_profiles: "Public Profiles",
+  view_public_profiles: "Discover Other Public Users",
+  search_users: "Search Users...",
+  profile_details: "Profile Details",
+  clinical_history: "Clinical History",
+  no_public_profiles: "No public profiles found",
+  user_reports: "Health Reports",
+  phone: "Phone",
+  email: "Email",
 };

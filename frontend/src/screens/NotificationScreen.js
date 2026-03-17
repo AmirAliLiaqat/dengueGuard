@@ -9,10 +9,10 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Bell, Info, ShieldAlert, CheckCircle, ChevronLeft, User, Share2, Download } from 'lucide-react-native';
+import { Bell, Info, ShieldAlert, CheckCircle, ChevronLeft, User, Share2, Download, CheckCheck } from 'lucide-react-native';
 
-import { useGetNotificationsQuery, useMarkAsReadMutation } from '../services/api';
-import { RefreshControl, ActivityIndicator } from 'react-native';
+import { useGetNotificationsQuery, useMarkAsReadMutation, useMarkAllAsReadMutation } from '../services/api';
+import { RefreshControl, ActivityIndicator, Alert } from 'react-native';
 
 const NotificationScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -22,6 +22,15 @@ const NotificationScreen = ({ navigation }) => {
 
   const { data: notifications = [], isLoading, refetch, isFetching } = useGetNotificationsQuery();
   const [markAsRead] = useMarkAsReadMutation();
+  const [markAllAsRead] = useMarkAllAsReadMutation();
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllAsRead().unwrap();
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
+  };
 
   const handleNotificationPress = (item) => {
     markAsRead(item.id);
@@ -96,7 +105,16 @@ const NotificationScreen = ({ navigation }) => {
           <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('notifications_toggle') || 'Notifications'}</Text>
-        <View style={{ width: 40 }} />
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={handleMarkAllRead}
+          disabled={!notifications.some(n => !n.is_read)}
+        >
+          <CheckCheck 
+            color={notifications.some(n => !n.is_read) ? colors.primary : colors.textMuted} 
+            size={24} 
+          />
+        </TouchableOpacity>
       </View>
 
       <FlatList
