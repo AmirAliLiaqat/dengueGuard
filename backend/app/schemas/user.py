@@ -10,6 +10,7 @@ class UserBase(BaseModel):
     phone: Optional[str] = None
     profile_picture: Optional[str] = None
     notifications_enabled: Optional[bool] = True
+    daily_reminders: Optional[bool] = True
 
 class UserCreate(UserBase):
     email: EmailStr
@@ -21,6 +22,7 @@ class UserUpdate(BaseModel):
     profile_picture: Optional[str] = None
     password: Optional[str] = None
     notifications_enabled: Optional[bool] = None
+    daily_reminders: Optional[bool] = None
 
 class UserResponse(UserBase):
     id: str

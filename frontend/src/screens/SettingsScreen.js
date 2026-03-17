@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {
   Moon,
   ChevronRight,
   Check,
+  AlarmClock,
 } from 'lucide-react-native';
 import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
 
@@ -26,11 +27,39 @@ const SettingsScreen = ({ navigation }) => {
   const { data: userData } = useGetMeQuery();
   const [updateProfile] = useUpdateProfileMutation();
 
+  // Local state for toggles to avoid "jumpy" UI
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
+
+  // Sync local state when userData arrives
+  useEffect(() => {
+    if (userData) {
+      if (userData.notifications_enabled !== undefined) {
+        setNotificationsEnabled(userData.notifications_enabled);
+      }
+      if (userData.daily_reminders !== undefined) {
+        setRemindersEnabled(userData.daily_reminders);
+      }
+    }
+  }, [userData]);
+
   const handleToggleNotifications = async (value) => {
+    setNotificationsEnabled(value); // Optimistic UI update
     try {
       await updateProfile({ notifications_enabled: value }).unwrap();
     } catch (err) {
       console.log('Failed to update notifications:', err);
+      setNotificationsEnabled(!value); // Revert on failure
+    }
+  };
+
+  const handleToggleReminders = async (value) => {
+    setRemindersEnabled(value); // Optimistic UI update
+    try {
+      await updateProfile({ daily_reminders: value }).unwrap();
+    } catch (err) {
+      console.log('Failed to update reminders:', err);
+      setRemindersEnabled(!value); // Revert on failure
     }
   };
 
@@ -89,10 +118,23 @@ const SettingsScreen = ({ navigation }) => {
             </View>
             <Text style={styles.itemLabel}>{t('notifications_toggle')}</Text>
             <Switch
-              value={userData?.notifications_enabled ?? true}
+              value={notificationsEnabled}
               onValueChange={handleToggleNotifications}
               trackColor={{ false: colors.glassBorder, true: colors.primary }}
-              thumbColor={(userData?.notifications_enabled ?? true) ? '#FFFFFF' : colors.textMuted}
+              thumbColor={notificationsEnabled ? '#FFFFFF' : colors.textMuted}
+            />
+          </View>
+
+          <View style={styles.settingItem}>
+            <View style={styles.itemIconContainer}>
+              <AlarmClock color={colors.primary} size={20} />
+            </View>
+            <Text style={styles.itemLabel}>{t('daily_reminders')}</Text>
+            <Switch
+              value={remindersEnabled}
+              onValueChange={handleToggleReminders}
+              trackColor={{ false: colors.glassBorder, true: colors.primary }}
+              thumbColor={remindersEnabled ? '#FFFFFF' : colors.textMuted}
             />
           </View>
         </View>

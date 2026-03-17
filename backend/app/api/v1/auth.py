@@ -130,7 +130,8 @@ async def get_me(current_user: User = Depends(get_current_user)):
         is_verified=current_user.is_verified,
         is_active=current_user.is_active,
         profile_picture=current_user.profile_picture,
-        notifications_enabled=current_user.notifications_enabled
+        notifications_enabled=current_user.notifications_enabled,
+        daily_reminders=current_user.daily_reminders
     )
 
 @router.put("/me", response_model=UserResponse)
@@ -145,6 +146,8 @@ async def update_me(update: UserUpdate, current_user: User = Depends(get_current
         current_user.hashed_password = security.get_password_hash(update.password)
     if update.notifications_enabled is not None:
         current_user.notifications_enabled = update.notifications_enabled
+    if update.daily_reminders is not None:
+        current_user.daily_reminders = update.daily_reminders
     
     await current_user.save()
     

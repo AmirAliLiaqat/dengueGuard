@@ -45,6 +45,11 @@ export const en = {
   preventive_measures: "Stay Safe",
   who_guidelines: "WHO Guides",
   official_medical_advice: "Official Advice",
+  dengue_encyclopedia: "Encyclopedia",
+  learn_all_about: "Learn All About It",
+  daily_reminders: "Reminders",
+  get_daily_tips: "Stay notified daily",
+  reminders_set_success: "Daily reminders scheduled successfully!",
 
   // Diagnosis Form
   diagnosis_form: "Diagnosis Form",

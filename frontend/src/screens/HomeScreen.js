@@ -3,19 +3,20 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Refre
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { PlusCircle, History, Bell, ChevronRight, AlertTriangle, HeartPulse, Globe } from 'lucide-react-native';
+import { PlusCircle, History, Bell, ChevronRight, AlertTriangle, HeartPulse, Globe, BookOpen, AlarmClock } from 'lucide-react-native';
+import { useState, useEffect } from 'react';
 
 const { width } = Dimensions.get('window');
 
 import { useGetHistoryQuery, useGetMeQuery, useSyncRemindersMutation, useGetNotificationsQuery } from '../services/api';
 import { scheduleDailyReminder } from '../services/NotificationService';
-import { useEffect } from 'react';
 
 const HomeScreen = ({ navigation }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
   const styles = createStyles(theme, isRTL);
+  const [reminderStatus, setReminderStatus] = useState(null);
 
   const { data: userData, refetch: refetchMe, isFetching: isFetchingMe } = useGetMeQuery();
   const { data: historyData, refetch: refetchHistory, isFetching: isFetchingHistory } = useGetHistoryQuery(3); // Fetch 3 latest
@@ -31,13 +32,30 @@ const HomeScreen = ({ navigation }) => {
     refetchHistory();
   }, [refetchMe, refetchHistory]);
 
+  const handleScheduleReminders = async () => {
+    try {
+      await scheduleDailyReminder();
+      setReminderStatus(t('reminders_set_success') || 'Daily reminders scheduled!');
+      setTimeout(() => setReminderStatus(null), 3000);
+    } catch (error) {
+       console.error(error);
+    }
+  };
+
   useEffect(() => {
-    scheduleDailyReminder();
+    if (userData) {
+      scheduleDailyReminder(userData.daily_reminders);
+    }
     syncReminders();
-  }, [syncReminders]);
+  }, [userData, syncReminders]);
 
   return (
     <SafeAreaView style={styles.container}>
+      {reminderStatus && (
+        <View style={[styles.toast, { backgroundColor: colors.primary }]}>
+          <Text style={styles.toastText}>{reminderStatus}</Text>
+        </View>
+      )}
       <ScrollView 
         style={styles.container}
         refreshControl={
@@ -89,7 +107,7 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('Diagnose')}
         >
           <View style={[styles.actionIcon, { backgroundColor: colors.primary + '1A' }]}>
-            <PlusCircle color={colors.primary} size={32} />
+            <PlusCircle color={colors.primary} size={24} />
           </View>
           <Text style={styles.actionTitle}>{t('new_diagnosis')}</Text>
           <Text style={styles.actionSubtitle}>{t('start_kbs_scan')}</Text>
@@ -100,7 +118,7 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('History')}
         >
           <View style={[styles.actionIcon, { backgroundColor: colors.accent + '1A' }]}>
-            <History color={colors.accent} size={32} />
+            <History color={colors.accent} size={24} />
           </View>
           <Text style={styles.actionTitle}>{t('health_history')}</Text>
           <Text style={styles.actionSubtitle}>{t('view_reports')}</Text>
@@ -108,10 +126,32 @@ const HomeScreen = ({ navigation }) => {
 
         <TouchableOpacity 
           style={styles.actionCard}
+          onPress={() => navigation.navigate('DengueInfo')} 
+        >
+          <View style={[styles.actionIcon, { backgroundColor: '#3498DB' + '1A' }]}>
+            <BookOpen color={'#3498DB'} size={24} />
+          </View>
+          <Text style={styles.actionTitle}>{t('dengue_encyclopedia')}</Text>
+          <Text style={styles.actionSubtitle}>{t('learn_all_about')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionCard}
+          onPress={handleScheduleReminders} 
+        >
+          <View style={[styles.actionIcon, { backgroundColor: '#F39C12' + '1A' }]}>
+            <AlarmClock color={'#F39C12'} size={24} />
+          </View>
+          <Text style={styles.actionTitle}>{t('daily_reminders')}</Text>
+          <Text style={styles.actionSubtitle}>{t('get_daily_tips')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.actionCard}
           onPress={() => navigation.navigate('HealthTips')} 
         >
           <View style={[styles.actionIcon, { backgroundColor: '#10B981' + '1A' }]}>
-            <HeartPulse color={'#10B981'} size={32} />
+            <HeartPulse color={'#10B981'} size={24} />
           </View>
           <Text style={styles.actionTitle}>{t('health_tips')}</Text>
           <Text style={styles.actionSubtitle}>{t('preventive_measures')}</Text>
@@ -266,23 +306,23 @@ const createStyles = (theme, isRTL) => {
     actionCard: {
       width: (width - spacing.l * 3) / 2,
       backgroundColor: colors.card,
-      borderRadius: 20,
-      padding: spacing.m,
+      borderRadius: 18,
+      padding: spacing.s + 4,
       marginBottom: spacing.m,
       borderWidth: 1,
       borderColor: colors.glassBorder,
       alignItems: isRTL ? 'flex-end' : 'flex-start',
     },
     actionIcon: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
+      width: 44,
+      height: 44,
+      borderRadius: 12,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: spacing.m,
+      marginBottom: 8,
     },
     actionTitle: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: 'bold',
       color: colors.text,
       textAlign,
@@ -320,6 +360,27 @@ const createStyles = (theme, isRTL) => {
       ...typography.caption,
       color: colors.textMuted,
       textAlign,
+    },
+    toast: {
+      position: 'absolute',
+      top: 100,
+      left: 20,
+      right: 20,
+      padding: spacing.m,
+      borderRadius: 12,
+      zIndex: 1000,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    toastText: {
+      color: '#FFFFFF',
+      fontWeight: 'bold',
+      textAlign: 'center',
     }
   });
 };

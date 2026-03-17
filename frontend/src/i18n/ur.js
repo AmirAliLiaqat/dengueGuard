@@ -45,6 +45,11 @@ export const ur = {
   preventive_measures: "محفوظ رہیں",
   who_guidelines: "WHO رہنمائی",
   official_medical_advice: "سرکاری مشورہ",
+  dengue_encyclopedia: "انسائیکلوپیڈیا",
+  learn_all_about: "سب کچھ جانیں",
+  daily_reminders: "یاد دہانیاں",
+  get_daily_tips: "روزانہ اطلاعات",
+  reminders_set_success: "روزانہ کی یاد دہانیاں کامیابی کے ساتھ ترتیب دے دی گئی ہیں!",
 
   // Diagnosis Form
   diagnosis_form: "تشخیصی فارم",

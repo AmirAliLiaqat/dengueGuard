@@ -25,29 +25,81 @@ A professional, high-end AI-Based Dengue Detection and Knowledge-Based Expert Sy
 
 ### 1. Backend Setup (FastAPI)
 1. **Navigate to backend**:
-   ```powershell
+   ```bash
    cd backend
    ```
 2. **Setup virtual environment**:
-   ```powershell
-   python -m venv venv
-   .\venv\Scripts\activate
-   ```
+   - **Windows**:
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\activate
+     ```
+   - **Linux/Ubuntu/macOS**:
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
 3. **Install dependencies**:
-   ```powershell
+   ```bash
    pip install -r requirements.txt
    ```
-4. **Configure Environment**: Create or update `.env` with your `MONGODB_URL`, `SMTP_USER`, and `SMTP_PASSWORD`.
-5. **Run the server**:
-   ```powershell
-   uvicorn app.main:app --reload --host 0.0.0.0
+4. **Train AI Model**: Before running the server, you must generate the model file.
+   ```bash
+   python train_model.py
    ```
-   *Note: Using `--host 0.0.0.0` is required for your mobile device to connect to your computer's IP.*
+5. **Configure Environment**: Create a `.env` file in the `backend/` directory:
+   ```env
+   MONGODB_URL=your_mongodb_uri
+   SECRET_KEY=your_random_secret_key
+   SMTP_USER=your_gmail_address
+   SMTP_PASSWORD=your_app_password
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+6. **Run the server**:
+   ```bash
+   python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+   *Note: Using `--host 0.0.0.0` allows your mobile device to connect to your computer's local IP.*
 
-### Frontend Setup (Expo)
-1. **Navigate to frontend**: `cd frontend`
-2. **Install dependencies**: `npm install`
-3. **Run the app**: `npx expo start`
+### 2. Frontend Setup (Expo)
+1. **Navigate to frontend**:
+   ```bash
+   cd frontend
+   ```
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+3. **Configure API URL**: Update `frontend/src/services/api.js` with your computer's local IP address (e.g., `http://192.168.1.10:8000/api/v1`).
+4. **Run the app**:
+   ```bash
+   npx expo start
+   ```
+
+---
+
+## 🌐 Production Deployment
+
+### 1. Deploying on Render.com
+Your project is configured for Render via `render.yaml`.
+- **Root Directory**: `backend`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT`
+- **Environment Variables**: Ensure you add all `.env` keys in the Render Dashboard.
+
+### 2. Deploying on Ubuntu Server
+1. **Install Prerequisites**:
+   ```bash
+   sudo apt update && sudo apt install python3-pip python3-venv gunicorn -y
+   ```
+2. **Setup Program**: Follow the "Local Development" steps to clone and install.
+3. **Run with Gunicorn**:
+   ```bash
+   gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+   ```
+4. **Reverse Proxy**: It is recommended to use **Nginx** to proxy traffic to port 8000.
 
 ---
 

@@ -13,6 +13,7 @@ class User(Document):
     is_active: bool = True
     is_verified: bool = False
     notifications_enabled: bool = True
+    daily_reminders: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     class Settings:
