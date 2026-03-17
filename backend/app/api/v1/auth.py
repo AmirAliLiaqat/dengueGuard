@@ -106,6 +106,25 @@ async def verify_otp(data: VerifyOTP):
     await record.delete()
     return {"message": "Verification successful"}
 
+@router.post("/request-2fa-otp")
+async def request_2fa_otp(email: str = Body(..., embed=True), current_user: User = Depends(get_current_user)):
+    otp = security.generate_otp()
+    otp_record = OTPRecord(
+        email=email,
+        otp_code=otp,
+        purpose="2fa_verify",
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=10)
+    )
+    await otp_record.insert()
+    
+    try:
+        await send_otp_email(email, otp)
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        raise HTTPException(status_code=500, detail="Failed to send verification email")
+    
+    return {"message": "OTP sent to secondary email"}
+
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await User.find_one(User.email == form_data.username)
@@ -134,6 +153,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         daily_reminders=current_user.daily_reminders,
         biometric_enabled=current_user.biometric_enabled,
         two_factor_enabled=current_user.two_factor_enabled,
+        secondary_email=current_user.secondary_email,
         is_public=current_user.is_public
     )
 
@@ -155,6 +175,8 @@ async def update_me(update: UserUpdate, current_user: User = Depends(get_current
         current_user.biometric_enabled = update.biometric_enabled
     if update.two_factor_enabled is not None:
         current_user.two_factor_enabled = update.two_factor_enabled
+    if update.secondary_email is not None:
+        current_user.secondary_email = update.secondary_email
     if update.is_public is not None:
         current_user.is_public = update.is_public
     

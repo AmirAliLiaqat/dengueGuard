@@ -5,8 +5,8 @@ import { getTheme } from '../theme/theme';
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Default to dark mode as requested
-  const [isDark, setIsDark] = useState(true);
+  // Default to light mode as requested
+  const [isDark, setIsDark] = useState(false);
 
   const theme = getTheme(isDark);
 

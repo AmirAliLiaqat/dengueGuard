@@ -1,14 +1,9 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, LayoutAnimation, Platform, UIManager, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, Plus, Minus, Mail, Phone, MessageSquare } from 'lucide-react-native';
-
-// setLayoutAnimationEnabledExperimental is a no-op in New Architecture
-// if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-//   UIManager.setLayoutAnimationEnabledExperimental(true);
-// }
 
 const HelpSupportScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -20,23 +15,23 @@ const HelpSupportScreen = ({ navigation }) => {
   const faqs = [
     {
       id: 1,
-      question: "How does the AI diagnosis work?",
-      answer: "Our AI analyzes the symptoms you input and cross-references them with global dengue trends and medical knowledge database."
+      question: t('faq_q1'),
+      answer: t('faq_a1')
     },
     {
       id: 2,
-      question: "Is this a substitute for a real doctor?",
-      answer: "No. This tool is for screening and early detection only. You must consult a qualified medical professional for diagnosis and treatment."
+      question: t('faq_q2'),
+      answer: t('faq_a2')
     },
     {
       id: 3,
-      question: "How accurate is the result?",
-      answer: "The probability score is based on clinical data models but should be used as a guideline. A score above 70% suggests immediate consultation."
+      question: t('faq_q3'),
+      answer: t('faq_a3')
     },
     {
       id: 4,
-      question: "What is KBS?",
-      answer: "KBS stands for Knowledge-Based System. It's a method where expert medical rules are programmed into the app to explain 'why' the AI gave a certain result."
+      question: t('faq_q4'),
+      answer: t('faq_a4')
     }
   ];
 
@@ -45,10 +40,24 @@ const HelpSupportScreen = ({ navigation }) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
+  const handleStartChat = () => {
+    const phoneNumber = '923090886518';
+    const message = 'Hello, I am using the Dengue Diagnose app and I need assistance.';
+    const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
+    
+    Linking.canOpenURL(url).then(supported => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        Linking.openURL(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`);
+      }
+    });
+  };
+
   const contactOptions = [
-    { icon: Mail, label: 'Email Support', info: 'support@denguediagnose.com' },
+    { icon: Mail, label: t('email_support'), info: 'support@denguediagnose.com' },
     { icon: Phone, label: t('phone_number'), info: '+92 309 08865818' },
-    { icon: MessageSquare, label: 'Live Chat', info: 'Available 24/7' },
+    { icon: MessageSquare, label: t('live_chat'), info: t('available_24_7') },
   ];
 
   return (
@@ -83,7 +92,19 @@ const HelpSupportScreen = ({ navigation }) => {
 
         <Text style={[styles.sectionTitle, { marginTop: spacing.s }]}>{t('contact_us')}</Text>
         {contactOptions.map((option, index) => (
-          <TouchableOpacity key={index} style={styles.contactItem}>
+          <TouchableOpacity 
+            key={index} 
+            style={styles.contactItem}
+            onPress={() => {
+              if (option.label === t('live_chat')) {
+                handleStartChat();
+              } else if (option.label === t('email_support')) {
+                Linking.openURL(`mailto:${option.info}`);
+              } else {
+                Linking.openURL(`tel:${option.info.replace(/\s/g, '')}`);
+              }
+            }}
+          >
             <View style={styles.contactIcon}>
               <option.icon color={colors.primary} size={20} />
             </View>
@@ -93,12 +114,11 @@ const HelpSupportScreen = ({ navigation }) => {
             </View>
           </TouchableOpacity>
         ))}
-
         <View style={styles.helpCard}>
-          <Text style={styles.helpCardTitle}>Still need help?</Text>
-          <Text style={styles.helpCardSub}>Our medical experts are available for live consultation.</Text>
-          <TouchableOpacity style={styles.chatButton}>
-            <Text style={styles.chatButtonText}>Start Chat</Text>
+          <Text style={styles.helpCardTitle}>{t('still_need_help')}</Text>
+          <Text style={styles.helpCardSub}>{t('medical_experts_available')}</Text>
+          <TouchableOpacity style={styles.chatButton} onPress={handleStartChat}>
+            <Text style={styles.chatButtonText}>{t('start_chat')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

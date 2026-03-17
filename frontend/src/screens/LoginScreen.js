@@ -14,7 +14,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Mail, Lock, LogIn, UserPlus, Eye, EyeOff } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, Fingerprint } from 'lucide-react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as SecureStore from 'expo-secure-store';
 import { useAlert } from '../context/AlertContext';
 
 import { useLoginMutation, useGetMeQuery } from '../services/api';
@@ -31,6 +33,50 @@ const LoginScreen = ({ navigation }) => {
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useDispatch();
   const { showAlert } = useAlert();
+  const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+  const [hasStoredCredentials, setHasStoredCredentials] = useState(false);
+
+  React.useEffect(() => {
+    checkBiometricSupport();
+  }, []);
+
+  const checkBiometricSupport = async () => {
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    const storedEmail = await SecureStore.getItemAsync('user_email');
+    const storedPass = await SecureStore.getItemAsync('user_password');
+
+    setIsBiometricSupported(hasHardware && isEnrolled);
+    setHasStoredCredentials(!!(storedEmail && storedPass));
+  };
+
+  const handleBiometricLogin = async () => {
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Login with Biometrics',
+        fallbackLabel: 'Use Password',
+      });
+
+      if (result.success) {
+        const storedEmail = await SecureStore.getItemAsync('user_email');
+        const storedPass = await SecureStore.getItemAsync('user_password');
+
+        if (storedEmail && storedPass) {
+          // Fill form and trigger login
+          setEmail(storedEmail);
+          setPassword(storedPass);
+          
+          const loginResult = await login({ email: storedEmail, password: storedPass }).unwrap();
+          dispatch(setCredentials({ 
+            access_token: loginResult.access_token,
+            user: { email: storedEmail }
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Biometric Login Error:', error);
+    }
+  };
 
   const styles = createStyles(theme, isRTL);
 
@@ -153,17 +199,29 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.forgotPasswordText}>{t('forgot_password')}</Text>
             </TouchableOpacity> */}
 
-            <TouchableOpacity 
-              style={[styles.loginButton, isLoading && { opacity: 0.8 }]} 
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.background} />
-              ) : (
-                <Text style={styles.loginButtonText}>{t('login_btn')}</Text>
+            <View style={styles.loginActions}>
+              <TouchableOpacity 
+                style={[styles.loginButton, isLoading && { opacity: 0.8 }, isBiometricSupported && hasStoredCredentials && { flex: 0.8 }]} 
+                onPress={handleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.background} />
+                ) : (
+                  <Text style={styles.loginButtonText}>{t('login_btn')}</Text>
+                )}
+              </TouchableOpacity>
+
+              {isBiometricSupported && hasStoredCredentials && (
+                <TouchableOpacity 
+                  style={styles.biometricButton} 
+                  onPress={handleBiometricLogin}
+                  disabled={isLoading}
+                >
+                  <Fingerprint color={colors.primary} size={32} />
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.footer}>
@@ -285,6 +343,21 @@ const createStyles = (theme, isRTL) => {
       color: colors.background,
       fontSize: 18,
       fontWeight: 'bold',
+    },
+    loginActions: {
+      flexDirection,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    biometricButton: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      backgroundColor: colors.card,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.primary + '33',
     },
     footer: {
       flexDirection,

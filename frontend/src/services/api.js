@@ -102,6 +102,13 @@ export const denguApi = createApi({
         body: userData,
       }),
     }),
+    request2faOtp: builder.mutation({
+      query: (email) => ({
+        url: '/auth/request-2fa-otp',
+        method: 'POST',
+        body: { email },
+      }),
+    }),
     verifyOtp: builder.mutation({
       query: (data) => ({
         url: '/auth/verify-otp',
@@ -146,6 +153,7 @@ export const {
   useGetReportDetailQuery,
   useLoginMutation,
   useSignupMutation,
+  useRequest2faOtpMutation,
   useVerifyOtpMutation,
   useGetMeQuery,
   useUpdateProfileMutation,

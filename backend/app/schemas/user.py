@@ -13,6 +13,7 @@ class UserBase(BaseModel):
     daily_reminders: Optional[bool] = True
     biometric_enabled: Optional[bool] = False
     two_factor_enabled: Optional[bool] = False
+    secondary_email: Optional[EmailStr] = None
     is_public: Optional[bool] = False
 
 class UserCreate(UserBase):
@@ -28,6 +29,7 @@ class UserUpdate(BaseModel):
     daily_reminders: Optional[bool] = None
     biometric_enabled: Optional[bool] = None
     two_factor_enabled: Optional[bool] = None
+    secondary_email: Optional[EmailStr] = None
     is_public: Optional[bool] = None
 
 class UserResponse(UserBase):

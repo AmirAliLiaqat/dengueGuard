@@ -16,6 +16,7 @@ class User(Document):
     daily_reminders: bool = True
     biometric_enabled: bool = False
     two_factor_enabled: bool = False
+    secondary_email: Optional[EmailStr] = None
     is_public: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     

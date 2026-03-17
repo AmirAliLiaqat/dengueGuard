@@ -7,12 +7,23 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  Modal,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { ChevronLeft, ShieldCheck, Lock, Eye, Fingerprint } from 'lucide-react-native';
 import { useAlert } from '../context/AlertContext';
-import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
+import {
+  useGetMeQuery,
+  useUpdateProfileMutation,
+  useRequest2faOtpMutation,
+  useVerifyOtpMutation,
+  useLoginMutation
+} from '../services/api';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as SecureStore from 'expo-secure-store';
 
 const PrivacyAndSecurityScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -23,20 +34,159 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
 
   const { data: userData } = useGetMeQuery();
   const [updateProfile] = useUpdateProfileMutation();
+  const [request2faOtp, { isLoading: isRequestingOtp }] = useRequest2faOtpMutation();
+  const [verifyOtp, { isLoading: isVerifyingOtp }] = useVerifyOtpMutation();
 
   const [isFaceID, setIsFaceID] = useState(false);
   const [isTwoFactor, setIsTwoFactor] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+
+  // 2FA Modal States
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [secondaryEmail, setSecondaryEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [isOtpSent, setIsOtpSent] = useState(false);
+
+  // Biometric Modal States
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
+  const [biometricPassword, setBiometricPassword] = useState('');
+  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
+  const [login] = useLoginMutation();
 
   useEffect(() => {
     if (userData) {
       setIsFaceID(userData.biometric_enabled ?? false);
       setIsTwoFactor(userData.two_factor_enabled ?? false);
       setIsVisible(userData.is_public ?? false);
+      setSecondaryEmail(userData.secondary_email ?? '');
     }
   }, [userData]);
 
+  const handleBiometricToggle = async (currentValue) => {
+    const newValue = !currentValue;
+    
+    if (newValue) {
+      try {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        
+        if (!hasHardware || !isEnrolled) {
+          showAlert({
+            title: "Not Available",
+            message: "Your device does not support biometric authentication or no fingerprints are enrolled.",
+            type: 'error'
+          });
+          return;
+        }
+
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Authenticate to enable biometric login',
+        });
+
+        if (result.success) {
+          setShowBiometricModal(true);
+          setBiometricPassword('');
+        }
+      } catch (error) {
+        console.error('Biometric Error:', error);
+      }
+    } else {
+      // Disable biometrics - clear stored credentials
+      await SecureStore.deleteItemAsync('user_email');
+      await SecureStore.deleteItemAsync('user_password');
+      processToggle('biometric', true, false);
+    }
+  };
+
+  const confirmBiometricEnable = async () => {
+    if (!biometricPassword) return;
+    
+    setIsVerifyingPassword(true);
+    try {
+      // Verify password with backend before storing
+      await login({ email: userData.email, password: biometricPassword }).unwrap();
+      
+      // Store credentials securely
+      await SecureStore.setItemAsync('user_email', userData.email);
+      await SecureStore.setItemAsync('user_password', biometricPassword);
+      
+      // Update backend toggle
+      await processToggle('biometric', false, true);
+      
+      setShowBiometricModal(false);
+      showAlert({ 
+        title: "Success", 
+        message: "Biometric login is now enabled and secured.", 
+        type: 'success' 
+      });
+    } catch (err) {
+      showAlert({ 
+        title: "Error", 
+        message: "Invalid password. Please try again to enable biometric login.", 
+        type: 'error' 
+      });
+    } finally {
+      setIsVerifyingPassword(false);
+    }
+  };
+
+  const handle2FAToggle = async (currentValue) => {
+    if (!currentValue) {
+      setShow2FAModal(true);
+      setIsOtpSent(false);
+      setOtpCode('');
+    } else {
+      processToggle('2fa', currentValue, false);
+    }
+  };
+
+  const sendOtpToSecondary = async () => {
+    if (!secondaryEmail || !secondaryEmail.includes('@')) {
+      showAlert({ title: "Error", message: "Please enter a valid secondary email", type: 'error' });
+      return;
+    }
+    try {
+      await request2faOtp(secondaryEmail).unwrap();
+      setIsOtpSent(true);
+      showAlert({ title: "Success", message: "Verification code sent to " + secondaryEmail, type: 'success' });
+    } catch (err) {
+      showAlert({ title: "Failed", message: err.data?.detail || "Could not send OTP", type: 'error' });
+    }
+  };
+
+  const verifyAndEnable2FA = async () => {
+    if (otpCode.length < 4) return;
+    try {
+      await verifyOtp({
+        email: secondaryEmail,
+        otp_code: otpCode,
+        purpose: '2fa_verify'
+      }).unwrap();
+
+      await updateProfile({
+        two_factor_enabled: true,
+        secondary_email: secondaryEmail
+      }).unwrap();
+
+      setShow2FAModal(false);
+      setIsTwoFactor(true);
+      showAlert({ title: "2FA Enabled", message: "Two-Factor Authentication is now active.", type: 'success' });
+    } catch (err) {
+      showAlert({ title: "Invalid Code", message: "The verification code you entered is incorrect.", type: 'error' });
+    }
+  };
+
   const toggleSetting = async (id, currentValue) => {
+    if (id === 'biometric') {
+      handleBiometricToggle(currentValue);
+      return;
+    }
+
+    if (id === '2fa') {
+      handle2FAToggle(currentValue);
+      return;
+    }
+
     const newValue = !currentValue;
 
     // Special handling for visibility - confirm when turning OFF
@@ -137,7 +287,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
           <ShieldCheck color={colors.success} size={64} />
         </View>
         <Text style={styles.introText}>
-          Your data security and medical privacy is our top priority.
+          {t('security_priority')}
         </Text>
 
         <View style={styles.section}>
@@ -164,7 +314,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>{t('data_policy')}</Text>
           <Text style={styles.infoText}>
-            We use industry-standard encryption to protect your health records. Your data is only used to provide diagnostic insights and will never be shared with third parties without your explicit consent.
+            {t('data_policy_desc')}
           </Text>
         </View>
 
@@ -179,6 +329,121 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
           <Text style={styles.deleteText}>{t('request_deletion')}</Text>
         </TouchableOpacity>
       </ScrollView>
+      <Modal
+        visible={show2FAModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShow2FAModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enable 2FA</Text>
+            <Text style={styles.modalSubtitle}>Verify your secondary email for extra security.</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Secondary Email"
+              placeholderTextColor={colors.textMuted}
+              value={secondaryEmail}
+              onChangeText={setSecondaryEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isOtpSent}
+            />
+
+            {isOtpSent && (
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Enter 4-digit OTP"
+                placeholderTextColor={colors.textMuted}
+                value={otpCode}
+                onChangeText={setOtpCode}
+                keyboardType="number-pad"
+                maxLength={4}
+              />
+            )}
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: colors.glass }]}
+                onPress={() => setShow2FAModal(false)}
+              >
+                <Text style={[styles.modalButtonText, { color: colors.text }]}>Cancel</Text>
+              </TouchableOpacity>
+
+              {!isOtpSent ? (
+                <TouchableOpacity
+                  style={[styles.modalButton, { backgroundColor: colors.primary }]}
+                  onPress={sendOtpToSecondary}
+                  disabled={isRequestingOtp}
+                >
+                  {isRequestingOtp ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.modalButtonText}>Send OTP</Text>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.modalButton, { backgroundColor: colors.success }]}
+                  onPress={verifyAndEnable2FA}
+                  disabled={isVerifyingOtp}
+                >
+                  {isVerifyingOtp ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.modalButtonText}>Verify & Enable</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={showBiometricModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowBiometricModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Secure Biometric Login</Text>
+            <Text style={styles.modalSubtitle}>Please enter your password to enable fingerprint login.</Text>
+            
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Your Password"
+              placeholderTextColor={colors.textMuted}
+              value={biometricPassword}
+              onChangeText={setBiometricPassword}
+              secureTextEntry
+              autoCapitalize="none"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, { backgroundColor: colors.glass }]} 
+                onPress={() => setShowBiometricModal(false)}
+              >
+                <Text style={[styles.modalButtonText, { color: colors.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalButton, { backgroundColor: colors.primary }]} 
+                onPress={confirmBiometricEnable}
+                disabled={isVerifyingPassword}
+              >
+                {isVerifyingPassword ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={styles.modalButtonText}>Enable</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -308,6 +573,60 @@ const createStyles = (theme, isRTL) => {
     deleteText: {
       color: colors.error,
       fontWeight: 'bold',
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: spacing.l,
+    },
+    modalContent: {
+      width: '100%',
+      backgroundColor: colors.card,
+      borderRadius: 24,
+      padding: spacing.l,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    modalTitle: {
+      ...typography.h2,
+      color: colors.text,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    modalSubtitle: {
+      ...typography.caption,
+      color: colors.textMuted,
+      marginBottom: spacing.l,
+      textAlign: 'center',
+    },
+    modalInput: {
+      backgroundColor: colors.glass,
+      borderRadius: 12,
+      padding: spacing.m,
+      color: colors.text,
+      marginBottom: spacing.m,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+      textAlign,
+    },
+    modalButtons: {
+      flexDirection,
+      justifyContent: 'space-between',
+      marginTop: spacing.s,
+    },
+    modalButton: {
+      flex: 0.48,
+      height: 48,
+      borderRadius: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalButtonText: {
+      ...typography.body,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
     },
   });
 };

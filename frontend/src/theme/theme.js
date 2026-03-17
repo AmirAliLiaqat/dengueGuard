@@ -37,7 +37,7 @@ export const Spacing = {
 };
 
 // This will be used as a fallback or default, but components will mostly use the context theme
-export const Colors = DarkColors;
+export const Colors = LightColors;
 
 export const Typography = {
   h1: { fontSize: 32, fontWeight: 'bold' },
