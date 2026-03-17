@@ -74,8 +74,8 @@ const EditProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Upload error:', error);
       showAlert({ 
-        title: "Upload Failed", 
-        message: error.data?.detail || "Could not upload image", 
+        title: t('upload_failed'), 
+        message: error.data?.detail || t('could_not_upload'), 
         type: "error" 
       });
       return null;
@@ -92,7 +92,7 @@ const EditProfileScreen = ({ navigation }) => {
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      showAlert({ title: "Permission Denied", message: `We need access to your ${useCamera ? 'camera' : 'gallery'} to change profile picture.`, type: "error" });
+      showAlert({ title: t('permission_denied'), message: t('camera_gallery_permission'), type: "error" });
       return;
     }
 
@@ -105,8 +105,8 @@ const EditProfileScreen = ({ navigation }) => {
       if (uploadedUrl) {
         setFormData({ ...formData, profile_picture: uploadedUrl });
         showAlert({
-          title: "Profile Picture Updated",
-          message: "Your new profile picture looks great! Don't forget to save changes.",
+          title: t('profile_picture_updated'),
+          message: t('profile_picture_success_msg'),
           type: "success"
         });
       }
@@ -115,7 +115,7 @@ const EditProfileScreen = ({ navigation }) => {
 
   const handleSave = async () => {
     if (!formData.name) {
-      showAlert({ title: "Error", message: "Name cannot be empty", type: "error" });
+      showAlert({ title: t('error'), message: t('name_cannot_empty'), type: "error" });
       return;
     }
 
@@ -127,15 +127,15 @@ const EditProfileScreen = ({ navigation }) => {
       }).unwrap();
 
       showAlert({
-        title: "Success",
-        message: "Your profile has been updated successfully.",
+        title: t('success'),
+        message: t('profile_updated_success'),
         type: "success"
       });
       navigation.goBack();
     } catch (error) {
       showAlert({
-        title: "Update Failed",
-        message: error.data?.detail || "Something went wrong",
+        title: t('update_failed'),
+        message: error.data?.detail || t('something_went_wrong'),
         type: "error"
       });
     }
@@ -156,7 +156,7 @@ const EditProfileScreen = ({ navigation }) => {
             {isUpdating ? (
               <ActivityIndicator color={colors.primary} size="small" />
             ) : (
-              <Text style={styles.saveText}>Save</Text>
+              <Text style={styles.saveText}>{t('save')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -192,7 +192,7 @@ const EditProfileScreen = ({ navigation }) => {
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Update Profile Picture</Text>
+                  <Text style={styles.modalTitle}>{t('update_profile_picture')}</Text>
                   <TouchableOpacity onPress={() => setIsModalVisible(false)}>
                     <X color={colors.text} size={24} />
                   </TouchableOpacity>
@@ -203,14 +203,14 @@ const EditProfileScreen = ({ navigation }) => {
                     <View style={[styles.optionIcon, { backgroundColor: colors.primary + '20' }]}>
                       <Camera color={colors.primary} size={24} />
                     </View>
-                    <Text style={styles.optionText}>Take Photo</Text>
+                    <Text style={styles.optionText}>{t('take_photo')}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity style={styles.modalOption} onPress={() => pickImage(false)}>
                     <View style={[styles.optionIcon, { backgroundColor: colors.success + '20' }]}>
                       <ImageIcon color={colors.success} size={24} />
                     </View>
-                    <Text style={styles.optionText}>Choose from Gallery</Text>
+                    <Text style={styles.optionText}>{t('choose_from_gallery')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -218,27 +218,27 @@ const EditProfileScreen = ({ navigation }) => {
           </Modal>
 
           <View style={styles.form}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t('full_name')}</Text>
             <View style={styles.inputGroup}>
               <User color={colors.textMuted} size={20} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 value={formData.name}
                 onChangeText={(text) => setFormData({ ...formData, name: text })}
-                placeholder="Enter your name"
+                placeholder={t('enter_your_name')}
                 placeholderTextColor={colors.textMuted}
                 textAlign={isRTL ? 'right' : 'left'}
               />
             </View>
 
-            <Text style={styles.label}>Email Address</Text>
+            <Text style={styles.label}>{t('email')}</Text>
             <View style={[styles.inputGroup, { opacity: 0.7, backgroundColor: colors.background }]}>
               <Mail color={colors.textMuted} size={20} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { color: colors.textMuted }]}
                 value={formData.email}
                 editable={false}
-                placeholder="Enter your email"
+                placeholder={t('enter_your_email')}
                 placeholderTextColor={colors.textMuted}
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -253,7 +253,7 @@ const EditProfileScreen = ({ navigation }) => {
                 style={styles.input}
                 value={formData.phone}
                 onChangeText={(text) => setFormData({ ...formData, phone: text })}
-                placeholder="Enter your phone"
+                placeholder={t('enter_your_phone')}
                 placeholderTextColor={colors.textMuted}
                 keyboardType="phone-pad"
                 textAlign={isRTL ? 'right' : 'left'}

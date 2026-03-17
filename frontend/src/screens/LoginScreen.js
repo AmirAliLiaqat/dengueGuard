@@ -53,8 +53,8 @@ const LoginScreen = ({ navigation }) => {
   const handleBiometricLogin = async () => {
     try {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Login with Biometrics',
-        fallbackLabel: 'Use Password',
+        promptMessage: t('biometric_access'),
+        fallbackLabel: t('use_password'),
       });
 
       if (result.success) {
@@ -83,8 +83,8 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     if (!email || !password) {
       showAlert({
-        title: "Error",
-        message: "Please enter email and password",
+        title: t('error'),
+        message: t('enter_email_password'),
         type: "error"
       });
       return;
@@ -103,17 +103,17 @@ const LoginScreen = ({ navigation }) => {
     } catch (error) {
       if (error.status === 401) {
         showAlert({
-          title: "Not Verified",
-          message: "Please verify your email first.",
+          title: t('not_verified'),
+          message: t('verify_email_first'),
           type: "warning",
           buttons: [
-            { text: "Verify Now", onPress: () => navigation.navigate('Verification', { email }) },
-            { text: "Cancel", style: "cancel" }
+            { text: t('verify_now'), onPress: () => navigation.navigate('Verification', { email }) },
+            { text: t('cancel'), style: "cancel" }
           ]
         });
       } else {
         console.log('Login error details:', error);
-        let errorMessage = "Invalid credentials";
+        let errorMessage = t('invalid_credentials');
         
         if (error.data?.detail) {
           if (Array.isArray(error.data.detail)) {
@@ -122,13 +122,13 @@ const LoginScreen = ({ navigation }) => {
             errorMessage = error.data.detail;
           }
         } else if (error.error) {
-          errorMessage = "Network error. Check your connection or server.";
+          errorMessage = t('network_server_error');
         } else if (error.status === 'FETCH_ERROR') {
-          errorMessage = "Server unreachable. Make sure the backend is running.";
+          errorMessage = t('server_unreachable');
         }
 
         showAlert({
-          title: "Login Failed",
+          title: t('login_failed'),
           message: errorMessage,
           type: "error"
         });

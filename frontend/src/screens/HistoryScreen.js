@@ -77,9 +77,9 @@ const HistoryScreen = ({ navigation }) => {
         </View>
         <View style={styles.cardFooter}>
           <View style={[styles.statusBadge, { backgroundColor: statusColor + '1A' }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>{risk} Risk</Text>
+            <Text style={[styles.statusText, { color: statusColor }]}>{t(risk.toLowerCase())} {t('risk_label')}</Text>
           </View>
-          <Text style={styles.scoreText}>ML Prob: {(item.ml_prediction?.probability * 100).toFixed(0)}%</Text>
+          <Text style={styles.scoreText}>{t('ml_probability')}: {(item.ml_prediction?.probability * 100).toFixed(0)}%</Text>
         </View>
       </TouchableOpacity>
     );
@@ -94,20 +94,17 @@ const HistoryScreen = ({ navigation }) => {
 
       <View style={styles.filterSection}>
         <View style={styles.sortToggleRow}>
-           <Text style={styles.filterLabel}>Filter by Risk:</Text>
+           <Text style={styles.filterLabel}>{t('filter_by_risk')}</Text>
            <TouchableOpacity 
              style={styles.sortButton} 
              onPress={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
            >
              {sortOrder === 'newest' ? <SortDesc color={colors.primary} size={18} /> : <SortAsc color={colors.primary} size={18} />}
-             <Text style={styles.sortButtonText}>{sortOrder === 'newest' ? 'Newest' : 'Oldest'}</Text>
+             <Text style={styles.sortButtonText}>{t(sortOrder)}</Text>
            </TouchableOpacity>
         </View>
         
         <RNScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
           contentContainerStyle={styles.filterScrollContent}
         >
           {riskLevels.map((risk) => (
@@ -122,7 +119,7 @@ const HistoryScreen = ({ navigation }) => {
               <Text style={[
                 styles.filterChipText,
                 riskFilter === risk && styles.activeFilterChipText
-              ]}>{risk}</Text>
+              ]}>{t(risk.toLowerCase())}</Text>
             </TouchableOpacity>
           ))}
         </RNScrollView>
@@ -138,7 +135,7 @@ const HistoryScreen = ({ navigation }) => {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <ClipboardList color={colors.textMuted} size={60} />
-            <Text style={styles.emptyText}>No reports match your filters.</Text>
+            <Text style={styles.emptyText}>{t('no_matching_reports')}</Text>
           </View>
         }
       />

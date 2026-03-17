@@ -95,16 +95,16 @@ const DiagnosisFormScreen = ({ navigation }) => {
          navigation.navigate('Result', { data: result.report });
       } else {
          showAlert({
-           title: "Analysis Failed",
-           message: "No explicit diagnosis returned from the engine.",
+           title: t('analysis_failed'),
+           message: t('analysis_failed_desc'),
            type: "warning"
          });
       }
     } catch (e) {
       console.error(e);
       showAlert({
-        title: "Error",
-        message: "Network or server error occurred. Please try again.",
+        title: t('error'),
+        message: t('network_error_message'),
         type: "error"
       });
     }
@@ -149,7 +149,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('diagnosis_form') || "Diagnosis Form"}</Text>
+        <Text style={styles.headerTitle}>{t('diagnosis_form')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -159,7 +159,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Stethoscope color={colors.accent} size={20} />
-            <Text style={styles.sectionTitle}>{t('symptoms') || "Classic Symptoms"}</Text>
+            <Text style={styles.sectionTitle}>{t('classic_symptoms')}</Text>
           </View>
           {renderSwitch('fever', 'fever')}
           {renderSwitch('headache', 'headache')}
@@ -175,7 +175,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Activity color={colors.info} size={20} />
-            <Text style={styles.sectionTitle}>{t('vital_signs') || "Vital Signs"}</Text>
+            <Text style={styles.sectionTitle}>{t('vital_signs')}</Text>
           </View>
           {renderInput('body_temperature', 'body_temperature', 'e.g. 39.0')}
           {renderInput('blood_pressure', 'blood_pressure', 'e.g. 110/70', 'default')}
@@ -186,7 +186,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Droplet color={colors.primary} size={20} />
-            <Text style={styles.sectionTitle}>{t('blood_report_data') || "Laboratory Tests"}</Text>
+            <Text style={styles.sectionTitle}>{t('laboratory_tests')}</Text>
           </View>
           {renderInput('platelet_count', 'platelet_count', 'e.g. 150000')}
           {renderInput('white_blood_cell_count', 'white_blood_cell_count', 'e.g. 4000')}
@@ -197,7 +197,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <AlertTriangle color={colors.warning || '#FFA500'} size={20} />
-            <Text style={styles.sectionTitle}>{t('warning_signs') || "Warning Signs"}</Text>
+            <Text style={styles.sectionTitle}>{t('warning_signs')}</Text>
           </View>
           {renderSwitch('abdominal_pain', 'abdominal_pain_or_tenderness')}
           {renderSwitch('persistent_vomiting', 'persistent_vomiting')}
@@ -211,7 +211,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Heart color={'#D32F2F'} size={20} />
-            <Text style={styles.sectionTitle}>{t('severe_criteria') || "Severe Criteria"}</Text>
+            <Text style={styles.sectionTitle}>{t('severe_criteria')}</Text>
           </View>
           {renderSwitch('severe_plasma_leakage', 'severe_plasma_leakage')}
           {renderSwitch('shock_dss', 'shock_(DSS)')}
@@ -226,7 +226,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Home color={colors.primary} size={20} />
-            <Text style={styles.sectionTitle}>{t('phase_home_care') || "Phase & Home Care criteria"}</Text>
+            <Text style={styles.sectionTitle}>{t('phase_home_care_criteria')}</Text>
           </View>
           {renderSwitch('fever_drops', 'fever_drops_(Defervescence)')}
           {renderSwitch('hematocrit_increases', 'hematocrit_rapidly_increases')}
@@ -239,7 +239,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <AlertTriangle color={colors.warning} size={20} />
-            <Text style={styles.sectionTitle}>{t('risk_factors') || "Risk Factors"}</Text>
+            <Text style={styles.sectionTitle}>{t('risk_factors')}</Text>
           </View>
           {renderSwitch('recent_travel', 'recent_travel_/_endemic_area')}
           {renderSwitch('local_dengue_outbreak', 'local_dengue_outbreak')}
@@ -256,7 +256,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
             <ActivityIndicator color={colors.background} />
           ) : (
             <>
-              <Text style={styles.analyzeButtonText}>{t('analyze_now') || "Analyze Now"}</Text>
+              <Text style={styles.analyzeButtonText}>{t('analyze_now')}</Text>
               <ChevronRight color={colors.background} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
             </>
           )}

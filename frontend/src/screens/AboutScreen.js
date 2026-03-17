@@ -35,8 +35,7 @@ const AboutScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('app_info')}</Text>
           <Text style={styles.description}>
-            Dengue KBS (Knowledge Based System) is an advanced medical decision support tool powered by Artificial Intelligence. 
-            Our platform combines machine learning models with expert medical rules to help users detect dengue symptoms early.
+            {t('app_desc')}
           </Text>
         </View>
 
@@ -45,9 +44,9 @@ const AboutScreen = ({ navigation }) => {
             <ShieldCheck color={colors.success} size={24} />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>Medical Grade Accuracy</Text>
+            <Text style={styles.cardTitle}>{t('medical_grade_accuracy')}</Text>
             <Text style={styles.cardText}>
-              Our AI is trained on high-quality clinical data providing reliable disease detection probabilities.
+              {t('medical_grade_desc')}
             </Text>
           </View>
         </View>
@@ -57,9 +56,9 @@ const AboutScreen = ({ navigation }) => {
             <Info color={colors.primary} size={24} />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>KBS Engine</Text>
+            <Text style={styles.cardTitle}>{t('kbs_engine')}</Text>
             <Text style={styles.cardText}>
-              Knowledge-Based System ensures every AI decision is double-checked by professional medical logic rules.
+              {t('kbs_engine_desc')}
             </Text>
           </View>
         </View>

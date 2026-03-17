@@ -70,7 +70,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={{ alignItems: isRTL ? 'flex-end' : 'flex-start' }}>
           <Text style={styles.welcomeText}>{t('welcome_back')}</Text>
-          <Text style={styles.nameText}>{userData?.full_name || 'Patient'}</Text>
+          <Text style={styles.nameText}>{userData?.full_name || t('patient')}</Text>
         </View>
         <TouchableOpacity 
           style={styles.iconButton}
@@ -182,7 +182,7 @@ const HomeScreen = ({ navigation }) => {
               onPress={() => navigation.navigate('ReportDetails', { reportId: report.id })}
             >
               <View style={styles.reportInfo}>
-                <Text style={styles.reportTitle}>Diagnosis #{report.id.slice(-4).toUpperCase()}</Text>
+                <Text style={styles.reportTitle}>{t('diagnosis_id_prefix')}{report.id.slice(-4).toUpperCase()}</Text>
                 <Text style={styles.reportSubtitle}>
                   {new Date(report.created_at).toLocaleDateString()} • {report.kbs_recommendation?.risk_classification || "Unknown"}
                 </Text>
@@ -192,7 +192,7 @@ const HomeScreen = ({ navigation }) => {
           ))
         ) : (
           <Text style={[styles.statusDescription, { textAlign: 'center', opacity: 0.6 }]}>
-            No recent reports found. Start a new diagnosis!
+            {t('no_recent_reports')}
           </Text>
         )}
       </View>

@@ -72,15 +72,15 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
         
         if (!hasHardware || !isEnrolled) {
           showAlert({
-            title: "Not Available",
-            message: "Your device does not support biometric authentication or no fingerprints are enrolled.",
+            title: t('biometric_not_available'),
+            message: t('biometric_hardware_error'),
             type: 'error'
           });
           return;
         }
 
         const result = await LocalAuthentication.authenticateAsync({
-          promptMessage: 'Authenticate to enable biometric login',
+          promptMessage: t('authenticate_enable_biometric'),
         });
 
         if (result.success) {
@@ -115,14 +115,14 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       
       setShowBiometricModal(false);
       showAlert({ 
-        title: "Success", 
-        message: "Biometric login is now enabled and secured.", 
+        title: t('success'), 
+        message: t('biometric_enabled_msg'), 
         type: 'success' 
       });
     } catch (err) {
       showAlert({ 
-        title: "Error", 
-        message: "Invalid password. Please try again to enable biometric login.", 
+        title: t('error'), 
+        message: t('invalid_password_biometric'), 
         type: 'error' 
       });
     } finally {
@@ -142,15 +142,15 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
 
   const sendOtpToSecondary = async () => {
     if (!secondaryEmail || !secondaryEmail.includes('@')) {
-      showAlert({ title: "Error", message: "Please enter a valid secondary email", type: 'error' });
+      showAlert({ title: t('error'), message: t('valid_secondary_email_error'), type: 'error' });
       return;
     }
     try {
       await request2faOtp(secondaryEmail).unwrap();
       setIsOtpSent(true);
-      showAlert({ title: "Success", message: "Verification code sent to " + secondaryEmail, type: 'success' });
+      showAlert({ title: t('success'), message: t('verification_code_sent') + secondaryEmail, type: 'success' });
     } catch (err) {
-      showAlert({ title: "Failed", message: err.data?.detail || "Could not send OTP", type: 'error' });
+      showAlert({ title: t('failed') || t('error'), message: err.data?.detail || t('otp_failed_msg'), type: 'error' });
     }
   };
 
@@ -170,9 +170,9 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
 
       setShow2FAModal(false);
       setIsTwoFactor(true);
-      showAlert({ title: "2FA Enabled", message: "Two-Factor Authentication is now active.", type: 'success' });
+      showAlert({ title: t('enable_2fa'), message: t('two_factor_active_msg'), type: 'success' });
     } catch (err) {
-      showAlert({ title: "Invalid Code", message: "The verification code you entered is incorrect.", type: 'error' });
+      showAlert({ title: t('invalid_code') || t('error'), message: t('incorrect_otp_msg'), type: 'error' });
     }
   };
 
@@ -192,13 +192,13 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
     // Special handling for visibility - confirm when turning OFF
     if (id === 'visibility' && currentValue === true) {
       showAlert({
-        title: "Make Profile Private?",
-        message: "Your profile and reports will no longer be visible in the public gallery. Are you sure?",
+        title: t('profile_private_title'),
+        message: t('profile_private_msg'),
         type: 'warning',
         buttons: [
-          { text: "Cancel", style: "cancel" },
+          { text: t('cancel'), style: "cancel" },
           {
-            text: "Yes, Make Private",
+            text: t('yes_make_private'),
             onPress: () => processToggle(id, currentValue, newValue),
           }
         ]
@@ -226,7 +226,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       if (id === 'visibility' && newValue) {
         showAlert({
           title: t('visibility'),
-          message: "Your profile is now public. Other users can view your health stats and reports.",
+          message: t('profile_public_msg'),
           type: 'success'
         });
       }
@@ -238,8 +238,8 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       if (id === 'visibility') setIsVisible(currentValue);
 
       showAlert({
-        title: "Error",
-        message: "Could not update setting. Please try again.",
+        title: t('error'),
+        message: t('update_setting_error'),
         type: 'error'
       });
     }
@@ -249,7 +249,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
     {
       id: 'biometric',
       title: t('biometric_access'),
-      subtitle: 'Use FaceID or Fingerprint to login',
+      subtitle: t('biometric_subtitle'),
       icon: Fingerprint,
       value: isFaceID,
       onToggle: () => toggleSetting('biometric', isFaceID)
@@ -257,7 +257,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
     {
       id: '2fa',
       title: t('two_factor'),
-      subtitle: 'Require secondary code for logins',
+      subtitle: t('two_factor_subtitle'),
       icon: Lock,
       value: isTwoFactor,
       onToggle: () => toggleSetting('2fa', isTwoFactor)
@@ -265,7 +265,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
     {
       id: 'visibility',
       title: t('visibility'),
-      subtitle: 'Make your profile & reports public to others',
+      subtitle: t('visibility_subtitle'),
       icon: Eye,
       value: isVisible,
       onToggle: () => toggleSetting('visibility', isVisible)
@@ -321,8 +321,8 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => showAlert({
-            title: "Request Sent",
-            message: "Our data protection officer will contact you within 48 hours.",
+            title: t('request_sent'),
+            message: t('request_deletion_msg'),
             type: 'info'
           })}
         >
@@ -337,12 +337,12 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Enable 2FA</Text>
-            <Text style={styles.modalSubtitle}>Verify your secondary email for extra security.</Text>
+            <Text style={styles.modalTitle}>{t('enable_2fa')}</Text>
+            <Text style={styles.modalSubtitle}>{t('verify_secondary_email_2fa')}</Text>
 
             <TextInput
               style={styles.modalInput}
-              placeholder="Secondary Email"
+              placeholder={t('secondary_email_label')}
               placeholderTextColor={colors.textMuted}
               value={secondaryEmail}
               onChangeText={setSecondaryEmail}
@@ -354,7 +354,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
             {isOtpSent && (
               <TextInput
                 style={styles.modalInput}
-                placeholder="Enter 4-digit OTP"
+                placeholder={t('enter_otp')}
                 placeholderTextColor={colors.textMuted}
                 value={otpCode}
                 onChangeText={setOtpCode}
@@ -380,7 +380,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
                   {isRequestingOtp ? (
                     <ActivityIndicator color="#FFF" />
                   ) : (
-                    <Text style={styles.modalButtonText}>Send OTP</Text>
+                    <Text style={styles.modalButtonText}>{t('send_otp')}</Text>
                   )}
                 </TouchableOpacity>
               ) : (
@@ -392,7 +392,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
                   {isVerifyingOtp ? (
                     <ActivityIndicator color="#FFF" />
                   ) : (
-                    <Text style={styles.modalButtonText}>Verify & Enable</Text>
+                    <Text style={styles.modalButtonText}>{t('verify_enable')}</Text>
                   )}
                 </TouchableOpacity>
               )}
@@ -408,12 +408,12 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Secure Biometric Login</Text>
-            <Text style={styles.modalSubtitle}>Please enter your password to enable fingerprint login.</Text>
+            <Text style={styles.modalTitle}>{t('secure_biometric_login')}</Text>
+            <Text style={styles.modalSubtitle}>{t('enter_password_biometric')}</Text>
             
             <TextInput
               style={styles.modalInput}
-              placeholder="Your Password"
+              placeholder={t('your_password')}
               placeholderTextColor={colors.textMuted}
               value={biometricPassword}
               onChangeText={setBiometricPassword}
@@ -437,7 +437,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
                 {isVerifyingPassword ? (
                   <ActivityIndicator color="#FFF" />
                 ) : (
-                  <Text style={styles.modalButtonText}>Enable</Text>
+                  <Text style={styles.modalButtonText}>{t('enable')}</Text>
                 )}
               </TouchableOpacity>
             </View>

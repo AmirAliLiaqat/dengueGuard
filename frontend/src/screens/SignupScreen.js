@@ -39,8 +39,8 @@ const SignupScreen = ({ navigation }) => {
   const handleSignup = async () => {
     if (!formData.email || !formData.password || !formData.name) {
       showAlert({
-        title: "Error",
-        message: "Please fill all fields",
+        title: t('error'),
+        message: t('fill_all_fields'),
         type: "error"
       });
       return;
@@ -57,7 +57,7 @@ const SignupScreen = ({ navigation }) => {
       navigation.navigate('Verification', { email: formData.email });
     } catch (error) {
       console.log('Signup error details:', error);
-      let errorMessage = "Something went wrong";
+      let errorMessage = t('something_went_wrong');
       
       if (error.data?.detail) {
         if (Array.isArray(error.data.detail)) {
@@ -66,13 +66,13 @@ const SignupScreen = ({ navigation }) => {
           errorMessage = error.data.detail;
         }
       } else if (error.error) {
-        errorMessage = "Network error. Check your connection or server.";
+        errorMessage = t('network_server_error');
       } else if (error.status === 'FETCH_ERROR') {
-        errorMessage = "Server unreachable. Make sure the backend is running.";
+        errorMessage = t('server_unreachable');
       }
 
       showAlert({
-        title: "Signup Failed",
+        title: t('signup_failed'),
         message: errorMessage,
         type: "error"
       });

@@ -45,8 +45,8 @@ const VerificationScreen = ({ navigation, route }) => {
     const otpString = otp.join('');
     if (otpString.length !== 6) {
       showAlert({
-        title: "Error",
-        message: "Please enter the complete 6-digit code.",
+        title: t('error'),
+        message: t('enter_complete_code'),
         type: "error"
       });
       return;
@@ -56,8 +56,8 @@ const VerificationScreen = ({ navigation, route }) => {
       const result = await verifyOtp({ email, otp_code: otpString, purpose }).unwrap();
       
       showAlert({
-        title: "Success",
-        message: "Email verified successfully!",
+        title: t('success'),
+        message: t('email_verified_success'),
         type: "success"
       });
 
@@ -71,7 +71,7 @@ const VerificationScreen = ({ navigation, route }) => {
       }
     } catch (error) {
       console.log('Verification error details:', error);
-      let errorMessage = "Invalid code.";
+      let errorMessage = t('invalid_code');
       
       if (error.data?.detail) {
         if (Array.isArray(error.data.detail)) {
@@ -80,13 +80,13 @@ const VerificationScreen = ({ navigation, route }) => {
           errorMessage = error.data.detail;
         }
       } else if (error.error) {
-        errorMessage = "Network error. Check your connection or server.";
+        errorMessage = t('network_server_error');
       } else if (error.status === 'FETCH_ERROR') {
-        errorMessage = "Server unreachable. Make sure the backend is running.";
+        errorMessage = t('server_unreachable');
       }
 
       showAlert({
-        title: "Verification Failed",
+        title: t('verification_failed'),
         message: errorMessage,
         type: "error"
       });
@@ -124,9 +124,9 @@ const VerificationScreen = ({ navigation, route }) => {
             <View style={styles.iconContainer}>
               <Mail color={colors.primary} size={40} />
             </View>
-            <Text style={styles.title}>Email Verification</Text>
+            <Text style={styles.title}>{t('email_verification')}</Text>
             <Text style={styles.subtitle}>
-              We've sent a 6-digit verification code to{"\n"}
+              {t('verification_code_desc')}{"\n"}
               <Text style={{ color: colors.text, fontWeight: 'bold' }}>{email}</Text>
             </Text>
           </View>
@@ -159,15 +159,15 @@ const VerificationScreen = ({ navigation, route }) => {
                 <ActivityIndicator color={colors.background} />
               ) : (
                 <>
-                  <Text style={styles.verifyButtonText}>Verify & Continue</Text>
-                  <ArrowRight color={colors.background} size={20} style={{ marginLeft: 8 }} />
+                  <Text style={styles.verifyButtonText}>{t('verify_continue')}</Text>
+                  <ArrowRight color={colors.background} size={20} style={{ marginLeft: 8, transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
                 </>
               )}
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.resendButton}>
-              <Text style={styles.resendText}>Didn't receive the code? </Text>
-              <Text style={styles.resendLink}>Resend Code</Text>
+              <Text style={styles.resendText}>{t('did_not_receive_code')}</Text>
+              <Text style={styles.resendLink}>{t('resend_code')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

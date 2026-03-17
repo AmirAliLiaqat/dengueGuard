@@ -44,9 +44,9 @@ const NotificationScreen = ({ navigation }) => {
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 60) return t('just_now');
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}${t('minutes_ago')}`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}${t('hours_ago')}`;
     return date.toLocaleDateString();
   };
 
@@ -104,7 +104,7 @@ const NotificationScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('notifications_toggle') || 'Notifications'}</Text>
+        <Text style={styles.headerTitle}>{t('notifications_toggle')}</Text>
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={handleMarkAllRead}
