@@ -20,3 +20,4 @@ redis
 python-dotenv
 aiosmtplib
 jinja2
+cloudinary
