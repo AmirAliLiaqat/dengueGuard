@@ -1,160 +1,151 @@
-# 🩺 Dengue Diagnose AI: Mobile & Backend System
+# 🩺 Dengue Diagnose AI: Comprehensive Technical Manual
 
-A professional, high-end AI-Based Dengue Detection and Knowledge-Based Expert System (KBS). This project combines advanced Machine Learning with a rules-based medical inference engine to provide accurate diagnostic assistance.
-
----
-
-## ✨ Key Features
-- **AI-Powered Diagnosis**: Random Forest classification for high-accuracy dengue risk detection.
-- **Expert System**: Forward-chaining inference engine applying medical rules for clinical recommendations.
-- **Premium UI**: Stunning dark-mode mobile interface with glassmorphism and smooth animations.
-- **Secure Auth**: JWT-based authentication, user roles (Admin, Doctor, User), and OTP email verification.
-- **Profile Management**: Customizable user profiles including name, email, and phone number.
+A professional-grade, high-end **AI-Driven Dengue Detection** and **Knowledge-Based Expert System (KBS)**. This project integrates statistical Machine Learning with a rule-based inference engine to provide a state-of-the-art diagnostic assistant.
 
 ---
 
-## 🛠️ Tech Stack
-- **Frontend**: React Native (Expo SDK 51), Redux Toolkit, RTK Query, Lucide Icons.
-- **Backend**: Python 3.12, FastAPI, Beanie (ODM), MongoDB (Motor).
-- **AI/ML**: Scikit-Learn (Random Forest), Pandas, NumPy.
-- **Email**: SMTP integration with STARTTLS support for Gmail.
+## 🌟 Key Features
+- **AI-Powered Analysis**: Random Forest classification model trained on hematological clinical data.
+- **KBS Inference Engine**: 7-tier forward-chaining medical logic system checking AI decisions against professional medical rules.
+- **Biometric Security**: Secure login using Fingerprint/FaceID and Two-Factor Authentication (2FA).
+- **Internationalization**: Full Dual-Language Support (English/Urdu) with dynamic RTL layouts.
+- **Premium UI**: Glassmorphism design system with smooth micro-animations.
 
 ---
 
-## 🚀 Local Development
+## 🛠️ Architecture Overview
 
-### 1. Backend Setup (FastAPI)
-1. **Navigate to backend**:
+| Component | Responsibility | Technology |
+| :--- | :--- | :--- |
+| **Mobile App** | Patient Interface & Data Input | React Native (Expo SDK 51), Redux |
+| **Expert System** | Logic & Medical Reasoning | Custom Forward Chaining Inference Logic |
+| **ML Engine** | Statistical Risk Prediction | Scikit-Learn (Random Forest Classifier) |
+| **Server** | API & State Management | Python 3.12 (FastAPI), Beanie ODM |
+| **Database** | Persistent Storage | MongoDB (Motor) |
+
+---
+
+## 🚀 Local Development (A to Z)
+
+### 1. Backend Setup (Local)
+Prerequisites: Python 3.12+ installed.
+
+1. **Navigate to backend**: `cd backend`
+2. **Setup Virtual Environment**:
    ```bash
-   cd backend
+   python -m venv venv
+   source venv/bin/activate  # Linux/macOS
+   .\venv\Scripts\activate   # Windows
    ```
-2. **Setup virtual environment**:
-   - **Windows**:
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\activate
-     ```
-   - **Linux/Ubuntu/macOS**:
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-3. **Install dependencies**:
+3. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-4. **Train AI Model**: Before running the server, you must generate the model file.
+4. **Train AI Model**: The model must be trained locally before the server can predict risk.
    ```bash
    python train_model.py
    ```
-5. **Configure Environment**: Create a `.env` file in the `backend/` directory:
+5. **Environment Setup**: Create a `.env` file in `/backend`:
    ```env
-   MONGODB_URL=your_mongodb_uri
-   SECRET_KEY=your_random_secret_key
-   SMTP_USER=your_gmail_address
-   SMTP_PASSWORD=your_app_password
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
+   # Database
+   MONGODB_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net/dengue_db
+   
+   # Security
+   SECRET_KEY=your_super_secret_key_here  # Generate with: openssl rand -hex 32
+   ALGORITHM=HS256
+   ACCESS_TOKEN_EXPIRE_MINUTES=11520
+   
+   # Email (SMTP)
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your_email@gmail.com
+   SMTP_PASSWORD=your_app_specific_password
+   
+   # Cloudinary (Media)
+   CLOUDINARY_CLOUD_NAME=your_name
+   CLOUDINARY_API_KEY=your_key
+   CLOUDINARY_API_SECRET=your_secret
    ```
-6. **Run the server**:
+6. **Launch Server**:
    ```bash
    python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
-   *Note: Using `--host 0.0.0.0` allows your mobile device to connect to your computer's local IP.*
 
-### 2. Frontend Setup (Expo)
-1. **Navigate to frontend**:
-   ```bash
-   cd frontend
-   ```
-2. **Install dependencies**:
+### 2. Frontend Setup (Local)
+Prerequisites: Node.js 18+ and Expo Go app (on mobile).
+
+1. **Navigate to frontend**: `cd frontend`
+2. **Install Dependencies**:
    ```bash
    npm install
    ```
-3. **Configure API URL**: Update `frontend/src/services/api.js` with your computer's local IP address (e.g., `http://192.168.1.10:8000/api/v1`).
-4. **Run the app**:
+3. **Configure API Source**: 
+   - Open `frontend/src/services/api.js`.
+   - Update `baseUrl` to your computer's local IP (e.g., `http://192.168.1.15:8000/api/v1`).
+   - *Note: Ensure both your PC and mobile device are on the same Wi-Fi network.*
+4. **Run Expo**:
    ```bash
    npx expo start
    ```
+5. **Connect**: Scan the QR code with the Expo Go app (Android) or Camera app (iOS).
 
 ---
 
-## 🌐 Production Deployment
+## 🌐 Production Deployment (A to Z)
 
-### 1. Deploying on Render.com
-Your project is configured for Render via `render.yaml`.
-- **Root Directory**: `backend`
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT`
-- **Environment Variables**: Ensure you add all `.env` keys in the Render Dashboard.
+### 1. Backend Deployment (Render.com)
+The project includes a `render.yaml` for automated deployment.
 
-### 2. Deploying on Ubuntu Server
-1. **Install Prerequisites**:
+1. **GitHub Connection**: Push your code to a GitHub repository.
+2. **Setup on Render**:
+   - Create a new **Blueprint** service on Render.
+   - Select your repository.
+   - Render will detect `render.yaml` and configure the service automatically.
+3. **Environment Variables**: Add the keys from your `.env` file into the "Environment" tab of your service on the Render Dashboard.
+4. **Build/Start Order**:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT`
+5. **Static Site**: If you deploy as a static site, ensure the backend URL is updated in the frontend build.
+
+### 2. Backend Deployment (Manual Ubuntu/Linux)
+1. **Prepare Server**:
    ```bash
-   sudo apt update && sudo apt install python3-pip python3-venv gunicorn -y
+   sudo apt update && sudo apt install python3-pip python3-venv gunicorn nginx -y
    ```
-2. **Setup Program**: Follow the "Local Development" steps to clone and install.
-3. **Run with Gunicorn**:
+2. **Clone & Setup**: (Same as Local Setup step 1-4).
+3. **Production Serve**:
    ```bash
    gunicorn app.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
    ```
-4. **Reverse Proxy**: It is recommended to use **Nginx** to proxy traffic to port 8000.
+4. **Nginx Proxy**: Configure Nginx as a reverse proxy to point domain traffic to port 8000.
+
+### 3. Frontend Deployment (Production APK/IPA)
+1. **Setup EAS**:
+   ```bash
+   npm install -g eas-cli
+   eas login
+   eas build:configure
+   ```
+2. **Update API URL**: Change the `baseUrl` in `api.js` to your live production backend URL (e.g., `https://my-dengue-backend.onrender.com/api/v1`).
+3. **Build APK (Android)**:
+   ```bash
+   eas build --platform android --profile preview
+   ```
+4. **Install**: Download the build from the Expo dashboard and install on your device.
 
 ---
 
-## 🏗️ System Architecture
+## 🧠 Diagnostic Tier System
 
-### 1. AI Diagnosis Module
-Uses a **Random Forest Classifier** trained on hematological data (Platelets, WBC, Hematocrit) and symptom frequency (Fever, Headache, etc.).
-- Location: `backend/app/ml/model.py`
-
-### 2. Knowledge-Based System (KBS)
-Implements a **Forward Chaining Inference Engine** to apply medical rules to patient symptoms and ML outputs.
-- Location: `backend/app/engine/inference.py`
-
-### 3. Mobile Application
-Built with **React Native (Expo)** using a premium dark-mode design system.
-- State Management: **Redux Toolkit + RTK Query**
-- Icons: **Lucide React Native**
-- Navigation: **React Navigation**
+| Risk Level | Trigger Logic |
+| :--- | :--- |
+| **CRITICAL** | Emergency Clinical Signs (KBS) OR AI Probability > 75% |
+| **HIGH** | WHO Warning Signs (KBS) OR AI Probability 40-75% |
+| **MODERATE** | Fever + 2 Symptoms (KBS) OR AI Probability 1-40% |
+| **LOW** | No clinical signs + 0% AI Probability |
 
 ---
 
-## 🧠 7-Tier AI-KBS Hybrid Logic
-
-The system utilizes a sophisticated **Hybrid Inference Engine** that combines statistical Machine Learning (AI) with deterministic Knowledge-Based rules (KBS).
-
-| Tier | Priority | Logic Category | Trigger Criteria & Description | Risk Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **1** | **100** | **Clinical Emergency** | Life-threatening signs detected (Shock, Severe Bleeding, Organ failure). Overrides all AI probabilities. | **CRITICAL** |
-| **2** | **90-80**| **AI High Confidence** | AI predicts "Severe" or "Warning Stage" with **75% - 100%** confidence. | **CRITICAL / HIGH** |
-| **3** | **70-60**| **Clinical Warning** | Detects WHO Warning Signs (Abdominal pain, fluid accumulation, lethargy). | **HIGH** |
-| **4** | **55-45**| **AI Medium Confidence** | AI predicts risk with **40% - 75%** confidence. Labeled as "AI Predicted Risk". | **HIGH / MODERATE** |
-| **5** | **40-30**| **Clinical Baseline** | Classic clinical Dengue symptoms met (Fever + 2 symptoms). Handles Home Management cases. | **MODERATE** |
-| **6** | **25-10**| **AI Low Confidence** | Even with **1% - 40%** confidence, AI "Severe" predictions are monitored for safety. | **MODERATE** |
-| **7** | **0**    | **Safe Fallback** | No clinical signs present and AI confidence at 0%. | **LOW** |
-
----
-
-## 📊 Database Schema
-The system uses **MongoDB** via the **Beanie ODM** for flexible medical record storage:
-- `users`: User authentication, profiles, and roles.
-- `diagnosis_reports`: Detailed historical logs of symptoms, ML predictions, and KBS results.
-- `notifications`: User action logs, daily reminders, and health alerts.
-- `otp_records`: Temporary secure verification codes for authentication.
-
----
-
-## 🛡️ Security
-- **JWT Authentication** for all private API routes.
-- **Passlib (Bcrypt)** for password hashing.
-- **OTP Verification**: Email-based verification for secure signups.
-- **RBAC**: Role-Based Access Control (Admin, Doctor, User).
-
----
-
-## 🛠️ Summary Tech Stack
-- **Mobile**: React Native, Expo, Redux Toolkit, RTK Query, Lucide Icons.
-- **Server**: Python, FastAPI, MongoDB, Scikit-Learn.
-- **Logic**: Random Forest Classification + Tiered Forward Chaining Engine.
+## 🛡️ License & Medical Notice
+This application is designed for **pre-screening and early identification support**. It is NOT a substitute for professional medical diagnosis. Always consult a licensed doctor for healthcare decisions.
+ 
