@@ -236,11 +236,11 @@ const HomeScreen = ({ navigation }) => {
                       "Unknown"}
                   </Text>
                 </View>
-                <ChevronRight
-                  color={colors.textMuted}
-                  size={20}
-                  style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-                />
+                {isRTL ? (
+                  <ChevronLeft color={colors.textMuted} size={20} />
+                ) : (
+                  <ChevronRight color={colors.textMuted} size={20} />
+                )}
               </TouchableOpacity>
             ))
           ) : (

@@ -185,11 +185,11 @@ const DiagnosisFormScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ChevronLeft
-            color={colors.text}
-            size={24}
-            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-          />
+          {isRTL ? (
+            <ChevronRight color={colors.text} size={24} />
+          ) : (
+            <ChevronLeft color={colors.text} size={24} />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("diagnosis_form")}</Text>
         <View style={{ width: 40 }} />
@@ -318,11 +318,11 @@ const DiagnosisFormScreen = ({ navigation }) => {
           ) : (
             <>
               <Text style={styles.analyzeButtonText}>{t("analyze_now")}</Text>
-              <ChevronRight
-                color={colors.background}
-                size={20}
-                style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-              />
+              {isRTL ? (
+                <ChevronLeft color={colors.background} size={20} />
+              ) : (
+                <ChevronRight color={colors.background} size={20} />
+              )}
             </>
           )}
         </TouchableOpacity>

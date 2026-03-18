@@ -3,6 +3,16 @@ from typing import Optional, List, Dict, Any
 from beanie import Document, Indexed
 from pydantic import EmailStr, Field
 
+class BenchmarkMetric(Document):
+    key: Indexed(str, unique=True)
+    label: str
+    metrics: Dict[str, float] = Field(default_factory=dict)  # e.g. {"auc": 0.899, "sensitivity": 0.90}
+    citation: Optional[str] = None
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    class Settings:
+        name = "benchmarks"
+
 class User(Document):
     email: Indexed(EmailStr, unique=True)
     hashed_password: str

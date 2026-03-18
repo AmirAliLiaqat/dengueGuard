@@ -18,6 +18,7 @@ import {
   Mail,
   Phone,
   ChevronLeft,
+  ChevronRight,
   Camera,
   Image as ImageIcon,
   X,
@@ -180,11 +181,11 @@ const EditProfileScreen = ({ navigation }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <ChevronLeft
-              color={colors.text}
-              size={24}
-              style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-            />
+            {isRTL ? (
+              <ChevronRight color={colors.text} size={24} />
+            ) : (
+              <ChevronLeft color={colors.text} size={24} />
+            )}
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("edit_profile_btn")}</Text>
           <TouchableOpacity onPress={handleSave} disabled={isUpdating}>

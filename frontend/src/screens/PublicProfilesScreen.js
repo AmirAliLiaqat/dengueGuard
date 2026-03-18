@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { ChevronLeft, Search, User, Globe } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, Search, User, Globe } from "lucide-react-native";
 import { useGetPublicProfilesQuery } from "../services/api";
 import { createStyles } from "../styles/PublicProfilesScreen.styles";
 
@@ -67,11 +67,11 @@ const PublicProfilesScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ChevronLeft
-            color={colors.text}
-            size={24}
-            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-          />
+          {isRTL ? (
+            <ChevronRight color={colors.text} size={24} />
+          ) : (
+            <ChevronLeft color={colors.text} size={24} />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("public_profiles")}</Text>
         <View style={{ width: 40 }} />

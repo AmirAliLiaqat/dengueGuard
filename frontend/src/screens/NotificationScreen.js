@@ -9,6 +9,7 @@ import {
   ShieldAlert,
   CheckCircle,
   ChevronLeft,
+  ChevronRight,
   User,
   Share2,
   Download,
@@ -157,11 +158,11 @@ const NotificationScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ChevronLeft
-            color={colors.text}
-            size={24}
-            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-          />
+          {isRTL ? (
+            <ChevronRight color={colors.text} size={24} />
+          ) : (
+            <ChevronLeft color={colors.text} size={24} />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("notifications_toggle")}</Text>
         <View style={styles.headerActions}>

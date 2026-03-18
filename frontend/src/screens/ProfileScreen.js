@@ -184,11 +184,11 @@ const ProfileScreen = ({ navigation }) => {
                 <item.icon color={colors.primary} size={22} />
               </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
-              <ChevronRight
-                color={colors.textMuted}
-                size={20}
-                style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-              />
+              {isRTL ? (
+                <ChevronLeft color={colors.textMuted} size={20} />
+              ) : (
+                <ChevronRight color={colors.textMuted} size={20} />
+              )}
             </TouchableOpacity>
           ))}
         </View>
@@ -203,11 +203,11 @@ const ProfileScreen = ({ navigation }) => {
               <FileText color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t("terms_conditions")}</Text>
-            <ChevronRight
-              color={colors.textMuted}
-              size={20}
-              style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-            />
+            {isRTL ? (
+              <ChevronLeft color={colors.textMuted} size={20} />
+            ) : (
+              <ChevronRight color={colors.textMuted} size={20} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}
@@ -217,11 +217,11 @@ const ProfileScreen = ({ navigation }) => {
               <HelpCircle color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t("help_faq")}</Text>
-            <ChevronRight
-              color={colors.textMuted}
-              size={20}
-              style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-            />
+            {isRTL ? (
+              <ChevronLeft color={colors.textMuted} size={20} />
+            ) : (
+              <ChevronRight color={colors.textMuted} size={20} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}
@@ -231,11 +231,11 @@ const ProfileScreen = ({ navigation }) => {
               <Info color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t("about_app")}</Text>
-            <ChevronRight
-              color={colors.textMuted}
-              size={20}
-              style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-            />
+            {isRTL ? (
+              <ChevronLeft color={colors.textMuted} size={20} />
+            ) : (
+              <ChevronRight color={colors.textMuted} size={20} />
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuItem}
@@ -245,11 +245,11 @@ const ProfileScreen = ({ navigation }) => {
               <Activity color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t("dengue_encyclopedia")}</Text>
-            <ChevronRight
-              color={colors.textMuted}
-              size={20}
-              style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-            />
+            {isRTL ? (
+              <ChevronLeft color={colors.textMuted} size={20} />
+            ) : (
+              <ChevronRight color={colors.textMuted} size={20} />
+            )}
           </TouchableOpacity>
         </View>
 

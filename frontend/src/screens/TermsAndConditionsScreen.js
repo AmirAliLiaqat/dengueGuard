@@ -2,7 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { ChevronLeft, Scale } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, Scale } from "lucide-react-native";
 import { createStyles } from "../styles/TermsAndConditionsScreen.styles";
 
 const TermsAndConditionsScreen = ({ navigation }) => {
@@ -46,11 +46,11 @@ const TermsAndConditionsScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ChevronLeft
-            color={colors.text}
-            size={24}
-            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-          />
+          {isRTL ? (
+            <ChevronRight color={colors.text} size={24} />
+          ) : (
+            <ChevronLeft color={colors.text} size={24} />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("terms_conditions")}</Text>
         <View style={{ width: 40 }} />

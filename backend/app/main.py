@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
-from app.models.dengue import User, OTPRecord, DiagnosisReport, RuleDocument, Notification
+from app.models.dengue import User, OTPRecord, DiagnosisReport, RuleDocument, Notification, BenchmarkMetric
 from app.core.config import settings
 from app.api.v1 import router as api_router
 
@@ -17,8 +17,18 @@ async def startup_event():
     client = AsyncIOMotorClient(settings.MONGODB_URL)
     await init_beanie(
         database=client.get_default_database(),
-        document_models=[User, OTPRecord, DiagnosisReport, RuleDocument, Notification]
+        document_models=[User, OTPRecord, DiagnosisReport, RuleDocument, Notification, BenchmarkMetric]
     )
+
+    # Seed a default benchmark record (editable in DB / via admin endpoint).
+    existing = await BenchmarkMetric.find_one(BenchmarkMetric.key == "example_ann_diagnosis")
+    if not existing:
+        await BenchmarkMetric(
+            key="example_ann_diagnosis",
+            label="Published ANN diagnostic example",
+            metrics={"auc": 0.899, "sensitivity": 0.90, "specificity": 0.82},
+            citation="Effectiveness of a diagnostic algorithm for dengue based on an artificial neural network (reported AUC 0.899, sensitivity 0.90, specificity 0.82).",
+        ).insert()
 
 # Set all CORS enabled origins
 app.add_middleware(

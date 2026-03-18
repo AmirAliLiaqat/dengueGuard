@@ -5,6 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import {
   ChevronLeft,
+  ChevronRight,
   Info,
   AlertTriangle,
   ShieldCheck,
@@ -79,11 +80,11 @@ const DengueInfoScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <ChevronLeft
-            color={colors.text}
-            size={24}
-            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
-          />
+          {isRTL ? (
+            <ChevronRight color={colors.text} size={24} />
+          ) : (
+            <ChevronLeft color={colors.text} size={24} />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Dengue Encyclopedia</Text>
       </View>

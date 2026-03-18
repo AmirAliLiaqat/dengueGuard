@@ -334,4 +334,28 @@ export const en = {
   mute_30m: "30 min",
   mute_1h: "1 hour",
   mute_24h: "24 hours",
+
+  // Reports (shared labels)
+  yes: "Yes",
+  no: "No",
+  why_selected: "Why selected",
+  rule_output: "Result",
+
+  system_comparison: "Comparison to published systems",
+  system_comparison_note: "Benchmarks vary by dataset and are shown for context (not a direct 1:1 comparison).",
+  this_report_confidence: "This report (ML probability)",
+  sensitivity: "Sensitivity",
+  specificity: "Specificity",
+
+  // Result + Report Details (extra)
+  user_details: "User Details",
+  analysis_complete: "Analysis Complete",
+  diagnosis: "Diagnosis",
+  unknown: "Unknown",
+  consult_doctor: "Please consult a doctor.",
+  recorded_probability: "Recorded Probability",
+  report_load_error: "Error loading report details.",
+  go_back: "Go Back",
+  dengue_analysis: "Dengue Analysis",
+  alert: "Alert",
 };

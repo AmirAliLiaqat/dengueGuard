@@ -19,6 +19,51 @@ const createHtmlContent = (report) => {
 
   const scoreText = report.score !== undefined ? `${report.score}%` : 'N/A';
   const scoreColor = report.score > 75 ? '#FF6B6B' : (report.score > 40 ? '#FFA500' : '#3B82F6');
+
+  const safe = (v) => (v === null || v === undefined || v === '' ? '—' : String(v));
+  const yesNo = (v) => (v === true ? 'Yes' : v === false ? 'No' : safe(v));
+
+  const formatKey = (key) =>
+    String(key || '')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase());
+
+  const formatKVTable = (obj) => {
+    if (!obj || typeof obj !== 'object') return '<p style="margin:0;color:#666;">None</p>';
+    const rows = Object.entries(obj)
+      .filter(([_, v]) => v !== null && v !== undefined && v !== '')
+      .map(
+        ([k, v]) =>
+          `<tr><td style="padding:8px 10px;border-bottom:1px solid #e9eef5;color:#666;">${formatKey(k)}</td><td style="padding:8px 10px;border-bottom:1px solid #e9eef5;color:#111;text-align:right;font-weight:600;">${yesNo(v)}</td></tr>`,
+      )
+      .join('');
+    if (!rows) return '<p style="margin:0;color:#666;">None</p>';
+    return `<table style="width:100%;border-collapse:collapse;">${rows}</table>`;
+  };
+
+  const formatRules = (rules) => {
+    if (!Array.isArray(rules) || rules.length === 0) return '<li>None</li>';
+    return rules
+      .map((r) => {
+        if (typeof r === 'string') return `<li>${r}</li>`;
+        const id = r?.id ? `<strong>${safe(r.id)}</strong>` : '<strong>Rule</strong>';
+        const desc = r?.description ? ` — ${safe(r.description)}` : '';
+        const matched = r?.matched
+          ? Object.entries(r.matched)
+              .map(([k, v]) => `${formatKey(k)}=${yesNo(v?.actual)}`)
+              .join(', ')
+          : '';
+        const results = r?.results
+          ? Object.entries(r.results)
+              .map(([k, v]) => `${formatKey(k)}=${safe(v)}`)
+              .join(', ')
+          : '';
+        const whyBlock = matched ? `<div style="margin-top:6px;color:#555;"><em>Why selected:</em> ${matched}</div>` : '';
+        const outBlock = results ? `<div style="margin-top:6px;color:#555;"><em>Result:</em> ${results}</div>` : '';
+        return `<li style="margin-bottom:10px;">${id}${desc}${whyBlock}${outBlock}</li>`;
+      })
+      .join('');
+  };
   
   // Create HTML
   return `
@@ -89,6 +134,14 @@ const createHtmlContent = (report) => {
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
+          }
+          .patient-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+            object-fit: cover;
+            border: 2px solid #dbeafe;
+            background: #fff;
           }
           .patient-box div p {
             margin: 5px 0;
@@ -163,8 +216,8 @@ const createHtmlContent = (report) => {
           <div class="header">
             <div class="brand">
               <div>
-                <h1 class="logo-text">DENGUE KBS</h1>
-                <p class="logo-sub">AI Medical Diagnosis System</p>
+                <h1 class="logo-text">DengueGuard</h1>
+                <p class="logo-sub">AI Health Screening Report</p>
               </div>
             </div>
             <div class="doc-info">
@@ -176,13 +229,16 @@ const createHtmlContent = (report) => {
 
           <div class="patient-box">
             <div>
-              <p><strong>Patient Name:</strong> ___________________</p>
-              <p><strong>Age/Gender:</strong> ____________________</p>
-              <p><strong>Contact:</strong> _______________________</p>
+              <p><strong>Patient Name:</strong> ${safe(report?.user?.full_name)}</p>
+              <p><strong>Email:</strong> ${safe(report?.user?.email)}</p>
+              <p><strong>Contact:</strong> ${safe(report?.user?.phone_number)}</p>
             </div>
-            <div style="text-align: right;">
+            <div style="text-align: right; display:flex; gap:12px; align-items:center; justify-content:flex-end;">
+              ${report?.user?.profile_picture ? `<img class="patient-avatar" src="${report.user.profile_picture}" />` : ''}
+              <div>
               <p><strong>Analysis Date:</strong> ${report.date || currentDate}</p>
               <p><strong>Analyzed By:</strong> Automated AI Engine</p>
+              </div>
             </div>
           </div>
 
@@ -201,6 +257,31 @@ const createHtmlContent = (report) => {
           </div>
 
           <div class="section">
+            <h3>Vital Signs</h3>
+            ${formatKVTable(report?.details?.vitals)}
+          </div>
+
+          <div class="section">
+            <h3>Blood Report / Lab Tests</h3>
+            ${formatKVTable(report?.details?.labs)}
+          </div>
+
+          <div class="section">
+            <h3>Warning Signs</h3>
+            ${formatKVTable(report?.details?.warning_signs)}
+          </div>
+
+          <div class="section">
+            <h3>Severe Criteria</h3>
+            ${formatKVTable(report?.details?.severe_criteria)}
+          </div>
+
+          <div class="section">
+            <h3>Home & Home Care Criteria</h3>
+            ${formatKVTable(report?.details?.home_care)}
+          </div>
+
+          <div class="section">
             <h3>Medical Recommendations</h3>
             <ul>
               ${formatList(report.recommendations)}
@@ -210,7 +291,7 @@ const createHtmlContent = (report) => {
           <div class="section">
             <h3>AI Logic & Reasoning Engine</h3>
             <ul>
-              ${formatList(report.reasoning)}
+              ${formatRules(report.reasoning)}
             </ul>
           </div>
 
@@ -224,8 +305,8 @@ const createHtmlContent = (report) => {
           </div>
 
           <div class="footer">
-            <p>This report is generated by Dengue KBS AI. It is intended to assist medical professionals and should not replace clinical judgment.</p>
-            <p>&copy; ${new Date().getFullYear()} Dengue KBS. All rights reserved.</p>
+            <p>This report is generated by DengueGuard. It is intended to assist medical professionals and should not replace clinical judgment.</p>
+            <p>&copy; ${new Date().getFullYear()} DengueGuard. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -263,7 +344,7 @@ export const generateAndSavePDF = async (reportData) => {
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri, {
         mimeType: 'application/pdf',
-        dialogTitle: 'Save Medical Report to Device',
+        dialogTitle: 'Save DengueGuard Report',
         UTI: 'com.adobe.pdf'
       });
     } else {

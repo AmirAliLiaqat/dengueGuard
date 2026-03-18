@@ -19,6 +19,11 @@ export const denguApi = createApi({
   }),
   tagTypes: ["User", "History", "Stats", "Notification"],
   endpoints: (builder) => ({
+    // Benchmarks (comparison stats)
+    getBenchmarks: builder.query({
+      query: () => "/benchmarks/",
+    }),
+
     // Notifications
     getNotifications: builder.query({
       query: () => "/notifications/",
@@ -158,6 +163,7 @@ export const {
   useGetHistoryQuery,
   useGetStatsQuery,
   useGetReportDetailQuery,
+  useGetBenchmarksQuery,
   useLoginMutation,
   useSignupMutation,
   useRequest2faOtpMutation,

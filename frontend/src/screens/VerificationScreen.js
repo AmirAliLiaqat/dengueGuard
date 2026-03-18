@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { Mail, ArrowRight } from "lucide-react-native";
+import { Mail, ArrowRight, ArrowLeft } from "lucide-react-native";
 import { useAlert } from "../context/AlertContext";
 import { useVerifyOtpMutation } from "../services/api";
 import { useDispatch } from "react-redux";
@@ -171,14 +171,11 @@ const VerificationScreen = ({ navigation, route }) => {
                   <Text style={styles.verifyButtonText}>
                     {t("verify_continue")}
                   </Text>
-                  <ArrowRight
-                    color={colors.background}
-                    size={20}
-                    style={{
-                      marginLeft: 8,
-                      transform: [{ scaleX: isRTL ? -1 : 1 }],
-                    }}
-                  />
+                  {isRTL ? (
+                    <ArrowLeft color={colors.background} size={20} style={{ marginLeft: 8 }} />
+                  ) : (
+                    <ArrowRight color={colors.background} size={20} style={{ marginLeft: 8 }} />
+                  )}
                 </>
               )}
             </TouchableOpacity>

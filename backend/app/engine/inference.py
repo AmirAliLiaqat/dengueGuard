@@ -57,10 +57,10 @@ class ForwardChainingEngine:
     def __init__(self, ruleset: List[KnowledgeRule]):
         self.ruleset = sorted(ruleset, key=lambda x: x.priority, reverse=True)
 
-    def infer(self, initial_facts: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str]]:
+    def infer(self, initial_facts: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
         """Iteratively apply rules until no more facts can be derived."""
         derived_facts = initial_facts.copy()
-        applied_rules_log = []
+        applied_rules_log: List[Dict[str, Any]] = []
         applied_rules_ids = set()
         
         self._preprocess_facts(derived_facts)
@@ -72,6 +72,13 @@ class ForwardChainingEngine:
             changed = False
             for rule in self.ruleset:
                 if rule.id not in applied_rules_ids and rule.evaluate(derived_facts):
+                    matched = {}
+                    for key, expected_val in rule.conditions.items():
+                        matched[key] = {
+                            "expected": expected_val,
+                            "actual": derived_facts.get(key),
+                        }
+
                     for key, val in rule.results.items():
                         # Only set if key hasn't been set by a higher priority rule
                         if key not in set_by_priority or rule.priority >= set_by_priority[key]:
@@ -80,7 +87,14 @@ class ForwardChainingEngine:
                                 set_by_priority[key] = rule.priority
                                 changed = True
                     applied_rules_ids.add(rule.id)
-                    applied_rules_log.append(f"Rule {rule.id}: {rule.description}")
+                    applied_rules_log.append({
+                        "id": rule.id,
+                        "description": rule.description,
+                        "priority": rule.priority,
+                        "conditions": rule.conditions,
+                        "matched": matched,
+                        "results": rule.results,
+                    })
         
         return derived_facts, applied_rules_log
         

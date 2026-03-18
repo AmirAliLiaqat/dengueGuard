@@ -310,4 +310,28 @@ export const ur = {
   mute_30m: "30 منٹ",
   mute_1h: "1 گھنٹہ",
   mute_24h: "24 گھنٹے",
+
+  // Reports (shared labels)
+  yes: "ہاں",
+  no: "نہیں",
+  why_selected: "کیوں منتخب ہوا",
+  rule_output: "نتیجہ",
+
+  system_comparison: "شائع شدہ سسٹمز سے موازنہ",
+  system_comparison_note: "بینچ مارکس ڈیٹاسیٹ کے لحاظ سے بدلتے ہیں اور صرف معلومات کے لیے دکھائے گئے ہیں (یہ براہ راست 1:1 موازنہ نہیں ہے)۔",
+  this_report_confidence: "یہ رپورٹ (ML امکان)",
+  sensitivity: "حساسیت",
+  specificity: "خصوصیت",
+
+  // Result + Report Details (extra)
+  user_details: "صارف کی تفصیلات",
+  analysis_complete: "تجزیہ مکمل",
+  diagnosis: "تشخیص",
+  unknown: "نامعلوم",
+  consult_doctor: "براہِ کرم ڈاکٹر سے رجوع کریں۔",
+  recorded_probability: "ریکارڈ شدہ امکان",
+  report_load_error: "رپورٹ کی تفصیلات لوڈ کرنے میں مسئلہ پیش آیا۔",
+  go_back: "واپس جائیں",
+  dengue_analysis: "ڈینگی تجزیہ",
+  alert: "الرٹ",
 };

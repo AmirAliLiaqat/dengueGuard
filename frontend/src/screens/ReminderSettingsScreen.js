@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-import { Bell, ChevronLeft, Clock, Plus, Trash2 } from 'lucide-react-native';
+import { Bell, ChevronLeft, ChevronRight, Clock, Plus, Trash2 } from 'lucide-react-native';
 import { createStyles } from '../styles/ReminderSettingsScreen.styles';
 import {
   applyReminderSettings,
@@ -178,7 +178,11 @@ const ReminderSettingsScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+          {isRTL ? (
+            <ChevronRight color={colors.text} size={24} />
+          ) : (
+            <ChevronLeft color={colors.text} size={24} />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('reminder_settings')}</Text>
         <View style={{ width: 40 }} />
