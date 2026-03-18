@@ -1,30 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../context/ThemeContext';
-import { useLanguage } from '../context/LanguageContext';
-import { Mail, ArrowRight } from 'lucide-react-native';
-import { useAlert } from '../context/AlertContext';
-import { useVerifyOtpMutation } from '../services/api';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '../redux/authSlice';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
+import { Mail, ArrowRight } from "lucide-react-native";
+import { useAlert } from "../context/AlertContext";
+import { useVerifyOtpMutation } from "../services/api";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../redux/authSlice";
+import { createStyles } from "../styles/VerificationScreen.styles";
 
 const VerificationScreen = ({ navigation, route }) => {
   const { theme } = useTheme();
   const { colors, typography, spacing } = theme;
   const { t, isRTL } = useLanguage();
   const dispatch = useDispatch();
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = [
     useRef(null),
     useRef(null),
@@ -35,60 +35,66 @@ const VerificationScreen = ({ navigation, route }) => {
   ];
   const [verifyOtp, { isLoading }] = useVerifyOtpMutation();
   const { showAlert } = useAlert();
-  
-  const email = route.params?.email || '';
-  const purpose = route.params?.purpose || 'signup';
+
+  const email = route.params?.email || "";
+  const purpose = route.params?.purpose || "signup";
 
   const styles = createStyles(theme, isRTL);
 
   const handleVerify = async () => {
-    const otpString = otp.join('');
+    const otpString = otp.join("");
     if (otpString.length !== 6) {
       showAlert({
-        title: t('error'),
-        message: t('enter_complete_code'),
-        type: "error"
+        title: t("error"),
+        message: t("enter_complete_code"),
+        type: "error",
       });
       return;
     }
 
     try {
-      const result = await verifyOtp({ email, otp_code: otpString, purpose }).unwrap();
-      
+      const result = await verifyOtp({
+        email,
+        otp_code: otpString,
+        purpose,
+      }).unwrap();
+
       showAlert({
-        title: t('success'),
-        message: t('email_verified_success'),
-        type: "success"
+        title: t("success"),
+        message: t("email_verified_success"),
+        type: "success",
       });
 
       if (result.access_token) {
-        dispatch(setCredentials({ 
-          access_token: result.access_token,
-          user: { email } 
-        }));
+        dispatch(
+          setCredentials({
+            access_token: result.access_token,
+            user: { email },
+          }),
+        );
       } else {
-        navigation.navigate('Login');
+        navigation.navigate("Login");
       }
     } catch (error) {
-      console.log('Verification error details:', error);
-      let errorMessage = t('invalid_code');
-      
+      console.log("Verification error details:", error);
+      let errorMessage = t("invalid_code");
+
       if (error.data?.detail) {
         if (Array.isArray(error.data.detail)) {
-          errorMessage = error.data.detail.map(err => err.msg).join(', ');
+          errorMessage = error.data.detail.map((err) => err.msg).join(", ");
         } else {
           errorMessage = error.data.detail;
         }
       } else if (error.error) {
-        errorMessage = t('network_server_error');
-      } else if (error.status === 'FETCH_ERROR') {
-        errorMessage = t('server_unreachable');
+        errorMessage = t("network_server_error");
+      } else if (error.status === "FETCH_ERROR") {
+        errorMessage = t("server_unreachable");
       }
 
       showAlert({
-        title: t('verification_failed'),
+        title: t("verification_failed"),
         message: errorMessage,
-        type: "error"
+        type: "error",
       });
     }
   };
@@ -108,7 +114,7 @@ const VerificationScreen = ({ navigation, route }) => {
   };
 
   const handleKeyPress = (e, index) => {
-    if (e.nativeEvent.key === 'Backspace' && !otp[index] && index > 0) {
+    if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs[index - 1].current.focus();
     }
   };
@@ -116,7 +122,7 @@ const VerificationScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -124,10 +130,13 @@ const VerificationScreen = ({ navigation, route }) => {
             <View style={styles.iconContainer}>
               <Mail color={colors.primary} size={40} />
             </View>
-            <Text style={styles.title}>{t('email_verification')}</Text>
+            <Text style={styles.title}>{t("email_verification")}</Text>
             <Text style={styles.subtitle}>
-              {t('verification_code_desc')}{"\n"}
-              <Text style={{ color: colors.text, fontWeight: 'bold' }}>{email}</Text>
+              {t("verification_code_desc")}
+              {"\n"}
+              <Text style={{ color: colors.text, fontWeight: "bold" }}>
+                {email}
+              </Text>
             </Text>
           </View>
 
@@ -150,8 +159,8 @@ const VerificationScreen = ({ navigation, route }) => {
               ))}
             </View>
 
-            <TouchableOpacity 
-              style={[styles.verifyButton, isLoading && { opacity: 0.7 }]} 
+            <TouchableOpacity
+              style={[styles.verifyButton, isLoading && { opacity: 0.7 }]}
               onPress={handleVerify}
               disabled={isLoading}
             >
@@ -159,77 +168,30 @@ const VerificationScreen = ({ navigation, route }) => {
                 <ActivityIndicator color={colors.background} />
               ) : (
                 <>
-                  <Text style={styles.verifyButtonText}>{t('verify_continue')}</Text>
-                  <ArrowRight color={colors.background} size={20} style={{ marginLeft: 8, transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+                  <Text style={styles.verifyButtonText}>
+                    {t("verify_continue")}
+                  </Text>
+                  <ArrowRight
+                    color={colors.background}
+                    size={20}
+                    style={{
+                      marginLeft: 8,
+                      transform: [{ scaleX: isRTL ? -1 : 1 }],
+                    }}
+                  />
                 </>
               )}
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.resendButton}>
-              <Text style={styles.resendText}>{t('did_not_receive_code')}</Text>
-              <Text style={styles.resendLink}>{t('resend_code')}</Text>
+              <Text style={styles.resendText}>{t("did_not_receive_code")}</Text>
+              <Text style={styles.resendLink}>{t("resend_code")}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};
-
-const createStyles = (theme, isRTL) => {
-  const { colors, typography, spacing } = theme;
-  return StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background },
-    scrollContent: { flexGrow: 1, padding: spacing.xl, justifyContent: 'center' },
-    header: { alignItems: 'center', marginBottom: spacing.xl * 2 },
-    iconContainer: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: colors.glass,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: spacing.l,
-    },
-    title: { ...typography.h1, color: colors.text, marginBottom: spacing.s },
-    subtitle: { ...typography.body, color: colors.textMuted, textAlign: 'center', lineHeight: 24 },
-    form: { width: '100%' },
-    otpInputsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: spacing.xl,
-    },
-    otpInput: {
-      width: 48,
-      height: 58,
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-      color: colors.text,
-      fontSize: 24,
-      fontWeight: 'bold',
-      textAlign: 'center',
-      padding: 0,
-    },
-    verifyButton: {
-      backgroundColor: colors.primary,
-      height: 56,
-      borderRadius: 16,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 5,
-    },
-    verifyButtonText: { color: colors.background, fontSize: 18, fontWeight: 'bold' },
-    resendButton: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xl },
-    resendText: { ...typography.body, color: colors.textMuted },
-    resendLink: { ...typography.body, color: colors.primary, fontWeight: 'bold' },
-  });
 };
 
 export default VerificationScreen;

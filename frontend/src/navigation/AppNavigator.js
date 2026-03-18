@@ -30,6 +30,7 @@ import NotificationDetailScreen from '../screens/NotificationDetailScreen';
 import DengueInfoScreen from '../screens/DengueInfoScreen';
 import PublicProfilesScreen from '../screens/PublicProfilesScreen';
 import UserProfileDetailScreen from '../screens/UserProfileDetailScreen';
+import ReminderSettingsScreen from '../screens/ReminderSettingsScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -126,6 +127,7 @@ const AppNavigator = () => {
           <Stack.Screen name="DengueInfo" component={DengueInfoScreen} />
           <Stack.Screen name="PublicProfiles" component={PublicProfilesScreen} />
           <Stack.Screen name="UserProfileDetail" component={UserProfileDetailScreen} />
+          <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} />
         </>
       )}
     </Stack.Navigator>

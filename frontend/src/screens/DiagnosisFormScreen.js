@@ -1,11 +1,29 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../context/ThemeContext';
-import { useLanguage } from '../context/LanguageContext';
-import { ChevronLeft, ChevronRight, Activity, Stethoscope, AlertTriangle, Droplet, Heart, Home } from 'lucide-react-native';
-import { useAlert } from '../context/AlertContext';
-import { useDiagnoseSymptomsMutation } from '../services/api';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Switch,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Activity,
+  Stethoscope,
+  AlertTriangle,
+  Droplet,
+  Heart,
+  Home,
+} from "lucide-react-native";
+import { useAlert } from "../context/AlertContext";
+import { useDiagnoseSymptomsMutation } from "../services/api";
+import { createStyles } from "../styles/DiagnosisFormScreen.styles";
 
 const DiagnosisFormScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -54,15 +72,15 @@ const DiagnosisFormScreen = ({ navigation }) => {
     urinating_regularly: false,
 
     // Vitals
-    body_temperature: '',
-    blood_pressure: '',
-    heart_rate: '',
-    
+    body_temperature: "",
+    blood_pressure: "",
+    heart_rate: "",
+
     // Lab Tests
-    platelet_count: '',
-    white_blood_cell_count: '',
-    hematocrit_level: '',
-    
+    platelet_count: "",
+    white_blood_cell_count: "",
+    hematocrit_level: "",
+
     // Exposures
     recent_travel: false,
     mosquito_exposure: false,
@@ -82,30 +100,40 @@ const DiagnosisFormScreen = ({ navigation }) => {
     try {
       const payload = {
         ...symptoms,
-        body_temperature: symptoms.body_temperature ? parseFloat(symptoms.body_temperature) : null,
-        heart_rate: symptoms.heart_rate ? parseInt(symptoms.heart_rate, 10) : null,
-        platelet_count: symptoms.platelet_count ? parseFloat(symptoms.platelet_count) : null,
-        white_blood_cell_count: symptoms.white_blood_cell_count ? parseFloat(symptoms.white_blood_cell_count) : null,
-        hematocrit_level: symptoms.hematocrit_level ? parseFloat(symptoms.hematocrit_level) : null,
+        body_temperature: symptoms.body_temperature
+          ? parseFloat(symptoms.body_temperature)
+          : null,
+        heart_rate: symptoms.heart_rate
+          ? parseInt(symptoms.heart_rate, 10)
+          : null,
+        platelet_count: symptoms.platelet_count
+          ? parseFloat(symptoms.platelet_count)
+          : null,
+        white_blood_cell_count: symptoms.white_blood_cell_count
+          ? parseFloat(symptoms.white_blood_cell_count)
+          : null,
+        hematocrit_level: symptoms.hematocrit_level
+          ? parseFloat(symptoms.hematocrit_level)
+          : null,
       };
 
       const result = await diagnoseSymptoms(payload).unwrap();
-      
+
       if (result?.report) {
-         navigation.navigate('Result', { data: result.report });
+        navigation.navigate("Result", { data: result.report });
       } else {
-         showAlert({
-           title: t('analysis_failed'),
-           message: t('analysis_failed_desc'),
-           type: "warning"
-         });
+        showAlert({
+          title: t("analysis_failed"),
+          message: t("analysis_failed_desc"),
+          type: "warning",
+        });
       }
     } catch (e) {
       console.error(e);
       showAlert({
-        title: t('error'),
-        message: t('network_error_message'),
-        type: "error"
+        title: t("error"),
+        message: t("network_error_message"),
+        type: "error",
       });
     }
   };
@@ -113,7 +141,9 @@ const DiagnosisFormScreen = ({ navigation }) => {
   const formatLabel = (key) => {
     const translated = t(key);
     if (translated !== key) return translated;
-    return key.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    return key
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   const renderSwitch = (key, labelTranslation) => (
@@ -123,12 +153,17 @@ const DiagnosisFormScreen = ({ navigation }) => {
         value={symptoms[key]}
         onValueChange={() => handleToggle(key)}
         trackColor={{ false: colors.glassBorder, true: colors.primary }}
-        thumbColor={symptoms[key] ? '#FFFFFF' : colors.textMuted}
+        thumbColor={symptoms[key] ? "#FFFFFF" : colors.textMuted}
       />
     </View>
   );
 
-  const renderInput = (key, labelTranslation, placeholder, keyboardType = "numeric") => (
+  const renderInput = (
+    key,
+    labelTranslation,
+    placeholder,
+    keyboardType = "numeric",
+  ) => (
     <View style={styles.inputGroup} key={key}>
       <Text style={styles.label}>{formatLabel(labelTranslation)}</Text>
       <TextInput
@@ -138,7 +173,7 @@ const DiagnosisFormScreen = ({ navigation }) => {
         keyboardType={keyboardType}
         value={symptoms[key]}
         onChangeText={(text) => handleText(key, text)}
-        textAlign={isRTL ? 'right' : 'left'}
+        textAlign={isRTL ? "right" : "left"}
       />
     </View>
   );
@@ -146,109 +181,135 @@ const DiagnosisFormScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ChevronLeft
+            color={colors.text}
+            size={24}
+            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+          />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('diagnosis_form')}</Text>
+        <Text style={styles.headerTitle}>{t("diagnosis_form")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        
         {/* Standard Symptoms */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Stethoscope color={colors.accent} size={20} />
-            <Text style={styles.sectionTitle}>{t('classic_symptoms')}</Text>
+            <Text style={styles.sectionTitle}>{t("classic_symptoms")}</Text>
           </View>
-          {renderSwitch('fever', 'fever')}
-          {renderSwitch('headache', 'headache')}
-          {renderSwitch('muscle_pain', 'muscle_pain')}
-          {renderSwitch('joint_pain', 'joint_pain')}
-          {renderSwitch('nausea', 'nausea')}
-          {renderSwitch('vomiting', 'vomiting')}
-          {renderSwitch('skin_rash', 'skin_rash')}
-          {renderSwitch('positive_tourniquet_test', 'positive_tourniquet_test')}
+          {renderSwitch("fever", "fever")}
+          {renderSwitch("headache", "headache")}
+          {renderSwitch("muscle_pain", "muscle_pain")}
+          {renderSwitch("joint_pain", "joint_pain")}
+          {renderSwitch("nausea", "nausea")}
+          {renderSwitch("vomiting", "vomiting")}
+          {renderSwitch("skin_rash", "skin_rash")}
+          {renderSwitch("positive_tourniquet_test", "positive_tourniquet_test")}
         </View>
 
         {/* Vital Signs Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Activity color={colors.info} size={20} />
-            <Text style={styles.sectionTitle}>{t('vital_signs')}</Text>
+            <Text style={styles.sectionTitle}>{t("vital_signs")}</Text>
           </View>
-          {renderInput('body_temperature', 'body_temperature', 'e.g. 39.0')}
-          {renderInput('blood_pressure', 'blood_pressure', 'e.g. 110/70', 'default')}
-          {renderInput('heart_rate', 'heart_rate', 'e.g. 95 BPM')}
+          {renderInput("body_temperature", "body_temperature", "e.g. 39.0")}
+          {renderInput(
+            "blood_pressure",
+            "blood_pressure",
+            "e.g. 110/70",
+            "default",
+          )}
+          {renderInput("heart_rate", "heart_rate", "e.g. 95 BPM")}
         </View>
 
         {/* Lab Tests Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Droplet color={colors.primary} size={20} />
-            <Text style={styles.sectionTitle}>{t('laboratory_tests')}</Text>
+            <Text style={styles.sectionTitle}>{t("laboratory_tests")}</Text>
           </View>
-          {renderInput('platelet_count', 'platelet_count', 'e.g. 150000')}
-          {renderInput('white_blood_cell_count', 'white_blood_cell_count', 'e.g. 4000')}
-          {renderInput('hematocrit_level', 'hematocrit_level', 'e.g. 42.0')}
+          {renderInput("platelet_count", "platelet_count", "e.g. 150000")}
+          {renderInput(
+            "white_blood_cell_count",
+            "white_blood_cell_count",
+            "e.g. 4000",
+          )}
+          {renderInput("hematocrit_level", "hematocrit_level", "e.g. 42.0")}
         </View>
 
         {/* Warning Signs */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <AlertTriangle color={colors.warning || '#FFA500'} size={20} />
-            <Text style={styles.sectionTitle}>{t('warning_signs')}</Text>
+            <AlertTriangle color={colors.warning || "#FFA500"} size={20} />
+            <Text style={styles.sectionTitle}>{t("warning_signs")}</Text>
           </View>
-          {renderSwitch('abdominal_pain', 'abdominal_pain_or_tenderness')}
-          {renderSwitch('persistent_vomiting', 'persistent_vomiting')}
-          {renderSwitch('clinical_fluid_accumulation', 'clinical_fluid_accumulation')}
-          {renderSwitch('mucosal_bleeding', 'mucosal_bleeding')}
-          {renderSwitch('lethargy_or_restlessness', 'lethargy_or_restlessness')}
-          {renderSwitch('liver_enlargement', 'liver_enlargement_>_2_cm')}
+          {renderSwitch("abdominal_pain", "abdominal_pain_or_tenderness")}
+          {renderSwitch("persistent_vomiting", "persistent_vomiting")}
+          {renderSwitch(
+            "clinical_fluid_accumulation",
+            "clinical_fluid_accumulation",
+          )}
+          {renderSwitch("mucosal_bleeding", "mucosal_bleeding")}
+          {renderSwitch("lethargy_or_restlessness", "lethargy_or_restlessness")}
+          {renderSwitch("liver_enlargement", "liver_enlargement_>_2_cm")}
         </View>
 
         {/* Severe Criteria */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Heart color={'#D32F2F'} size={20} />
-            <Text style={styles.sectionTitle}>{t('severe_criteria')}</Text>
+            <Heart color={"#D32F2F"} size={20} />
+            <Text style={styles.sectionTitle}>{t("severe_criteria")}</Text>
           </View>
-          {renderSwitch('severe_plasma_leakage', 'severe_plasma_leakage')}
-          {renderSwitch('shock_dss', 'shock_(DSS)')}
-          {renderSwitch('respiratory_distress', 'respiratory_distress')}
-          {renderSwitch('severe_bleeding', 'severe_bleeding')}
-          {renderSwitch('ast_alt_1000', 'liver_AST/ALT_>=_1000')}
-          {renderSwitch('impaired_consciousness', 'impaired_consciousness')}
-          {renderSwitch('heart_involvement', 'heart_involvement')}
+          {renderSwitch("severe_plasma_leakage", "severe_plasma_leakage")}
+          {renderSwitch("shock_dss", "shock_(DSS)")}
+          {renderSwitch("respiratory_distress", "respiratory_distress")}
+          {renderSwitch("severe_bleeding", "severe_bleeding")}
+          {renderSwitch("ast_alt_1000", "liver_AST/ALT_>=_1000")}
+          {renderSwitch("impaired_consciousness", "impaired_consciousness")}
+          {renderSwitch("heart_involvement", "heart_involvement")}
         </View>
 
         {/* Phase & Home Care */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Home color={colors.primary} size={20} />
-            <Text style={styles.sectionTitle}>{t('phase_home_care_criteria')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t("phase_home_care_criteria")}
+            </Text>
           </View>
-          {renderSwitch('fever_drops', 'fever_drops_(Defervescence)')}
-          {renderSwitch('hematocrit_increases', 'hematocrit_rapidly_increases')}
-          {renderSwitch('platelet_decreases', 'platelet_rapidly_decreases')}
-          {renderSwitch('tolerates_oral_fluids', 'tolerates_adequate_oral_fluids')}
-          {renderSwitch('urinating_regularly', 'urinating_at_least_every_6_hours')}
+          {renderSwitch("fever_drops", "fever_drops_(Defervescence)")}
+          {renderSwitch("hematocrit_increases", "hematocrit_rapidly_increases")}
+          {renderSwitch("platelet_decreases", "platelet_rapidly_decreases")}
+          {renderSwitch(
+            "tolerates_oral_fluids",
+            "tolerates_adequate_oral_fluids",
+          )}
+          {renderSwitch(
+            "urinating_regularly",
+            "urinating_at_least_every_6_hours",
+          )}
         </View>
 
         {/* Risk Factors Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <AlertTriangle color={colors.warning} size={20} />
-            <Text style={styles.sectionTitle}>{t('risk_factors')}</Text>
+            <Text style={styles.sectionTitle}>{t("risk_factors")}</Text>
           </View>
-          {renderSwitch('recent_travel', 'recent_travel_/_endemic_area')}
-          {renderSwitch('local_dengue_outbreak', 'local_dengue_outbreak')}
-          {renderSwitch('mosquito_exposure', 'mosquito_exposure')}
-          {renderSwitch('rainy_season', 'rainy_season')}
+          {renderSwitch("recent_travel", "recent_travel_/_endemic_area")}
+          {renderSwitch("local_dengue_outbreak", "local_dengue_outbreak")}
+          {renderSwitch("mosquito_exposure", "mosquito_exposure")}
+          {renderSwitch("rainy_season", "rainy_season")}
         </View>
 
-        <TouchableOpacity 
-          style={[styles.analyzeButton, isLoading && { opacity: 0.7 }]} 
+        <TouchableOpacity
+          style={[styles.analyzeButton, isLoading && { opacity: 0.7 }]}
           onPress={handleAnalyze}
           disabled={isLoading}
         >
@@ -256,126 +317,20 @@ const DiagnosisFormScreen = ({ navigation }) => {
             <ActivityIndicator color={colors.background} />
           ) : (
             <>
-              <Text style={styles.analyzeButtonText}>{t('analyze_now')}</Text>
-              <ChevronRight color={colors.background} size={20} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+              <Text style={styles.analyzeButtonText}>{t("analyze_now")}</Text>
+              <ChevronRight
+                color={colors.background}
+                size={20}
+                style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+              />
             </>
           )}
         </TouchableOpacity>
-        
-        <View style={{height: 20}} />
+
+        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
   );
-};
-
-const createStyles = (theme, isRTL) => {
-  const { colors, typography, spacing } = theme;
-  const textAlign = isRTL ? 'right' : 'left';
-  const flexDirection = isRTL ? 'row-reverse' : 'row';
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      flexDirection,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.m,
-      paddingTop: spacing.xl,
-      paddingBottom: spacing.m,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.glassBorder,
-    },
-    backButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.glass,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-    },
-    headerTitle: {
-      ...typography.h2,
-      color: colors.text,
-    },
-    content: {
-      padding: spacing.l,
-    },
-    section: {
-      backgroundColor: colors.card,
-      borderRadius: 20,
-      padding: spacing.l,
-      marginBottom: spacing.l,
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-    },
-    sectionHeader: {
-      flexDirection,
-      alignItems: 'center',
-      marginBottom: 0,
-    },
-    sectionTitle: {
-      ...typography.h3,
-      color: colors.text,
-      marginLeft: isRTL ? 0 : spacing.s,
-      marginRight: isRTL ? spacing.s : 0,
-      textTransform: 'capitalize',
-    },
-    inputGroup: {
-      marginBottom: spacing.m,
-    },
-    label: {
-      ...typography.caption,
-      color: colors.textMuted,
-      marginBottom: 8,
-      textAlign,
-      textTransform: 'capitalize',
-    },
-    textInput: {
-      height: 52,
-      backgroundColor: colors.background,
-      borderRadius: 12,
-      paddingHorizontal: spacing.m,
-      color: colors.text,
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-      ...typography.body,
-    },
-    checkboxItem: {
-      flexDirection,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: spacing.s,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.glassBorder + '1A',
-    },
-    checkboxLabel: {
-      ...typography.body,
-      color: colors.text,
-      textTransform: 'capitalize',
-      flex: 1,
-      textAlign,
-    },
-    analyzeButton: {
-      backgroundColor: colors.primary,
-      flexDirection,
-      height: 56,
-      borderRadius: 16,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: spacing.xl,
-    },
-    analyzeButtonText: {
-      color: colors.background,
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginHorizontal: 8,
-    },
-  });
 };
 
 export default DiagnosisFormScreen;

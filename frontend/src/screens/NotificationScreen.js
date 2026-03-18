@@ -1,18 +1,28 @@
-import React from 'react';
+import React from "react";
+import { View, Text, FlatList, TouchableOpacity, Modal } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native';
-import { useTheme } from '../context/ThemeContext';
-import { useLanguage } from '../context/LanguageContext';
-import { Bell, Info, ShieldAlert, CheckCircle, ChevronLeft, User, Share2, Download, CheckCheck } from 'lucide-react-native';
-
-import { useGetNotificationsQuery, useMarkAsReadMutation, useMarkAllAsReadMutation } from '../services/api';
-import { RefreshControl, ActivityIndicator, Alert } from 'react-native';
+  Bell,
+  Info,
+  ShieldAlert,
+  CheckCircle,
+  ChevronLeft,
+  User,
+  Share2,
+  Download,
+  CheckCheck,
+  Trash2,
+} from "lucide-react-native";
+import { createStyles } from "../styles/NotificationScreen.styles";
+import {
+  useGetNotificationsQuery,
+  useMarkAsReadMutation,
+  useMarkAllAsReadMutation,
+  useDeleteAllNotificationsMutation,
+} from "../services/api";
+import { RefreshControl, ActivityIndicator } from "react-native";
 
 const NotificationScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -20,71 +30,108 @@ const NotificationScreen = ({ navigation }) => {
   const { t, isRTL } = useLanguage();
   const styles = createStyles(theme, isRTL);
 
-  const { data: notifications = [], isLoading, refetch, isFetching } = useGetNotificationsQuery();
+  const {
+    data: notifications = [],
+    isLoading,
+    refetch,
+    isFetching,
+  } = useGetNotificationsQuery();
   const [markAsRead] = useMarkAsReadMutation();
   const [markAllAsRead] = useMarkAllAsReadMutation();
+  const [deleteAllNotifications, { isLoading: isDeletingAll }] =
+    useDeleteAllNotificationsMutation();
+  const [showDeleteAllModal, setShowDeleteAllModal] = React.useState(false);
 
   const handleMarkAllRead = async () => {
     try {
       await markAllAsRead().unwrap();
     } catch (err) {
-      console.error('Failed to mark all as read:', err);
+      console.error("Failed to mark all as read:", err);
+    }
+  };
+
+  const handleDeleteAll = () => {
+    if (!notifications.length) return;
+    setShowDeleteAllModal(true);
+  };
+
+  const confirmDeleteAll = async () => {
+    try {
+      await deleteAllNotifications().unwrap();
+      setShowDeleteAllModal(false);
+      refetch();
+    } catch (err) {
+      console.error("Failed to delete all notifications:", err);
+      setShowDeleteAllModal(false);
     }
   };
 
   const handleNotificationPress = (item) => {
     markAsRead(item.id);
-    navigation.navigate('NotificationDetail', { notification: item });
+    navigation.navigate("NotificationDetail", { notification: item });
   };
 
   const getTimeAgo = (dateString) => {
     // Force UTC parsing by ensuring 'Z' exists
-    const utcString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
-    const date = new Date(utcString.replace('Z', '') + 'Z'); 
+    const utcString = dateString.endsWith("Z") ? dateString : dateString + "Z";
+    const date = new Date(utcString.replace("Z", "") + "Z");
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
-    
-    if (diffInSeconds < 60) return t('just_now');
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}${t('minutes_ago')}`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}${t('hours_ago')}`;
+
+    if (diffInSeconds < 60) return t("just_now");
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)}${t("minutes_ago")}`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)}${t("hours_ago")}`;
     return date.toLocaleDateString();
   };
 
   const renderItem = ({ item }) => {
     let Icon = Info;
     let iconColor = colors.info;
-    
-    if (item.type === 'warning' || item.type === 'alert') {
+
+    if (item.type === "warning" || item.type === "alert") {
       Icon = ShieldAlert;
       iconColor = colors.error;
-    } else if (item.type === 'success') {
+    } else if (item.type === "success") {
       Icon = CheckCircle;
       iconColor = colors.success;
-    } else if (item.type === 'profile') {
+    } else if (item.type === "profile") {
       Icon = User;
-      iconColor = '#8E44AD'; // Purple
-    } else if (item.type === 'share') {
+      iconColor = "#8E44AD"; // Purple
+    } else if (item.type === "share") {
       Icon = Share2;
       iconColor = colors.primary;
-    } else if (item.type === 'download') {
+    } else if (item.type === "download") {
       Icon = Download;
-      iconColor = '#2ECC71'; // Green
+      iconColor = "#2ECC71"; // Green
     }
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.notificationItem, !item.is_read && styles.unreadItem]}
         onPress={() => handleNotificationPress(item)}
       >
-        <View style={[styles.iconContainer, { backgroundColor: iconColor + '1A' }]}>
+        <View
+          style={[styles.iconContainer, { backgroundColor: iconColor + "1A" }]}
+        >
           <Icon color={iconColor} size={24} />
         </View>
         <View style={styles.contentContainer}>
           <View style={styles.itemHeader}>
-            <Text style={[styles.itemTitle, !item.is_read && { fontWeight: 'bold' }]}>{item.title}</Text>
+            <Text
+              style={[
+                styles.itemTitle,
+                !item.is_read && { fontWeight: "bold" },
+              ]}
+            >
+              {item.title}
+            </Text>
             <Text style={styles.itemDate}>{getTimeAgo(item.created_at)}</Text>
           </View>
-          <Text style={styles.itemMessage} numberOfLines={2}>{item.message}</Text>
+          <Text style={styles.itemMessage} numberOfLines={2}>
+            {item.message}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -92,7 +139,12 @@ const NotificationScreen = ({ navigation }) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
@@ -101,20 +153,47 @@ const NotificationScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('notifications_toggle')}</Text>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={handleMarkAllRead}
-          disabled={!notifications.some(n => !n.is_read)}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
         >
-          <CheckCheck 
-            color={notifications.some(n => !n.is_read) ? colors.primary : colors.textMuted} 
-            size={24} 
+          <ChevronLeft
+            color={colors.text}
+            size={24}
+            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
           />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>{t("notifications_toggle")}</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={handleMarkAllRead}
+            disabled={!notifications.some((n) => !n.is_read)}
+          >
+            <CheckCheck
+              color={
+                notifications.some((n) => !n.is_read)
+                  ? colors.primary
+                  : colors.textMuted
+              }
+              size={24}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={handleDeleteAll}
+            disabled={!notifications.length || isDeletingAll}
+          >
+            <Trash2
+              color={
+                notifications.length && !isDeletingAll
+                  ? colors.error
+                  : colors.textMuted
+              }
+              size={22}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -123,114 +202,67 @@ const NotificationScreen = ({ navigation }) => {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
-          <RefreshControl refreshing={isFetching} onRefresh={refetch} tintColor={colors.primary} />
+          <RefreshControl
+            refreshing={isFetching}
+            onRefresh={refetch}
+            tintColor={colors.primary}
+          />
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Bell color={colors.textMuted} size={64} />
-            <Text style={styles.emptyText}>{t('no_notifications')}</Text>
+            <Text style={styles.emptyText}>{t("no_notifications")}</Text>
           </View>
         }
       />
+
+      <Modal
+        visible={showDeleteAllModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteAllModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmCard}>
+            <View style={styles.confirmIconWrap}>
+              <Trash2 color={colors.error} size={26} />
+            </View>
+            <Text style={styles.confirmTitle}>
+              {t("delete_all_notifications_title")}
+            </Text>
+            <Text style={styles.confirmMessage}>
+              {t("delete_all_notifications_msg")}
+            </Text>
+
+            <View style={styles.confirmButtonsRow}>
+              <TouchableOpacity
+                style={[styles.confirmButton, styles.confirmCancelButton]}
+                onPress={() => setShowDeleteAllModal(false)}
+                disabled={isDeletingAll}
+              >
+                <Text
+                  style={[styles.confirmButtonText, { color: colors.text }]}
+                >
+                  {t("cancel")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmButton, styles.confirmDeleteButton]}
+                onPress={confirmDeleteAll}
+                disabled={isDeletingAll}
+              >
+                {isDeletingAll ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={styles.confirmDeleteText}>{t("delete")}</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
-};
-
-const createStyles = (theme, isRTL) => {
-  const { colors, typography, spacing } = theme;
-  const textAlign = isRTL ? 'right' : 'left';
-  const flexDirection = isRTL ? 'row-reverse' : 'row';
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      flexDirection,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.m,
-      paddingTop: spacing.xl,
-      paddingBottom: spacing.m,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.glassBorder,
-    },
-    backButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.glass,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-    },
-    headerTitle: {
-      ...typography.h2,
-      color: colors.text,
-    },
-    listContent: {
-      padding: spacing.l,
-    },
-    notificationItem: {
-      flexDirection,
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      padding: spacing.m,
-      marginBottom: spacing.m,
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-    },
-    unreadItem: {
-      backgroundColor: colors.primary + '0A',
-      borderColor: colors.primary + '33',
-    },
-    iconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: isRTL ? spacing.m : 0,
-      marginRight: isRTL ? 0 : spacing.m,
-    },
-    contentContainer: {
-      flex: 1,
-    },
-    itemHeader: {
-      flexDirection,
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 4,
-    },
-    itemTitle: {
-      ...typography.body,
-      fontWeight: 'bold',
-      color: colors.text,
-      textAlign,
-    },
-    itemDate: {
-      ...typography.caption,
-      color: colors.textMuted,
-    },
-    itemMessage: {
-      ...typography.caption,
-      color: colors.text,
-      lineHeight: 18,
-      textAlign,
-    },
-    emptyContainer: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingTop: 100,
-    },
-    emptyText: {
-      ...typography.body,
-      color: colors.textMuted,
-      marginTop: spacing.m,
-    },
-  });
 };
 
 export default NotificationScreen;

@@ -1,15 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Switch,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../context/ThemeContext';
-import { useLanguage } from '../context/LanguageContext';
+import React, { useState, useEffect } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import {
   ChevronLeft,
   Bell,
@@ -17,8 +10,9 @@ import {
   ChevronRight,
   Check,
   AlarmClock,
-} from 'lucide-react-native';
-import { useGetMeQuery, useUpdateProfileMutation } from '../services/api';
+} from "lucide-react-native";
+import { useGetMeQuery, useUpdateProfileMutation } from "../services/api";
+import { createStyles } from "../styles/SettingsScreen.styles";
 
 const SettingsScreen = ({ navigation }) => {
   const { isDark, toggleTheme, theme } = useTheme();
@@ -48,7 +42,7 @@ const SettingsScreen = ({ navigation }) => {
     try {
       await updateProfile({ notifications_enabled: value }).unwrap();
     } catch (err) {
-      console.log('Failed to update notifications:', err);
+      console.log("Failed to update notifications:", err);
       setNotificationsEnabled(!value); // Revert on failure
     }
   };
@@ -58,7 +52,7 @@ const SettingsScreen = ({ navigation }) => {
     try {
       await updateProfile({ daily_reminders: value }).unwrap();
     } catch (err) {
-      console.log('Failed to update reminders:', err);
+      console.log("Failed to update reminders:", err);
       setRemindersEnabled(!value); // Revert on failure
     }
   };
@@ -68,47 +62,74 @@ const SettingsScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <ChevronLeft color={colors.text} size={24} style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <ChevronLeft
+            color={colors.text}
+            size={24}
+            style={{ transform: [{ scaleX: isRTL ? -1 : 1 }] }}
+          />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('settings')}</Text>
+        <Text style={styles.headerTitle}>{t("settings")}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitleText}>{t('language')}</Text>
+          <Text style={styles.sectionTitleText}>{t("language")}</Text>
           <View style={styles.languageContainer}>
-            <TouchableOpacity 
-              style={[styles.languageOption, language === 'en' && styles.languageOptionActive]}
-              onPress={() => changeLanguage('en')}
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                language === "en" && styles.languageOptionActive,
+              ]}
+              onPress={() => changeLanguage("en")}
             >
-              <Text style={[styles.languageText, language === 'en' && styles.languageTextActive]}>English</Text>
-              {language === 'en' && <Check color={colors.primary} size={16} />}
+              <Text
+                style={[
+                  styles.languageText,
+                  language === "en" && styles.languageTextActive,
+                ]}
+              >
+                English
+              </Text>
+              {language === "en" && <Check color={colors.primary} size={16} />}
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.languageOption, language === 'ur' && styles.languageOptionActive]}
-              onPress={() => changeLanguage('ur')}
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                language === "ur" && styles.languageOptionActive,
+              ]}
+              onPress={() => changeLanguage("ur")}
             >
-              <Text style={[styles.languageText, language === 'ur' && styles.languageTextActive]}>اردو (Urdu)</Text>
-              {language === 'ur' && <Check color={colors.primary} size={16} />}
+              <Text
+                style={[
+                  styles.languageText,
+                  language === "ur" && styles.languageTextActive,
+                ]}
+              >
+                اردو (Urdu)
+              </Text>
+              {language === "ur" && <Check color={colors.primary} size={16} />}
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitleText}>{t('settings')}</Text>
-          
+          <Text style={styles.sectionTitleText}>{t("settings")}</Text>
+
           <View style={styles.settingItem}>
             <View style={styles.itemIconContainer}>
               <Moon color={colors.primary} size={20} />
             </View>
-            <Text style={styles.itemLabel}>{t('dark_mode')}</Text>
+            <Text style={styles.itemLabel}>{t("dark_mode")}</Text>
             <Switch
               value={isDark}
               onValueChange={toggleTheme}
               trackColor={{ false: colors.glassBorder, true: colors.primary }}
-              thumbColor={isDark ? '#FFFFFF' : colors.textMuted}
+              thumbColor={isDark ? "#FFFFFF" : colors.textMuted}
             />
           </View>
 
@@ -116,12 +137,12 @@ const SettingsScreen = ({ navigation }) => {
             <View style={styles.itemIconContainer}>
               <Bell color={colors.primary} size={20} />
             </View>
-            <Text style={styles.itemLabel}>{t('notifications_toggle')}</Text>
+            <Text style={styles.itemLabel}>{t("notifications_toggle")}</Text>
             <Switch
               value={notificationsEnabled}
               onValueChange={handleToggleNotifications}
               trackColor={{ false: colors.glassBorder, true: colors.primary }}
-              thumbColor={notificationsEnabled ? '#FFFFFF' : colors.textMuted}
+              thumbColor={notificationsEnabled ? "#FFFFFF" : colors.textMuted}
             />
           </View>
 
@@ -129,135 +150,24 @@ const SettingsScreen = ({ navigation }) => {
             <View style={styles.itemIconContainer}>
               <AlarmClock color={colors.primary} size={20} />
             </View>
-            <Text style={styles.itemLabel}>{t('daily_reminders')}</Text>
+            <Text style={styles.itemLabel}>{t("daily_reminders")}</Text>
             <Switch
               value={remindersEnabled}
               onValueChange={handleToggleReminders}
               trackColor={{ false: colors.glassBorder, true: colors.primary }}
-              thumbColor={remindersEnabled ? '#FFFFFF' : colors.textMuted}
+              thumbColor={remindersEnabled ? "#FFFFFF" : colors.textMuted}
             />
           </View>
         </View>
 
-
         <View style={styles.footer}>
-          <Text style={styles.versionText}>{t('app_version')}: 1.0.0 (Build 124)</Text>
+          <Text style={styles.versionText}>
+            {t("app_version")}: 1.0.0 (Build 124)
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
-};
-
-const createStyles = (theme, isRTL) => {
-  const { colors, typography, spacing } = theme;
-  const textAlign = isRTL ? 'right' : 'left';
-  const flexDirection = isRTL ? 'row-reverse' : 'row';
-
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      flexDirection,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: spacing.m,
-      paddingTop: spacing.xl,
-      paddingBottom: spacing.m,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.glassBorder,
-    },
-    backButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: colors.glass,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-    },
-    headerTitle: {
-      ...typography.h2,
-      color: colors.text,
-    },
-    scrollContent: {
-      padding: spacing.l,
-    },
-    section: {
-      marginBottom: spacing.xl,
-    },
-    sectionTitleText: {
-      ...typography.caption,
-      fontWeight: 'bold',
-      textTransform: 'uppercase',
-      marginBottom: spacing.m,
-      letterSpacing: 1,
-      color: colors.textMuted,
-      textAlign,
-    },
-    settingItem: {
-      flexDirection,
-      alignItems: 'center',
-      backgroundColor: colors.card,
-      padding: spacing.m,
-      borderRadius: 16,
-      marginBottom: spacing.s,
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-    },
-    itemIconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 10,
-      backgroundColor: colors.glass,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginLeft: isRTL ? spacing.m : 0,
-      marginRight: isRTL ? 0 : spacing.m,
-    },
-    itemLabel: {
-      flex: 1,
-      ...typography.body,
-      textAlign,
-      color: colors.text,
-    },
-    languageContainer: {
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: colors.glassBorder,
-      overflow: 'hidden',
-    },
-    languageOption: {
-      flexDirection,
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: spacing.m,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.glassBorder,
-    },
-    languageOptionActive: {
-      backgroundColor: colors.primary + '0D',
-    },
-    languageText: {
-      ...typography.body,
-      color: colors.text,
-    },
-    languageTextActive: {
-      color: colors.primary,
-      fontWeight: 'bold',
-    },
-    footer: {
-      paddingVertical: spacing.m,
-      alignItems: 'center',
-    },
-    versionText: {
-      ...typography.caption,
-      color: colors.textMuted,
-    },
-  });
 };
 
 export default SettingsScreen;

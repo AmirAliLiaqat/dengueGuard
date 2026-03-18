@@ -67,9 +67,9 @@ async def sync_reminders(current_user: User = Depends(get_current_user)):
         return {"status": "already_sent"}
         
     # Get last diagnosis
-    last_report = await DiagnosisReport.find_one(
+    last_report = await DiagnosisReport.find(
         DiagnosisReport.user_id == str(current_user.id)
-    ).sort("-created_at")
+    ).sort("-created_at").first_or_none()
     
     message = "Time for your daily health check! Regular monitoring is key to early detection."
     notif_type = "info"
@@ -125,6 +125,14 @@ async def mark_as_read(notification_id: str, current_user: User = Depends(get_cu
     notification.is_read = True
     await notification.save()
     return {"status": "success"}
+
+@router.delete("/delete-all")
+async def delete_all_notifications(current_user: User = Depends(get_current_user)):
+    result = await Notification.find(
+        Notification.user_id == str(current_user.id)
+    ).delete()
+    deleted_count = getattr(result, "deleted_count", None)
+    return {"status": "success", "deleted": deleted_count}
 
 @router.delete("/{notification_id}")
 async def delete_notification(notification_id: str, current_user: User = Depends(get_current_user)):
