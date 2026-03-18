@@ -21,6 +21,21 @@ const SettingsScreen = ({ navigation }) => {
   const { data: userData } = useGetMeQuery();
   const [updateProfile] = useUpdateProfileMutation();
 
+  const languageOptions = [
+    { code: "en", label: "English" },
+    { code: "ur", label: "اردو (Urdu)" },
+    { code: "de", label: "Deutsch (German)" },
+    { code: "fr", label: "Français (French)" },
+    { code: "zh", label: "中文 (Chinese)" },
+    { code: "ps", label: "پښتو (Pashto/Afghan)" },
+    { code: "ja", label: "日本語 (Japanese)" },
+    { code: "ko", label: "한국어 (Korean)" },
+    { code: "tr", label: "Türkçe (Turkish)" },
+    { code: "fa", label: "فارسی (Farsi)" },
+    { code: "hi", label: "हिन्दी (Hindi)" },
+    { code: "bn", label: "বাংলা (Bengali)" },
+  ];
+
   // Local state for toggles to avoid "jumpy" UI
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
@@ -80,40 +95,30 @@ const SettingsScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitleText}>{t("language")}</Text>
           <View style={styles.languageContainer}>
-            <TouchableOpacity
-              style={[
-                styles.languageOption,
-                language === "en" && styles.languageOptionActive,
-              ]}
-              onPress={() => changeLanguage("en")}
-            >
-              <Text
-                style={[
-                  styles.languageText,
-                  language === "en" && styles.languageTextActive,
-                ]}
-              >
-                English
-              </Text>
-              {language === "en" && <Check color={colors.primary} size={16} />}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.languageOption,
-                language === "ur" && styles.languageOptionActive,
-              ]}
-              onPress={() => changeLanguage("ur")}
-            >
-              <Text
-                style={[
-                  styles.languageText,
-                  language === "ur" && styles.languageTextActive,
-                ]}
-              >
-                اردو (Urdu)
-              </Text>
-              {language === "ur" && <Check color={colors.primary} size={16} />}
-            </TouchableOpacity>
+            {languageOptions.map((opt, idx) => {
+              const active = language === opt.code;
+              return (
+                <TouchableOpacity
+                  key={opt.code}
+                  style={[
+                    styles.languageOption,
+                    active && styles.languageOptionActive,
+                    idx === languageOptions.length - 1 && { borderBottomWidth: 0 },
+                  ]}
+                  onPress={() => changeLanguage(opt.code)}
+                >
+                  <Text
+                    style={[
+                      styles.languageText,
+                      active && styles.languageTextActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                  {active && <Check color={colors.primary} size={16} />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 

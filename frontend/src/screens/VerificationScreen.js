@@ -172,9 +172,17 @@ const VerificationScreen = ({ navigation, route }) => {
                     {t("verify_continue")}
                   </Text>
                   {isRTL ? (
-                    <ArrowLeft color={colors.background} size={20} style={{ marginLeft: 8 }} />
+                    <ArrowLeft
+                      color={colors.background}
+                      size={20}
+                      style={{ marginLeft: 8 }}
+                    />
                   ) : (
-                    <ArrowRight color={colors.background} size={20} style={{ marginLeft: 8 }} />
+                    <ArrowRight
+                      color={colors.background}
+                      size={20}
+                      style={{ marginLeft: 8 }}
+                    />
                   )}
                 </>
               )}
