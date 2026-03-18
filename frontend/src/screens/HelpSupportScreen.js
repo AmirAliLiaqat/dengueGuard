@@ -60,7 +60,7 @@ const HelpSupportScreen = ({ navigation }) => {
   const handleStartChat = () => {
     const phoneNumber = "923090886518";
     const message =
-      "Hello, I am using the Dengue Diagnose app and I need assistance.";
+      "Hello, I am using the DengueGuard app and I need assistance.";
     const url = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
     Linking.canOpenURL(url).then((supported) => {

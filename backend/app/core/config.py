@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Dengue Diagnose"
+    PROJECT_NAME: str = "DengueGuard"
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "45c5c77d8fcfbe97e0d13ad1125ade5cbcf4ad6ebaf6580320b77a404ace8ca24a2de599" # Change in production
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days

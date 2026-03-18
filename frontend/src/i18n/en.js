@@ -1,6 +1,6 @@
 export const en = {
   // General
-  app_name: "Dengue Diagnose",
+  app_name: "DengueGuard",
   secure_platform: "Secure Medical Grade Platform",
   save: "Save",
   done: "Done",
@@ -34,7 +34,8 @@ export const en = {
   // Home
   welcome_back: "Welcome back",
   precaution_alert: "Precaution Alert",
-  dengue_alert_desc: "High dengue cases reported in your area. Use mosquito repellent and cover water containers.",
+  dengue_alert_desc:
+    "High dengue cases reported in your area. Use mosquito repellent and cover water containers.",
   quick_actions: "Quick Actions",
   new_diagnosis: "New Diagnosis",
   start_kbs_scan: "Start KBS Scan",
@@ -174,27 +175,37 @@ export const en = {
   user_reports: "Health Reports",
   phone: "Phone",
   email: "Email",
-  security_priority: "Your data security and medical privacy is our top priority.",
-  data_policy_desc: "We use industry standard encryption to protect your health records. Your data is only used to provide diagnostic insights and will never be shared with third parties without your explicit consent.",
+  security_priority:
+    "Your data security and medical privacy is our top priority.",
+  data_policy_desc:
+    "We use industry standard encryption to protect your health records. Your data is only used to provide diagnostic insights and will never be shared with third parties without your explicit consent.",
   faq_q1: "How does the AI diagnosis work?",
-  faq_a1: "Our AI analyzes the symptoms you input and cross-references them with global dengue trends and medical knowledge database.",
+  faq_a1:
+    "Our AI analyzes the symptoms you input and cross-references them with global dengue trends and medical knowledge database.",
   faq_q2: "Is this a substitute for a real doctor?",
-  faq_a2: "No. This tool is for screening and early detection only. You must consult a qualified medical professional for diagnosis and treatment.",
+  faq_a2:
+    "No. This tool is for screening and early detection only. You must consult a qualified medical professional for diagnosis and treatment.",
   faq_q3: "How accurate is the result?",
-  faq_a3: "The probability score is based on clinical data models but should be used as a guideline. A score above 70% suggests immediate consultation.",
+  faq_a3:
+    "The probability score is based on clinical data models but should be used as a guideline. A score above 70% suggests immediate consultation.",
   faq_q4: "What is KBS?",
-  faq_a4: "KBS stands for Knowledge-Based System. It's a method where expert medical rules are programmed into the app to explain 'why' the AI gave a certain result.",
+  faq_a4:
+    "KBS stands for Knowledge-Based System. It's a method where expert medical rules are programmed into the app to explain 'why' the AI gave a certain result.",
   still_need_help: "Still need help?",
-  medical_experts_available: "Our medical experts are available for live consultation.",
+  medical_experts_available:
+    "Our medical experts are available for live consultation.",
   start_chat: "Start Chat",
   live_chat: "Live Chat",
   email_support: "Email Support",
   available_24_7: "Available 24/7",
-  app_desc: "Dengue KBS (Knowledge Based System) is an advanced medical decision support tool powered by Artificial Intelligence. Our platform combines machine learning models with expert medical rules to help users detect dengue symptoms early.",
+  app_desc:
+    "Dengue KBS (Knowledge Based System) is an advanced medical decision support tool powered by Artificial Intelligence. Our platform combines machine learning models with expert medical rules to help users detect dengue symptoms early.",
   medical_grade_accuracy: "Medical Grade Accuracy",
-  medical_grade_desc: "Our AI is trained on high-quality clinical data providing reliable disease detection probabilities.",
+  medical_grade_desc:
+    "Our AI is trained on high-quality clinical data providing reliable disease detection probabilities.",
   kbs_engine: "KBS Engine",
-  kbs_engine_desc: "Knowledge-Based System ensures every AI decision is double-checked by professional medical logic rules.",
+  kbs_engine_desc:
+    "Knowledge-Based System ensures every AI decision is double-checked by professional medical logic rules.",
   patient: "Patient",
   diagnosis_id_prefix: "Diagnosis #",
   no_recent_reports: "No recent reports found. Start a new diagnosis!",
@@ -247,19 +258,23 @@ export const en = {
   upload_failed: "Upload Failed",
   could_not_upload: "Could not upload image",
   permission_denied: "Permission Denied",
-  camera_gallery_permission: "We need access to your device to change profile picture.",
+  camera_gallery_permission:
+    "We need access to your device to change profile picture.",
   profile_picture_updated: "Profile Picture Updated",
-  profile_picture_success_msg: "Your new profile picture looks great! Don't forget to save changes.",
+  profile_picture_success_msg:
+    "Your new profile picture looks great! Don't forget to save changes.",
   name_cannot_empty: "Name cannot be empty",
   success: "Success",
   profile_updated_success: "Your profile has been updated successfully.",
   update_failed: "Update Failed",
   something_went_wrong: "Something went wrong",
   biometric_not_available: "Not Available",
-  biometric_hardware_error: "Your device does not support biometric authentication or no fingerprints are enrolled.",
+  biometric_hardware_error:
+    "Your device does not support biometric authentication or no fingerprints are enrolled.",
   authenticate_enable_biometric: "Authenticate to enable biometric login",
   biometric_enabled_msg: "Biometric login is now enabled and secured.",
-  invalid_password_biometric: "Invalid password. Please try again to enable biometric login.",
+  invalid_password_biometric:
+    "Invalid password. Please try again to enable biometric login.",
   valid_secondary_email_error: "Please enter a valid secondary email",
   verification_code_sent: "Verification code sent to ",
   otp_failed_msg: "Could not send OTP",
@@ -273,19 +288,24 @@ export const en = {
   incorrect_otp_msg: "The verification code you entered is incorrect.",
   delete: "Delete",
   delete_all_notifications_title: "Delete all notifications?",
-  delete_all_notifications_msg: "This will remove all your notifications. This action cannot be undone.",
+  delete_all_notifications_msg:
+    "This will remove all your notifications. This action cannot be undone.",
   profile_private_title: "Make Profile Private?",
-  profile_private_msg: "Your profile and reports will no longer be visible in the public gallery. Are you sure?",
+  profile_private_msg:
+    "Your profile and reports will no longer be visible in the public gallery. Are you sure?",
   yes_make_private: "Yes, Make Private",
-  profile_public_msg: "Your profile is now public. Other users can view your health stats and reports.",
+  profile_public_msg:
+    "Your profile is now public. Other users can view your health stats and reports.",
   update_setting_error: "Could not update setting. Please try again.",
   biometric_subtitle: "Use FaceID or Fingerprint to login",
   two_factor_subtitle: "Require secondary code for logins",
   visibility_subtitle: "Make your profile & reports public to others",
   request_sent: "Request Sent",
-  request_deletion_msg: "Our data protection officer will contact you within 48 hours.",
+  request_deletion_msg:
+    "Our data protection officer will contact you within 48 hours.",
   secure_biometric_login: "Secure Biometric Login",
-  enter_password_biometric: "Please enter your password to enable fingerprint login.",
+  enter_password_biometric:
+    "Please enter your password to enable fingerprint login.",
   your_password: "Your Password",
   enable: "Enable",
   fill_all_fields: "Please fill all fields",

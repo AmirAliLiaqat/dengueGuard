@@ -4,9 +4,9 @@ from app.core.config import settings
 
 async def send_otp_email(email_to: str, otp: str):
     message = EmailMessage()
-    message["From"] = f"Dengue Diagnose <{settings.EMAILS_FROM_EMAIL}>"
+    message["From"] = f"DengueGuard <{settings.EMAILS_FROM_EMAIL}>"
     message["To"] = email_to
-    message["Subject"] = f"Dengue Diagnose verification code"
+    message["Subject"] = f"DengueGuard verification code"
     
     content = f"""
     <!DOCTYPE html>
@@ -92,7 +92,7 @@ async def send_otp_email(email_to: str, otp: str):
         <div class="email-container">
             <div class="card">
                 <div class="header">
-                    <p class="logo-text">DENGUE DIAGNOSE</p>
+                    <p class="logo-text">DengueGuard</p>
                     <p class="logo-subtitle">AI Health Assistant</p>
                 </div>
                 <div class="content">
@@ -110,7 +110,7 @@ async def send_otp_email(email_to: str, otp: str):
                 <div class="footer">
                     <p class="disclaimer">
                         If you didn't request this code, you can safely ignore this email.<br>
-                        © 2026 Dengue Diagnose AI. All rights reserved.
+                        © 2026 DengueGuard AI. All rights reserved.
                     </p>
                 </div>
             </div>

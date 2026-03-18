@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Dengue Diagnose",
-    "description": "Dengue Diagnose is a mobile application for early detection of dengue fever using artificial intelligence.",
+    "name": "DengueGuard",
+    "description": "DengueGuard is a mobile application for early detection of dengue fever using artificial intelligence.",
     "slug": "dengue-kbs",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,9 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/android-icon-foreground.png",
@@ -30,10 +28,7 @@
     "web": {
       "favicon": "./src/assets/favicon.png"
     },
-    "plugins": [
-      "expo-asset",
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-asset", "expo-secure-store"],
     "extra": {
       "eas": {
         "projectId": "ed147549-7430-4fdb-aadf-583cc084eb32"

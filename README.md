@@ -1,10 +1,11 @@
-# 🩺 Dengue Diagnose AI: Comprehensive Technical Manual
+# 🩺 DengueGuard AI: Comprehensive Technical Manual
 
 A professional-grade, high-end **AI-Driven Dengue Detection** and **Knowledge-Based Expert System (KBS)**. This project integrates statistical Machine Learning with a rule-based inference engine to provide a state-of-the-art diagnostic assistant.
 
 ---
 
 ## 🌟 Key Features
+
 - **AI-Powered Analysis**: Random Forest classification model trained on hematological clinical data.
 - **KBS Inference Engine**: 7-tier forward-chaining medical logic system checking AI decisions against professional medical rules.
 - **Biometric Security**: Secure login using Fingerprint/FaceID and Two-Factor Authentication (2FA).
@@ -15,19 +16,20 @@ A professional-grade, high-end **AI-Driven Dengue Detection** and **Knowledge-Ba
 
 ## 🛠️ Architecture Overview
 
-| Component | Responsibility | Technology |
-| :--- | :--- | :--- |
-| **Mobile App** | Patient Interface & Data Input | React Native (Expo SDK 51), Redux |
-| **Expert System** | Logic & Medical Reasoning | Custom Forward Chaining Inference Logic |
-| **ML Engine** | Statistical Risk Prediction | Scikit-Learn (Random Forest Classifier) |
-| **Server** | API & State Management | Python 3.12 (FastAPI), Beanie ODM |
-| **Database** | Persistent Storage | MongoDB (Motor) |
+| Component         | Responsibility                 | Technology                              |
+| :---------------- | :----------------------------- | :-------------------------------------- |
+| **Mobile App**    | Patient Interface & Data Input | React Native (Expo SDK 51), Redux       |
+| **Expert System** | Logic & Medical Reasoning      | Custom Forward Chaining Inference Logic |
+| **ML Engine**     | Statistical Risk Prediction    | Scikit-Learn (Random Forest Classifier) |
+| **Server**        | API & State Management         | Python 3.12 (FastAPI), Beanie ODM       |
+| **Database**      | Persistent Storage             | MongoDB (Motor)                         |
 
 ---
 
 ## 🚀 Local Development (A to Z)
 
 ### 1. Backend Setup (Local)
+
 Prerequisites: Python 3.12+ installed.
 
 1. **Navigate to backend**: `cd backend`
@@ -46,32 +48,35 @@ Prerequisites: Python 3.12+ installed.
    python train_model.py
    ```
 5. **Environment Setup**: Create a `.env` file in `/backend`:
+
    ```env
    # Database
    MONGODB_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net/dengue_db
-   
+
    # Security
    SECRET_KEY=your_super_secret_key_here  # Generate with: openssl rand -hex 32
    ALGORITHM=HS256
    ACCESS_TOKEN_EXPIRE_MINUTES=11520
-   
+
    # Email (SMTP)
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
    SMTP_USER=your_email@gmail.com
    SMTP_PASSWORD=your_app_specific_password
-   
+
    # Cloudinary (Media)
    CLOUDINARY_CLOUD_NAME=your_name
    CLOUDINARY_API_KEY=your_key
    CLOUDINARY_API_SECRET=your_secret
    ```
+
 6. **Launch Server**:
    ```bash
    python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
 ### 2. Frontend Setup (Local)
+
 Prerequisites: Node.js 18+ and Expo Go app (on mobile).
 
 1. **Navigate to frontend**: `cd frontend`
@@ -79,10 +84,10 @@ Prerequisites: Node.js 18+ and Expo Go app (on mobile).
    ```bash
    npm install
    ```
-3. **Configure API Source**: 
+3. **Configure API Source**:
    - Open `frontend/src/services/api.js`.
    - Update `baseUrl` to your computer's local IP (e.g., `http://192.168.1.15:8000/api/v1`).
-   - *Note: Ensure both your PC and mobile device are on the same Wi-Fi network.*
+   - _Note: Ensure both your PC and mobile device are on the same Wi-Fi network._
 4. **Run Expo**:
    ```bash
    npx expo start
@@ -94,6 +99,7 @@ Prerequisites: Node.js 18+ and Expo Go app (on mobile).
 ## 🌐 Production Deployment (A to Z)
 
 ### 1. Backend Deployment (Render.com)
+
 The project includes a `render.yaml` for automated deployment.
 
 1. **GitHub Connection**: Push your code to a GitHub repository.
@@ -108,6 +114,7 @@ The project includes a `render.yaml` for automated deployment.
 5. **Static Site**: If you deploy as a static site, ensure the backend URL is updated in the frontend build.
 
 ### 2. Backend Deployment (Manual Ubuntu/Linux)
+
 1. **Prepare Server**:
    ```bash
    sudo apt update && sudo apt install python3-pip python3-venv gunicorn nginx -y
@@ -120,6 +127,7 @@ The project includes a `render.yaml` for automated deployment.
 4. **Nginx Proxy**: Configure Nginx as a reverse proxy to point domain traffic to port 8000.
 
 ### 3. Frontend Deployment (Production APK/IPA)
+
 1. **Setup EAS**:
    ```bash
    npm install -g eas-cli
@@ -137,15 +145,15 @@ The project includes a `render.yaml` for automated deployment.
 
 ## 🧠 Diagnostic Tier System
 
-| Risk Level | Trigger Logic |
-| :--- | :--- |
+| Risk Level   | Trigger Logic                                          |
+| :----------- | :----------------------------------------------------- |
 | **CRITICAL** | Emergency Clinical Signs (KBS) OR AI Probability > 75% |
-| **HIGH** | WHO Warning Signs (KBS) OR AI Probability 40-75% |
-| **MODERATE** | Fever + 2 Symptoms (KBS) OR AI Probability 1-40% |
-| **LOW** | No clinical signs + 0% AI Probability |
+| **HIGH**     | WHO Warning Signs (KBS) OR AI Probability 40-75%       |
+| **MODERATE** | Fever + 2 Symptoms (KBS) OR AI Probability 1-40%       |
+| **LOW**      | No clinical signs + 0% AI Probability                  |
 
 ---
 
 ## 🛡️ License & Medical Notice
+
 This application is designed for **pre-screening and early identification support**. It is NOT a substitute for professional medical diagnosis. Always consult a licensed doctor for healthcare decisions.
- 
