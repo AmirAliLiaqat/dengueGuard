@@ -37,18 +37,31 @@ export const createStyles = (theme, isRTL) => {
     scrollContent: {
       padding: spacing.l,
     },
-    logoSection: {
+    hero: {
+      backgroundColor: colors.card,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+      padding: spacing.l,
+      marginTop: spacing.m,
+      marginBottom: spacing.xl,
+      overflow: 'hidden',
+    },
+    heroTop: {
+      flexDirection,
       alignItems: 'center',
-      marginVertical: spacing.xl,
+      gap: spacing.m,
+    },
+    heroMeta: {
+      flex: 1,
     },
     logoCircle: {
-      width: 120,
-      height: 120,
-      borderRadius: 24,
-      backgroundColor: colors.card,
+      width: 96,
+      height: 96,
+      borderRadius: 22,
+      backgroundColor: colors.background,
       justifyContent: 'center',
       alignItems: 'center',
-      marginBottom: spacing.m,
       borderWidth: 2,
       borderColor: colors.primary + '33',
       overflow: 'hidden',
@@ -58,13 +71,22 @@ export const createStyles = (theme, isRTL) => {
       height: '100%',
     },
     appName: {
-      ...typography.h1,
+      ...typography.h2,
       color: colors.text,
+      textAlign,
     },
     version: {
       ...typography.caption,
       color: colors.textMuted,
       marginTop: 4,
+      textAlign,
+    },
+    tagline: {
+      ...typography.caption,
+      color: colors.textMuted,
+      marginTop: 8,
+      lineHeight: 18,
+      textAlign,
     },
     section: {
       marginBottom: spacing.xl,
@@ -73,6 +95,17 @@ export const createStyles = (theme, isRTL) => {
       ...typography.h3,
       color: colors.text,
       marginBottom: spacing.s,
+      textAlign,
+    },
+    sectionHeaderRow: {
+      flexDirection,
+      alignItems: 'center',
+      gap: spacing.s,
+      marginBottom: spacing.s,
+    },
+    sectionTitleInline: {
+      ...typography.h3,
+      color: colors.text,
       textAlign,
     },
     description: {
@@ -89,6 +122,10 @@ export const createStyles = (theme, isRTL) => {
       marginBottom: spacing.m,
       borderWidth: 1,
       borderColor: colors.glassBorder,
+    },
+    grid: {
+      gap: spacing.m,
+      marginBottom: spacing.xl,
     },
     cardIcon: {
       width: 48,
@@ -124,6 +161,41 @@ export const createStyles = (theme, isRTL) => {
     footerText: {
       ...typography.caption,
       color: colors.textMuted,
+    },
+    benchmarkCard: {
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+      padding: spacing.l,
+      marginTop: spacing.m,
+      gap: spacing.l,
+    },
+    benchmarkItem: {
+      gap: 8,
+    },
+    benchmarkLabel: {
+      ...typography.body,
+      fontWeight: 'bold',
+      color: colors.text,
+      textAlign,
+    },
+    benchmarkRow: {
+      flexDirection,
+      flexWrap: 'wrap',
+      gap: 10,
+      justifyContent: 'space-between',
+    },
+    benchmarkMetric: {
+      ...typography.caption,
+      color: colors.text,
+      fontWeight: '700',
+    },
+    benchmarkCitation: {
+      ...typography.caption,
+      color: colors.textMuted,
+      lineHeight: 18,
+      textAlign,
     },
   });
 };

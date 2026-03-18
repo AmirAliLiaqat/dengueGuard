@@ -13,6 +13,7 @@ import {
   PlusCircle,
   History,
   Bell,
+  ChevronLeft,
   ChevronRight,
   AlertTriangle,
   HeartPulse,

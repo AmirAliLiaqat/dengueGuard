@@ -14,6 +14,7 @@ import {
   User,
   Settings,
   LogOut,
+  ChevronLeft,
   ChevronRight,
   Shield,
   Bell,

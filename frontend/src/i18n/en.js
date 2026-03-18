@@ -199,7 +199,7 @@ export const en = {
   email_support: "Email Support",
   available_24_7: "Available 24/7",
   app_desc:
-    "Dengue KBS (Knowledge Based System) is an advanced medical decision support tool powered by Artificial Intelligence. Our platform combines machine learning models with expert medical rules to help users detect dengue symptoms early.",
+    "DengueGuard (Knowledge Based System) is an advanced medical decision support tool powered by Artificial Intelligence. Our platform combines machine learning models with expert medical rules to help users detect dengue symptoms early.",
   medical_grade_accuracy: "Medical Grade Accuracy",
   medical_grade_desc:
     "Our AI is trained on high-quality clinical data providing reliable disease detection probabilities.",
@@ -341,8 +341,9 @@ export const en = {
   why_selected: "Why selected",
   rule_output: "Result",
 
-  system_comparison: "Comparison to published systems",
-  system_comparison_note: "Benchmarks vary by dataset and are shown for context (not a direct 1:1 comparison).",
+  system_comparison: "Comparison to Published Systems",
+  system_comparison_note:
+    "Benchmarks vary by dataset and are shown for context (not a direct 1:1 comparison).",
   this_report_confidence: "This report (ML probability)",
   sensitivity: "Sensitivity",
   specificity: "Specificity",
@@ -358,4 +359,21 @@ export const en = {
   go_back: "Go Back",
   dengue_analysis: "Dengue Analysis",
   alert: "Alert",
+
+  // About
+  about_tagline: "Early screening + explainable rules, built for clarity.",
+  about_how_it_works: "How it works",
+  about_how_it_works_desc:
+    "Combines Machine Learning probability with a Knowledge-Based System (KBS) to explain which clinical rules were selected and why.",
+  about_data_used: "What data it uses",
+  about_data_used_desc:
+    "Vital signs, blood report values, warning signs, severe criteria and home-care criteria entered by the user.",
+  about_privacy: "Privacy & Security",
+  about_privacy_desc:
+    "Your data is protected and used only to generate your screening report. We do not sell your health data.",
+  about_disclaimer: "Medical Disclaimer",
+  about_disclaimer_desc:
+    "DengueGuard is a screening/support tool and does not replace a doctor. If you have warning signs or severe symptoms, seek emergency care.",
+  about_no_benchmarks: "No comparison benchmarks available yet.",
+  about_footer_brand: "© DengueGuard",
 };
