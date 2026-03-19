@@ -93,36 +93,6 @@ const SettingsScreen = ({ navigation }) => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitleText}>{t("language")}</Text>
-          <View style={styles.languageContainer}>
-            {languageOptions.map((opt, idx) => {
-              const active = language === opt.code;
-              return (
-                <TouchableOpacity
-                  key={opt.code}
-                  style={[
-                    styles.languageOption,
-                    active && styles.languageOptionActive,
-                    idx === languageOptions.length - 1 && { borderBottomWidth: 0 },
-                  ]}
-                  onPress={() => changeLanguage(opt.code)}
-                >
-                  <Text
-                    style={[
-                      styles.languageText,
-                      active && styles.languageTextActive,
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                  {active && <Check color={colors.primary} size={16} />}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitleText}>{t("settings")}</Text>
 
           <View style={styles.settingItem}>
@@ -162,6 +132,36 @@ const SettingsScreen = ({ navigation }) => {
               trackColor={{ false: colors.glassBorder, true: colors.primary }}
               thumbColor={remindersEnabled ? "#FFFFFF" : colors.textMuted}
             />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitleText}>{t("language")}</Text>
+          <View style={styles.languageContainer}>
+            {languageOptions.map((opt, idx) => {
+              const active = language === opt.code;
+              return (
+                <TouchableOpacity
+                  key={opt.code}
+                  style={[
+                    styles.languageOption,
+                    active && styles.languageOptionActive,
+                    idx === languageOptions.length - 1 && { borderBottomWidth: 0 },
+                  ]}
+                  onPress={() => changeLanguage(opt.code)}
+                >
+                  <Text
+                    style={[
+                      styles.languageText,
+                      active && styles.languageTextActive,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                  {active && <Check color={colors.primary} size={16} />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 

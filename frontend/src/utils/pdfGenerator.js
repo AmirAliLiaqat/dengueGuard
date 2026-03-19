@@ -23,10 +23,26 @@ const createHtmlContent = (report) => {
   const safe = (v) => (v === null || v === undefined || v === '' ? '—' : String(v));
   const yesNo = (v) => (v === true ? 'Yes' : v === false ? 'No' : safe(v));
 
-  const formatKey = (key) =>
-    String(key || '')
+  const symptomLabelKeyMap = {
+    abdominal_pain: 'Abdominal Pain / Tenderness',
+    liver_enlargement: 'Liver Enlargement > 2 cm',
+    hematocrit_increases: 'Hematocrit Rapidly Increases',
+    platelet_decreases: 'Platelet Rapidly Decreases',
+    ast_alt_1000: 'Liver AST/ALT ≥ 1000',
+    fever_drops: 'Fever Drops (Defervescence)',
+    tolerates_oral_fluids: 'Tolerates Adequate Oral Fluids',
+    urinating_regularly: 'Urinating At Least Every 6 Hours',
+    shock_dss: 'Shock (DSS)',
+  };
+
+  const formatKey = (key) => {
+    const k = String(key || '');
+    const mapped = symptomLabelKeyMap[k];
+    if (mapped) return mapped;
+    return k
       .replace(/_/g, ' ')
       .replace(/\b\w/g, (l) => l.toUpperCase());
+  };
 
   const formatKVTable = (obj) => {
     if (!obj || typeof obj !== 'object') return '<p style="margin:0;color:#666;">None</p>';

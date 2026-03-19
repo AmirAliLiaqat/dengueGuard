@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Development URL (Your local IP) vs Production URL (Render.com)
 const API_BASE_URL = __DEV__
-  ? "http://192.168.0.106:8000/api/v1"
+  ? "http://192.168.18.28:8000/api/v1"
   : "https://dengue-dignose.onrender.com/api/v1";
 
 export const denguApi = createApi({

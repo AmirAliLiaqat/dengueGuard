@@ -277,9 +277,24 @@ const ReportDetailsScreen = ({ route, navigation }) => {
   if (risk === "High") riskColor = colors.accent || "#FF6B6B";
   if (risk === "Critical") riskColor = "#D32F2F";
 
-  const formatKeyLabel = (key) =>
-    t(key) ||
-    key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  const symptomLabelKeyMap = {
+    abdominal_pain: "abdominal_pain_or_tenderness",
+    liver_enlargement: "liver_enlargement_>_2_cm",
+    hematocrit_increases: "hematocrit_rapidly_increases",
+    platelet_decreases: "platelet_rapidly_decreases",
+    ast_alt_1000: "liver_AST/ALT_>=_1000",
+    fever_drops: "fever_drops_(Defervescence)",
+    tolerates_oral_fluids: "tolerates_adequate_oral_fluids",
+    urinating_regularly: "urinating_at_least_every_6_hours",
+    shock_dss: "shock_(DSS)",
+  };
+
+  const formatKeyLabel = (key) => {
+    const mapped = symptomLabelKeyMap[key] || key;
+    const translated = t(mapped);
+    if (translated && translated !== mapped) return translated;
+    return mapped.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  };
 
   const formatValue = (val) => {
     if (val === null || val === undefined || val === "") return "—";

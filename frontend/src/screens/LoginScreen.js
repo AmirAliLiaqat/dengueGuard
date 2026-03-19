@@ -51,31 +51,38 @@ const LoginScreen = ({ navigation }) => {
 
   const handleBiometricLogin = async () => {
     try {
+      const storedEmail = await SecureStore.getItemAsync("user_email");
+      const storedPass = await SecureStore.getItemAsync("user_password");
+
+      if (!storedEmail || !storedPass) {
+        showAlert({
+          title: t("biometric_setup_required"),
+          message: t("biometric_setup_required_desc"),
+          type: "warning",
+        });
+        return;
+      }
+
       const result = await LocalAuthentication.authenticateAsync({
         promptMessage: t("biometric_access"),
         fallbackLabel: t("use_password"),
       });
 
       if (result.success) {
-        const storedEmail = await SecureStore.getItemAsync("user_email");
-        const storedPass = await SecureStore.getItemAsync("user_password");
+        // Fill form and trigger login
+        setEmail(storedEmail);
+        setPassword(storedPass);
 
-        if (storedEmail && storedPass) {
-          // Fill form and trigger login
-          setEmail(storedEmail);
-          setPassword(storedPass);
-
-          const loginResult = await login({
-            email: storedEmail,
-            password: storedPass,
-          }).unwrap();
-          dispatch(
-            setCredentials({
-              access_token: loginResult.access_token,
-              user: { email: storedEmail },
-            }),
-          );
-        }
+        const loginResult = await login({
+          email: storedEmail,
+          password: storedPass,
+        }).unwrap();
+        dispatch(
+          setCredentials({
+            access_token: loginResult.access_token,
+            user: { email: storedEmail },
+          }),
+        );
       }
     } catch (error) {
       console.error("Biometric Login Error:", error);
@@ -241,7 +248,7 @@ const LoginScreen = ({ navigation }) => {
                 )}
               </TouchableOpacity>
 
-              {isBiometricSupported && hasStoredCredentials && (
+              {isBiometricSupported && (
                 <TouchableOpacity
                   style={styles.biometricButton}
                   onPress={handleBiometricLogin}

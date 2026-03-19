@@ -253,6 +253,9 @@ export const ur = {
   something_went_wrong: "کچھ غلط ہو گیا",
   biometric_not_available: "دستیاب نہیں ہے",
   biometric_hardware_error: "آپ کا آلہ بایومیٹرک تصدیق کی حمایت نہیں کرتا یا کوئی فنگر پرنٹس اینرول نہیں ہیں۔",
+  biometric_setup_required: "بایومیٹرک سیٹ اپ درکار ہے",
+  biometric_setup_required_desc:
+    "بایومیٹرک لاگ ان فعال ہے، لیکن محفوظ شدہ معلومات نہیں ملیں۔ براہ کرم Privacy & Security میں جا کر Biometric Access دوبارہ فعال کریں تاکہ آپ کی معلومات دوبارہ محفوظ ہو سکیں۔",
   authenticate_enable_biometric: "بایومیٹرک لاگ ان فعال کرنے کے لیے تصدیق کریں۔",
   biometric_enabled_msg: "بایومیٹرک لاگ ان اب فعال اور محفوظ ہے۔",
   invalid_password_biometric: "غلط پاس ورڈ۔ براہ کرم بایومیٹرک لاگ ان فعال کرنے کے لیے دوبارہ کوشش کریں۔",

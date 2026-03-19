@@ -271,6 +271,9 @@ export const en = {
   biometric_not_available: "Not Available",
   biometric_hardware_error:
     "Your device does not support biometric authentication or no fingerprints are enrolled.",
+  biometric_setup_required: "Biometric setup required",
+  biometric_setup_required_desc:
+    "Biometric login is enabled, but your saved credentials were not found. Please go to Privacy & Security and re-enable Biometric Access to save your credentials again.",
   authenticate_enable_biometric: "Authenticate to enable biometric login",
   biometric_enabled_msg: "Biometric login is now enabled and secured.",
   invalid_password_biometric:
