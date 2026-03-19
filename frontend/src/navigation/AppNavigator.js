@@ -1,10 +1,11 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../context/ThemeContext';
-import { Home, ClipboardList, User } from 'lucide-react-native';
+import { Home, ClipboardList, User, Users, Stethoscope } from 'lucide-react-native';
 import { useSelector } from 'react-redux';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useGetMeQuery } from '../services/api';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -31,9 +32,76 @@ import DengueInfoScreen from '../screens/DengueInfoScreen';
 import PublicProfilesScreen from '../screens/PublicProfilesScreen';
 import UserProfileDetailScreen from '../screens/UserProfileDetailScreen';
 import ReminderSettingsScreen from '../screens/ReminderSettingsScreen';
+import AdminDashboardScreen from '../screens/AdminDashboardScreen';
+import AdminUsersScreen from '../screens/AdminUsersScreen';
+import AdminUserDetailScreen from '../screens/AdminUserDetailScreen';
+import AdminDoctorsScreen from '../screens/AdminDoctorsScreen';
+import AdminAddDoctorScreen from '../screens/AdminAddDoctorScreen';
+import AdminDoctorDetailScreen from '../screens/AdminDoctorDetailScreen';
+import AdminProfileScreen from '../screens/AdminProfileScreen';
+import DoctorDetailScreen from '../screens/DoctorDetailScreen';
+import LoadingScreen from '../screens/LoadingScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const AdminTabs = () => {
+  const { theme } = useTheme();
+  const { colors } = theme;
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.glassBorder,
+          height: Platform.OS === 'android' ? 70 + insets.bottom : 88,
+          paddingBottom: Platform.OS === 'android' ? (insets.bottom > 0 ? insets.bottom + 5 : 12) : 30,
+          paddingTop: 12,
+          borderTopWidth: 1,
+        },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+      }}
+    >
+      <Tab.Screen
+        name="AdminDashboard"
+        component={AdminDashboardScreen}
+        options={{
+          title: 'Admin Panel',
+          tabBarIcon: ({ color }) => <Home color={color} size={22} />,
+        }}
+      />
+      <Tab.Screen
+        name="AdminUsers"
+        component={AdminUsersScreen}
+        options={{
+          title: 'Users',
+          tabBarIcon: ({ color }) => <Users color={color} size={22} />,
+        }}
+      />
+      <Tab.Screen
+        name="AdminDoctors"
+        component={AdminDoctorsScreen}
+        options={{
+          title: 'Doctors',
+          tabBarIcon: ({ color }) => <Stethoscope color={color} size={22} />,
+        }}
+      />
+      <Tab.Screen
+        name="AdminProfile"
+        component={AdminProfileScreen}
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <User color={color} size={22} />,
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 const MainTabs = () => {
   const { theme } = useTheme();
@@ -97,7 +165,18 @@ const MainTabs = () => {
 };
 
 const AppNavigator = () => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, token } = useSelector((state) => state.auth);
+  const {
+    data: me,
+    isLoading: isMeLoading,
+    isFetching: isMeFetching,
+  } = useGetMeQuery(token, {
+    skip: !isAuthenticated,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const isAdmin = !!me && me.role === 'admin';
+  const isMePending = isAuthenticated && (isMeLoading || isMeFetching || !me);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -106,6 +185,21 @@ const AppNavigator = () => {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
           <Stack.Screen name="Verification" component={VerificationScreen} />
+        </>
+      ) : isMePending ? (
+        <Stack.Screen name="Loading" component={LoadingScreen} />
+      ) : isAdmin ? (
+        <>
+          <Stack.Screen name="AdminMain" component={AdminTabs} />
+          <Stack.Screen name="AdminUserDetail" component={AdminUserDetailScreen} />
+          <Stack.Screen name="AdminAddDoctor" component={AdminAddDoctorScreen} />
+          <Stack.Screen name="AdminDoctorDetail" component={AdminDoctorDetailScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen name="TermsAndConditions" component={TermsAndConditionsScreen} />
+          <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
+          <Stack.Screen name="DengueInfo" component={DengueInfoScreen} />
         </>
       ) : (
         <>
@@ -128,6 +222,7 @@ const AppNavigator = () => {
           <Stack.Screen name="PublicProfiles" component={PublicProfilesScreen} />
           <Stack.Screen name="UserProfileDetail" component={UserProfileDetailScreen} />
           <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} />
+          <Stack.Screen name="DoctorDetail" component={DoctorDetailScreen} />
         </>
       )}
     </Stack.Navigator>

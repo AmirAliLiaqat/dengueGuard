@@ -17,7 +17,7 @@ export const denguApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["User", "History", "Stats", "Notification"],
+  tagTypes: ["User", "History", "Stats", "Notification", "Admin", "Doctor"],
   endpoints: (builder) => ({
     // Benchmarks (comparison stats)
     getBenchmarks: builder.query({
@@ -94,6 +94,62 @@ export const denguApi = createApi({
       query: (id) => `/diagnose/report/${id}`,
     }),
 
+    // Admin
+    getAdminOverview: builder.query({
+      query: () => "/admin/overview",
+      providesTags: ["Admin"],
+    }),
+    getAdminUsers: builder.query({
+      query: () => "/admin/users",
+      providesTags: ["Admin"],
+    }),
+    getAdminUserReports: builder.query({
+      query: (userId) => `/admin/users/${userId}/reports`,
+      providesTags: ["Admin"],
+    }),
+    getAdminDoctors: builder.query({
+      query: () => "/admin/doctors",
+      providesTags: ["Doctor"],
+    }),
+    uploadDoctorPicture: builder.mutation({
+      query: (formData) => ({
+        url: "/admin/doctors/upload-picture",
+        method: "POST",
+        body: formData,
+      }),
+    }),
+    createAdminDoctor: builder.mutation({
+      query: (data) => ({
+        url: "/admin/doctors",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Doctor"],
+    }),
+    updateAdminDoctor: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/admin/doctors/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Doctor"],
+    }),
+    deleteAdminDoctor: builder.mutation({
+      query: (id) => ({
+        url: `/admin/doctors/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Doctor"],
+    }),
+    getPublicDoctors: builder.query({
+      query: () => "/admin/doctors-public",
+      providesTags: ["Doctor"],
+    }),
+    getPublicDoctorDetail: builder.query({
+      query: (id) => `/admin/doctors-public/${id}`,
+      providesTags: ["Doctor"],
+    }),
+
     // Auth
     login: builder.mutation({
       query: (credentials) => {
@@ -163,6 +219,16 @@ export const {
   useGetHistoryQuery,
   useGetStatsQuery,
   useGetReportDetailQuery,
+  useGetAdminOverviewQuery,
+  useGetAdminUsersQuery,
+  useGetAdminUserReportsQuery,
+  useGetAdminDoctorsQuery,
+  useUploadDoctorPictureMutation,
+  useCreateAdminDoctorMutation,
+  useUpdateAdminDoctorMutation,
+  useDeleteAdminDoctorMutation,
+  useGetPublicDoctorsQuery,
+  useGetPublicDoctorDetailQuery,
   useGetBenchmarksQuery,
   useLoginMutation,
   useSignupMutation,

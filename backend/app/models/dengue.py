@@ -73,3 +73,14 @@ class Notification(Document):
     
     class Settings:
         name = "notifications"
+
+class Doctor(Document):
+    name: str
+    age: Optional[int] = None
+    picture_url: Optional[str] = None
+    bio: Optional[str] = None
+    dengue_expertise: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    class Settings:
+        name = "doctors"

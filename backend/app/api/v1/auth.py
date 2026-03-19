@@ -42,12 +42,13 @@ async def signup(user_in: UserCreate):
     if user:
         raise HTTPException(status_code=400, detail="User already exists")
     
+    # Always create normal users from signup; admin accounts are seeded on startup.
     new_user = User(
         email=user_in.email,
         hashed_password=security.get_password_hash(user_in.password),
         full_name=user_in.full_name,
         phone=user_in.phone,
-        role=user_in.role,
+        role="user",
         is_verified=False
     )
     await new_user.insert()

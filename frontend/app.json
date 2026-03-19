@@ -19,7 +19,7 @@
         "backgroundColor": "#0F172A"
       },
       "package": "com.dengue.kbs",
-      "softwareKeyboardLayoutMode": "pan",
+      "softwareKeyboardLayoutMode": "resize",
       "navigationBar": {
         "barStyle": "light-content",
         "backgroundColor": "#0F172A"

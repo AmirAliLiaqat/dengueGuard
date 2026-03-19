@@ -40,6 +40,23 @@ export const createStyles = (theme) => {
       marginBottom: spacing.m,
       borderWidth: 1,
       borderColor: colors.glassBorder,
+      gap: spacing.m,
+    },
+    avatarWrap: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: colors.glass,
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    avatarImage: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
     },
     patientInfo: {
       flex: 1,

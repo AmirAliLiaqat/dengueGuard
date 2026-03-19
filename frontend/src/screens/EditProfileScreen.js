@@ -115,11 +115,13 @@ const EditProfileScreen = ({ navigation }) => {
 
     const result = useCamera
       ? await ImagePicker.launchCameraAsync({
+          mediaTypes: ["images"],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.5,
         })
       : await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ["images"],
           allowsEditing: true,
           aspect: [1, 1],
           quality: 0.5,

@@ -127,6 +127,45 @@ export const createStyles = (theme, isRTL) => {
       marginLeft: isRTL ? 0 : spacing.s,
       marginRight: isRTL ? spacing.s : 0,
     },
+    /** Admin profile / inline edit (same visual language as profile cards) */
+    formSectionCard: {
+      backgroundColor: colors.card,
+      borderRadius: 16,
+      padding: spacing.m,
+      marginBottom: spacing.xl,
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+    },
+    profileInput: {
+      borderWidth: 1,
+      borderColor: colors.glassBorder,
+      borderRadius: 12,
+      paddingHorizontal: spacing.m,
+      paddingVertical: spacing.s,
+      color: colors.text,
+      marginBottom: spacing.m,
+      ...typography.body,
+      textAlign,
+    },
+    primaryButton: {
+      backgroundColor: colors.primary,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: spacing.m,
+    },
+    primaryButtonText: {
+      ...typography.body,
+      color: colors.background,
+      fontWeight: 'bold',
+    },
+    roleCaption: {
+      ...typography.caption,
+      color: colors.primary,
+      textAlign: 'center',
+      marginTop: spacing.xs || 4,
+      fontWeight: '600',
+    },
   });
 };
 

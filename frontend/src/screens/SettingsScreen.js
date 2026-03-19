@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Check,
   AlarmClock,
+  Stethoscope,
 } from "lucide-react-native";
 import { useGetMeQuery, useUpdateProfileMutation } from "../services/api";
 import { createStyles } from "../styles/SettingsScreen.styles";
@@ -133,6 +134,17 @@ const SettingsScreen = ({ navigation }) => {
               thumbColor={remindersEnabled ? "#FFFFFF" : colors.textMuted}
             />
           </View>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => navigation.navigate("Doctor")}
+          >
+            <View style={styles.itemIconContainer}>
+              <Stethoscope color={colors.primary} size={20} />
+            </View>
+            <Text style={styles.itemLabel}>{t("doctor_panel") || "Doctors"}</Text>
+            <ChevronRight color={colors.textMuted} size={20} />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>

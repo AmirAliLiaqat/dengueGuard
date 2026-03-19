@@ -191,6 +191,12 @@ export const ur = {
   data_policy: "ڈیٹا پالیسی",
   request_deletion: "ڈیٹا ختم کرنے کی درخواست",
   doctor_panel: "ڈیٹر پنل",
+  add_doctor: "ڈاکٹر شامل کریں",
+  no_doctors_yet: "ابھی کوئی ڈاکٹر نہیں۔ شامل کرنے کے لیے Add دبائیں۔",
+  no_expertise: "کوئی مہارت شامل نہیں",
+  age: "عمر",
+  edit: "ترمیم",
+  saved: "محفوظ ہو گیا۔",
 
   // Notifications
   no_notifications: "کوئی اطلاع نہیں ملی",

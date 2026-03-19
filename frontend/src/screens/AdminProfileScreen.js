@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -16,79 +16,54 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Shield,
-  Bell,
   FileText,
   HelpCircle,
   Info,
-  Stethoscope,
   Activity,
-  Globe,
 } from "lucide-react-native";
-import { useGetMeQuery, useGetStatsQuery } from "../services/api";
+import { useGetMeQuery, useGetAdminOverviewQuery } from "../services/api";
 import { useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
 import { createStyles } from "../styles/ProfileScreen.styles";
 
-const ProfileScreen = ({ navigation }) => {
+const AdminProfileScreen = ({ navigation }) => {
   const { theme } = useTheme();
-  const { colors, typography, spacing } = theme;
+  const { colors } = theme;
   const { t, isRTL } = useLanguage();
   const dispatch = useDispatch();
+  const styles = createStyles(theme, isRTL);
 
   const {
-    data: userData,
+    data: me,
     refetch: refetchMe,
     isFetching: isFetchingMe,
   } = useGetMeQuery();
   const {
-    data: statsData,
-    refetch: refetchStats,
-    isFetching: isFetchingStats,
-  } = useGetStatsQuery();
+    data: overview,
+    refetch: refetchOverview,
+    isFetching: isFetchingOverview,
+  } = useGetAdminOverviewQuery();
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = useCallback(() => {
     refetchMe();
-    refetchStats();
-  }, [refetchMe, refetchStats]);
-
-  const styles = createStyles(theme, isRTL);
+    refetchOverview();
+  }, [refetchMe, refetchOverview]);
 
   const handleLogout = () => {
     dispatch(logout());
     navigation.replace("Login");
   };
 
-  const menuItems = [
+  const accountMenuItems = [
     {
       icon: User,
       label: t("edit_profile_btn"),
       onPress: () => navigation.navigate("EditProfile"),
     },
     {
-      icon: Bell,
-      label: t("notifications_toggle"),
-      onPress: () => navigation.navigate("Notifications"),
-    },
-    {
-      icon: Shield,
-      label: t("privacy_security"),
-      onPress: () => navigation.navigate("PrivacyAndSecurity"),
-    },
-    {
-      icon: Globe,
-      label: t("public_profiles_gallery") || "Public Profiles Gallery",
-      onPress: () => navigation.navigate("PublicProfiles"),
-    },
-    {
       icon: Settings,
       label: t("settings"),
       onPress: () => navigation.navigate("Settings"),
-    },
-    {
-      icon: Stethoscope,
-      label: "Doctors Panel",
-      onPress: () => navigation.navigate("Doctor"),
     },
   ];
 
@@ -98,7 +73,7 @@ const ProfileScreen = ({ navigation }) => {
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
-            refreshing={isFetchingMe || isFetchingStats}
+            refreshing={isFetchingMe || isFetchingOverview}
             onRefresh={onRefresh}
             colors={[colors.primary]}
             tintColor={colors.primary}
@@ -108,9 +83,9 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.header}>
           <View style={styles.imageContainer}>
             <View style={styles.placeholderImage}>
-              {userData?.profile_picture ? (
+              {me?.profile_picture ? (
                 <Image
-                  source={{ uri: userData.profile_picture }}
+                  source={{ uri: me.profile_picture }}
                   style={styles.avatarImage}
                 />
               ) : (
@@ -118,16 +93,21 @@ const ProfileScreen = ({ navigation }) => {
               )}
             </View>
           </View>
-          <Text style={styles.nameText}>{userData?.full_name || "User"}</Text>
-          <Text style={styles.emailText}>{userData?.email}</Text>
+          <Text style={styles.nameText}>{me?.full_name || "Admin"}</Text>
+          <Text style={styles.emailText}>{me?.email}</Text>
+          <Text style={styles.roleCaption}>Administrator</Text>
         </View>
 
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
+            <Text style={styles.statValue}>{overview?.total_users ?? "—"}</Text>
+            <Text style={styles.statLabel}>App users</Text>
+          </View>
+          <View style={[styles.statBox, styles.statBorder]}>
             <Text style={styles.statValue}>
-              {statsData?.total_diagnoses || 0}
+              {overview?.total_reports ?? "—"}
             </Text>
-            <Text style={styles.statLabel}>{t("stats_tests")}</Text>
+            <Text style={styles.statLabel}>Reports</Text>
           </View>
           <View style={[styles.statBox, styles.statBorder]}>
             <View
@@ -141,46 +121,33 @@ const ProfileScreen = ({ navigation }) => {
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: userData?.is_active
-                    ? "#2ECC71"
-                    : colors.textMuted,
+                  backgroundColor: me?.is_active ? "#2ECC71" : colors.textMuted,
                   marginRight: isRTL ? 0 : 6,
                   marginLeft: isRTL ? 6 : 0,
                 }}
               />
               <Text style={styles.statValue}>
-                {userData?.is_active ? t("status_active") : t("status_offline")}
+                {me?.is_active ? t("status_active") : t("status_offline")}
               </Text>
             </View>
             <Text style={styles.statLabel}>{t("account_status")}</Text>
           </View>
-          <View style={styles.statBox}>
-            <Text
-              style={[
-                styles.statValue,
-                {
-                  color:
-                    Object.keys(statsData?.risk_summary || {}).filter(
-                      (k) => k !== "Low",
-                    ).length > 0
-                      ? colors.accent
-                      : colors.primary,
-                },
-              ]}
-            >
-              {Object.keys(statsData?.risk_summary || {}).filter(
-                (k) => k !== "Low",
-              ).length > 0
-                ? t("status_at_risk")
-                : t("status_safe")}
-            </Text>
-            <Text style={styles.statLabel}>{t("health_status")}</Text>
-          </View>
         </View>
+
+        {overview && (
+          <View style={styles.statsContainer}>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue}>
+                {overview?.total_doctors ?? "—"}
+              </Text>
+              <Text style={styles.statLabel}>Doctors</Text>
+            </View>
+          </View>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("account_section")}</Text>
-          {menuItems.map((item, index) => (
+          {accountMenuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.menuItem}
@@ -268,4 +235,4 @@ const ProfileScreen = ({ navigation }) => {
   );
 };
 
-export default ProfileScreen;
+export default AdminProfileScreen;

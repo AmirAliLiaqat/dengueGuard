@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = "your_api_key"
     CLOUDINARY_API_SECRET: str = "your_api_secret"
 
+    # Default admin bootstrap (can be overridden via .env)
+    # Use the same email/password you want to log in with.
+    ADMIN_EMAIL: str = "admin@dengueguard.com"
+    ADMIN_PASSWORD: str = "Admin123!"
+    ADMIN_FULL_NAME: str = "DengueGuard Admin"
+
     model_config = {
         "case_sensitive": True,
         "env_file": ".env"

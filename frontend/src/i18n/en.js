@@ -161,6 +161,12 @@ export const en = {
   data_policy: "Data Use Policy",
   request_deletion: "Request Data Deletion",
   doctor_panel: "Doctor Panel",
+  add_doctor: "Add doctor",
+  no_doctors_yet: "No doctors yet. Tap Add to create one.",
+  no_expertise: "No expertise added",
+  age: "Age",
+  edit: "Edit",
+  saved: "Saved.",
 
   // Notifications
   no_notifications: "No notifications found",
