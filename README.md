@@ -71,9 +71,17 @@ Prerequisites: Python 3.12+ installed.
    ```
 
 6. **Launch Server**:
+
    ```bash
    python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
+
+7. **Find Ubuntu IP Address**:
+   `hostname -I`
+
+8. **Admin Login Creds**:
+   Email: admin@dengueguard.com
+   Password: Admin123!
 
 ### 2. Frontend Setup (Local)
 

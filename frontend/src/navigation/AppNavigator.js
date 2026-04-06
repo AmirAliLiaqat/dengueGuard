@@ -2,10 +2,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from '../context/ThemeContext';
 import { Home, ClipboardList, User, Users, Stethoscope } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetMeQuery } from '../services/api';
+import { logout } from '../redux/authSlice';
+import { useEffect } from 'react';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -166,17 +168,27 @@ const MainTabs = () => {
 
 const AppNavigator = () => {
   const { isAuthenticated, token } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
   const {
     data: me,
     isLoading: isMeLoading,
     isFetching: isMeFetching,
+    isError,
   } = useGetMeQuery(token, {
     skip: !isAuthenticated,
     refetchOnMountOrArgChange: true,
   });
 
+  useEffect(() => {
+    if (isError) {
+      // If we get an error fetching user (e.g., token expired or network error), logout
+      dispatch(logout());
+    }
+  }, [isError, dispatch]);
+
   const isAdmin = !!me && me.role === 'admin';
-  const isMePending = isAuthenticated && (isMeLoading || isMeFetching || !me);
+  const isMePending = isAuthenticated && (isMeLoading || isMeFetching || (!me && !isError));
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

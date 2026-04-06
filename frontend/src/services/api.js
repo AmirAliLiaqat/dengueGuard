@@ -1,8 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// Development URL (Your local IP) vs Production URL (Render.com)
+import { Platform } from 'react-native';
+
+// Development URL vs Production URL
+// Use your local IP for mobile devices (e.g. 192.168.x.x) or localhost for web
 const API_BASE_URL = __DEV__
-  ? "http://192.168.18.28:8000/api/v1"
+  ? Platform.OS === 'web'
+    ? "http://localhost:8000/api/v1"
+    // IMPORTANT: If testing on a mobile device, change this to your computer's current local IP address!
+    : "http://192.168.11.122:8000/api/v1"
   : "https://dengue-dignose.onrender.com/api/v1";
 
 export const denguApi = createApi({
