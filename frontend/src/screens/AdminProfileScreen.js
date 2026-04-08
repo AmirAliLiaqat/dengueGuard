@@ -16,7 +16,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  FileText,
+  File,
   HelpCircle,
   Info,
   Activity,
@@ -173,7 +173,7 @@ const AdminProfileScreen = ({ navigation }) => {
             onPress={() => navigation.navigate("TermsAndConditions")}
           >
             <View style={styles.menuIconContainer}>
-              <FileText color={colors.primary} size={22} />
+              <File color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t("terms_conditions")}</Text>
             {isRTL ? (

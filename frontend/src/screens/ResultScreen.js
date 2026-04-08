@@ -15,6 +15,7 @@ import {
   Share2,
 } from "lucide-react-native";
 import { generateAndSavePDF } from "../utils/pdfGenerator";
+import { riskFromProbabilityPercent } from "../utils/risk";
 import { useGetMeQuery, useRecordActionMutation } from "../services/api";
 import { createStyles } from "../styles/ResultScreen.styles";
 import { useGetBenchmarksQuery } from "../services/api";
@@ -32,23 +33,27 @@ const ResultScreen = ({ route, navigation }) => {
   const { data: me } = useGetMeQuery();
   const { data: benchmarks } = useGetBenchmarksQuery();
 
-  const stage = diagnosis.disease_detection || t("analysis_complete");
-  const risk = diagnosis.risk_classification || t("unknown");
-  const recommendation = diagnosis.clinical_recommendations || t("consult_doctor");
-  const alertText = diagnosis.alert_system;
   let probability = 0;
   if (
     reportData.ml_prediction &&
     typeof reportData.ml_prediction.probability === "number"
   ) {
-    probability = (reportData.ml_prediction.probability * 100).toFixed(0);
+    probability = Math.round(reportData.ml_prediction.probability * 100);
   } else if (
     reportData.ml_model_result &&
     typeof reportData.ml_model_result.probability === "number"
   ) {
     // fallback for old format if any
-    probability = (reportData.ml_model_result.probability * 100).toFixed(0);
+    probability = Math.round(reportData.ml_model_result.probability * 100);
   }
+
+  const stage = diagnosis.disease_detection || t("analysis_complete");
+  const derivedRisk =
+    typeof probability === "number" ? riskFromProbabilityPercent(probability) : null;
+  const risk = derivedRisk || diagnosis.risk_classification || t("unknown");
+  const recommendation =
+    diagnosis.clinical_recommendations || t("consult_doctor");
+  const alertText = diagnosis.alert_system;
 
   // Determine colors based on risk
   let riskColor = colors.primary;
@@ -652,7 +657,7 @@ const ResultScreen = ({ route, navigation }) => {
           onPress={handleDownload}
           disabled={isDownloading}
         >
-          <FileText
+          <Download
             color={colors.background}
             size={20}
             style={{ marginHorizontal: 8 }}

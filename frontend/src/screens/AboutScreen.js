@@ -17,7 +17,7 @@ import {
   LineChart,
   Brain,
   Lock,
-  FileText,
+  File,
 } from "lucide-react-native";
 import { createStyles } from "../styles/AboutScreen.styles";
 import { useGetBenchmarksQuery } from "../services/api";
@@ -106,7 +106,7 @@ const AboutScreen = ({ navigation }) => {
 
           <View style={styles.card}>
             <View style={styles.cardIcon}>
-              <FileText color={colors.info} size={24} />
+              <File color={colors.info} size={24} />
             </View>
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>{t("about_data_used")}</Text>

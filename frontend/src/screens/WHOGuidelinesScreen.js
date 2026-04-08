@@ -12,7 +12,7 @@ import { useLanguage } from "../context/LanguageContext";
 import {
   ChevronLeft,
   ChevronRight,
-  FileText,
+  File,
   ExternalLink,
   Info,
   Activity,
@@ -75,7 +75,7 @@ const WHOGuidelinesScreen = ({ navigation }) => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.heroCard}>
-          <FileText color="#FFFFFF" size={48} />
+          <File color="#FFFFFF" size={48} />
           <Text style={styles.heroTitle}>Official WHO Protocols</Text>
           <Text style={styles.heroSubtitle}>
             World Health Organization Guidelines for Dengue Management

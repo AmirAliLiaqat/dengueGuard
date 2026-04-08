@@ -8,7 +8,7 @@ const API_BASE_URL = __DEV__
   ? Platform.OS === 'web'
     ? "http://localhost:8000/api/v1"
     // IMPORTANT: If testing on a mobile device, change this to your computer's current local IP address!
-    : "http://192.168.11.122:8000/api/v1"
+    : "http://192.168.1.105:8000/api/v1"
   : "https://dengue-dignose.onrender.com/api/v1";
 
 export const denguApi = createApi({
@@ -98,6 +98,14 @@ export const denguApi = createApi({
     }),
     getReportDetail: builder.query({
       query: (id) => `/diagnose/report/${id}`,
+    }),
+    updateReport: builder.mutation({
+      query: ({ id, ...patch }) => ({
+        url: `/diagnose/report/${id}`,
+        method: "PATCH",
+        body: patch,
+      }),
+      invalidatesTags: ["History", "Stats"],
     }),
 
     // Admin
@@ -225,6 +233,7 @@ export const {
   useGetHistoryQuery,
   useGetStatsQuery,
   useGetReportDetailQuery,
+  useUpdateReportMutation,
   useGetAdminOverviewQuery,
   useGetAdminUsersQuery,
   useGetAdminUserReportsQuery,

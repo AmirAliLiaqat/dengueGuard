@@ -13,7 +13,7 @@ import {
   ClipboardList,
   ChevronLeft,
   ChevronRight,
-  FileText,
+  File,
   SortAsc,
   SortDesc,
 } from "lucide-react-native";
@@ -81,7 +81,7 @@ const HistoryScreen = ({ navigation }) => {
       >
         <View style={styles.cardHeader}>
           <View style={styles.iconContainer}>
-            <FileText color={colors.primary} size={24} />
+            <File color={colors.primary} size={24} />
           </View>
           <View style={styles.cardMain}>
             <Text style={styles.cardTitle}>

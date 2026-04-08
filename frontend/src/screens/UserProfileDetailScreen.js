@@ -16,7 +16,7 @@ import {
   User,
   Phone,
   Mail,
-  FileText,
+  File,
   Calendar,
 } from "lucide-react-native";
 import { useGetPublicProfileDetailQuery } from "../services/api";
@@ -104,7 +104,7 @@ const UserProfileDetailScreen = ({ route, navigation }) => {
                 style={styles.reportCard}
               >
                 <View style={styles.reportHeader}>
-                  <FileText color={colors.accent} size={20} />
+                  <File color={colors.accent} size={20} />
                   <Text style={styles.reportTitle}>
                     {report.kbs_recommendation?.disease_detection || "Analysis"}
                   </Text>

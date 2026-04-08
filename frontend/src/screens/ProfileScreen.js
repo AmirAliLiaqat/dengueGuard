@@ -18,7 +18,7 @@ import {
   ChevronRight,
   Shield,
   Bell,
-  FileText,
+  File,
   HelpCircle,
   Info,
   Stethoscope,
@@ -206,7 +206,7 @@ const ProfileScreen = ({ navigation }) => {
             onPress={() => navigation.navigate("TermsAndConditions")}
           >
             <View style={styles.menuIconContainer}>
-              <FileText color={colors.primary} size={22} />
+              <File color={colors.primary} size={22} />
             </View>
             <Text style={styles.menuLabel}>{t("terms_conditions")}</Text>
             {isRTL ? (

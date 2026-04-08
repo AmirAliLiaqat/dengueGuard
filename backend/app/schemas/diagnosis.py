@@ -15,6 +15,12 @@ class DiagnosisResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class DiagnosisReportUpdate(BaseModel):
+    # Allow patching only safe fields on existing reports.
+    doctor_notes: Optional[str] = None
+    kbs_recommendation: Optional[Dict[str, Any]] = None
+    ml_prediction: Optional[Dict[str, Any]] = None
+
 class UserStats(BaseModel):
     total_diagnoses: int
     risk_summary: Dict[str, int] # e.g. {"High": 2, "Low": 5}

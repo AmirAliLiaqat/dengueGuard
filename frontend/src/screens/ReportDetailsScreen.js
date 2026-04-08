@@ -20,10 +20,11 @@ import {
   Info,
   List,
   Brain,
-  FileText,
+  File,
   Share2,
 } from "lucide-react-native";
 import { generateAndSavePDF } from "../utils/pdfGenerator";
+import { riskFromProbabilityPercent } from "../utils/risk";
 import {
   useGetReportDetailQuery,
   useGetMeQuery,
@@ -259,17 +260,20 @@ const ReportDetailsScreen = ({ route, navigation }) => {
   }
 
   const diagnosis = reportData.kbs_recommendation || {};
-  const stage = diagnosis.disease_detection || t("diagnosis");
-  const risk = diagnosis.risk_classification || t("unknown");
-  const recommendations = diagnosis.clinical_recommendations || "";
-  const alertText = diagnosis.alert_system;
   let probability = 0;
   if (
     reportData.ml_prediction &&
     typeof reportData.ml_prediction.probability === "number"
   ) {
-    probability = (reportData.ml_prediction.probability * 100).toFixed(0);
+    probability = Math.round(reportData.ml_prediction.probability * 100);
   }
+
+  const stage = diagnosis.disease_detection || t("diagnosis");
+  const derivedRisk =
+    typeof probability === "number" ? riskFromProbabilityPercent(probability) : null;
+  const risk = derivedRisk || diagnosis.risk_classification || t("unknown");
+  const recommendations = diagnosis.clinical_recommendations || "";
+  const alertText = diagnosis.alert_system;
 
   // Determine colors based on risk
   let riskColor = colors.primary;
@@ -707,7 +711,7 @@ const ReportDetailsScreen = ({ route, navigation }) => {
           onPress={handleDownload}
           disabled={isDownloading}
         >
-          <FileText
+          <File
             color={colors.background}
             size={20}
             style={{ marginHorizontal: 8 }}

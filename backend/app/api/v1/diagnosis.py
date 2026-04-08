@@ -4,7 +4,7 @@ from app.ml.model import DenguePredictor
 from app.engine.inference import ForwardChainingEngine, DENGUE_RULES
 from app.api.v1.auth import get_current_user
 from app.models.dengue import User, DiagnosisReport, Notification
-from app.schemas.diagnosis import DiagnosisResponse, UserStats
+from app.schemas.diagnosis import DiagnosisResponse, UserStats, DiagnosisReportUpdate
 from datetime import datetime
 
 router = APIRouter()
@@ -134,4 +134,45 @@ async def get_report_detail(report_id: str, current_user: User = Depends(get_cur
         ml_prediction=report.ml_prediction,
         kbs_recommendation=report.kbs_recommendation,
         created_at=report.created_at
+    )
+
+@router.patch("/report/{report_id}", response_model=DiagnosisResponse)
+async def update_report(
+    report_id: str,
+    payload: DiagnosisReportUpdate,
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Patch an existing report.
+    - Report owner can update their own report's `doctor_notes` only.
+    - Doctor/Admin can update `doctor_notes`, `kbs_recommendation`, and `ml_prediction`.
+    """
+    report = await DiagnosisReport.get(report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    is_owner = report.user_id == str(current_user.id)
+    is_privileged = current_user.role in ["doctor", "admin"]
+    if not (is_owner or is_privileged):
+        raise HTTPException(status_code=403, detail="Not allowed")
+
+    update_data = payload.model_dump(exclude_unset=True)
+
+    # Owners can only set doctor_notes.
+    if is_owner and not is_privileged:
+        update_data = {k: v for k, v in update_data.items() if k == "doctor_notes"}
+        if not update_data:
+            raise HTTPException(status_code=403, detail="Not allowed")
+
+    for k, v in update_data.items():
+        setattr(report, k, v)
+
+    await report.save()
+
+    return DiagnosisResponse(
+        id=str(report.id),
+        symptoms=report.symptoms,
+        ml_prediction=report.ml_prediction,
+        kbs_recommendation=report.kbs_recommendation,
+        created_at=report.created_at,
     )
