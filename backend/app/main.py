@@ -16,6 +16,12 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     client = AsyncIOMotorClient(settings.MONGODB_URL)
+    
+    # Bugfix for Beanie 2.1.0/Motor 3.7.0 compatibility:
+    # Motor returns a Database object for any missing attribute, which causes Beanie's hasattr check to pass erroneously.
+    if not hasattr(client.__class__, "append_metadata"):
+        client.append_metadata = lambda x: None
+
     await init_beanie(
         database=client.get_default_database(),
         document_models=[User, OTPRecord, DiagnosisReport, RuleDocument, Notification, BenchmarkMetric, Doctor]

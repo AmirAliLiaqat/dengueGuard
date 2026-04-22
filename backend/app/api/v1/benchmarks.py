@@ -2,11 +2,52 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
+import json
+import os
 
 from app.api.v1.auth import get_current_user
 from app.models.dengue import User, BenchmarkMetric
 
 router = APIRouter()
+
+# Path to model metadata produced by the training pipeline
+_META_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+    "data", "model_meta.json"
+)
+
+
+@router.get("/model-info")
+async def get_model_info():
+    """
+    Public endpoint returning the trained model's version and performance
+    metrics.  No auth required — used by frontend dashboards.
+    """
+    if not os.path.exists(_META_PATH):
+        return {
+            "version": "1.0.0",
+            "status": "legacy",
+            "message": "No model metadata found.  Run train_model.py to generate.",
+        }
+    
+    with open(_META_PATH, "r") as f:
+        meta = json.load(f)
+    
+    return {
+        "version": meta.get("version", "unknown"),
+        "trained_on": meta.get("trained_on"),
+        "dataset_size": meta.get("dataset_size"),
+        "model_type": meta.get("model_type"),
+        "label_strategy": meta.get("label_strategy"),
+        "accuracy": meta.get("accuracy"),
+        "auc_roc": meta.get("auc_roc"),
+        "precision": meta.get("precision"),
+        "recall": meta.get("recall"),
+        "f1_score": meta.get("f1_score"),
+        "cv_accuracy_mean": meta.get("cv_accuracy_mean"),
+        "symptom_knowledge_entries": meta.get("symptom_knowledge_entries"),
+        "features": meta.get("features"),
+    }
 
 
 class BenchmarkUpsert(BaseModel):
