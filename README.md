@@ -53,7 +53,8 @@ Prerequisites: Python 3.12+ installed.
 1. **Navigate to backend**: `cd backend`
 2. **Setup Virtual Environment**:
    ```bash
-   python -m venv venv
+   python -m venv venv       # Windows
+   python3 -m venv venv      # Linux/macOS
    source venv/bin/activate  # Linux/macOS
    .\venv\Scripts\activate   # Windows
    ```

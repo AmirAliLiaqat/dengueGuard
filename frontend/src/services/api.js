@@ -8,7 +8,7 @@ const API_BASE_URL = __DEV__
   ? Platform.OS === 'web'
     ? "http://localhost:8000/api/v1"
     // IMPORTANT: If testing on a mobile device, change this to your computer's current local IP address!
-    : "http://10.0.5.216:8000/api/v1"
+    : "http://192.168.18.28:8000/api/v1"
   : "https://dengue-dignose.onrender.com/api/v1";
 
 export const denguApi = createApi({
