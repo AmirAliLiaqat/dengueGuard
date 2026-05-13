@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Switch } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Switch, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -11,6 +11,7 @@ import {
   Check,
   AlarmClock,
   Stethoscope,
+  ShieldCheck,
 } from "lucide-react-native";
 import { useGetMeQuery, useUpdateProfileMutation } from "../services/api";
 import { createStyles } from "../styles/SettingsScreen.styles";
@@ -143,6 +144,17 @@ const SettingsScreen = ({ navigation }) => {
               <Stethoscope color={colors.primary} size={20} />
             </View>
             <Text style={styles.itemLabel}>{t("doctor_panel") || "Doctors"}</Text>
+            <ChevronRight color={colors.textMuted} size={20} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={() => Linking.openURL("https://your-privacy-policy-url.com")}
+          >
+            <View style={styles.itemIconContainer}>
+              <ShieldCheck color={colors.primary} size={20} />
+            </View>
+            <Text style={styles.itemLabel}>{t("privacy_policy") || "Privacy Policy"}</Text>
             <ChevronRight color={colors.textMuted} size={20} />
           </TouchableOpacity>
         </View>

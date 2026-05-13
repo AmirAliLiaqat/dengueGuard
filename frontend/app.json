@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DengueGuard",
-    "description": "DengueGuard is a mobile application for early detection of dengue fever using artificial intelligence.",
+    "description": "Early detection of dengue fever using machine learning and medical knowledge base.",
     "slug": "dengue-kbs",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,27 +12,47 @@
       "resizeMode": "contain",
       "backgroundColor": "#FFFFFF"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/android-icon-foreground.png",
         "backgroundColor": "#0F172A"
       },
-      "package": "com.dengue.kbs",
+      "package": "com.amirali.dengueguard",
       "softwareKeyboardLayoutMode": "resize",
       "navigationBar": {
         "barStyle": "light-content",
         "backgroundColor": "#0F172A"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.amirali.dengueguard",
+      "infoPlist": {
+        "NSCameraUsageDescription": "DengueGuard needs access to your camera to let you take profile pictures and scan documents.",
+        "NSPhotoLibraryUsageDescription": "DengueGuard needs access to your photos to let you choose a profile picture."
       }
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
     },
-    "plugins": ["expo-asset", "expo-secure-store"],
+    "plugins": [
+      "expo-asset",
+      "expo-secure-store"
+    ],
     "extra": {
       "eas": {
         "projectId": "ed147549-7430-4fdb-aadf-583cc084eb32"
       }
-    }
+    },
+    "owner": "amiraliliaqat"
   }
 }

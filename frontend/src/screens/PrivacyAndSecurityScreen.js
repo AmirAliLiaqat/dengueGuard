@@ -9,6 +9,7 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -349,10 +350,18 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
           ))}
         </View>
 
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>{t("data_policy")}</Text>
-          <Text style={styles.infoText}>{t("data_policy_desc")}</Text>
-        </View>
+        <TouchableOpacity
+          style={styles.infoCard}
+          onPress={() => Linking.openURL("https://your-privacy-policy-url.com")}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.infoTitle}>{t("data_policy")}</Text>
+              <Text style={styles.infoText}>{t("data_policy_desc")}</Text>
+            </View>
+            <ChevronRight color={colors.textMuted} size={20} />
+          </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.deleteButton}
