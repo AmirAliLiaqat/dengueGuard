@@ -352,7 +352,7 @@ const PrivacyAndSecurityScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.infoCard}
-          onPress={() => Linking.openURL("https://your-privacy-policy-url.com")}
+          onPress={() => Linking.openURL("https://dengueguard-privacy.netlify.app/")}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flex: 1 }}>

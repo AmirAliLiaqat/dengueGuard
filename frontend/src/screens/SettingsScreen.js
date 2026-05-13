@@ -149,7 +149,7 @@ const SettingsScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.settingItem}
-            onPress={() => Linking.openURL("https://your-privacy-policy-url.com")}
+            onPress={() => Linking.openURL("https://dengueguard-privacy.netlify.app/")}
           >
             <View style={styles.itemIconContainer}>
               <ShieldCheck color={colors.primary} size={20} />
