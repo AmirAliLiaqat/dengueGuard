@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { Mail, Lock, Eye, EyeOff, Fingerprint } from "lucide-react-native";
+import { Mail, Lock, Eye, EyeOff, Fingerprint, User } from "lucide-react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as SecureStore from "expo-secure-store";
 import { useAlert } from "../context/AlertContext";
@@ -152,6 +152,44 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  const handleDemoLogin = async () => {
+    const demoEmail = "tester@dengueguard.com";
+    const demoPassword = "Tester123!";
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+
+    try {
+      const result = await login({ email: demoEmail, password: demoPassword }).unwrap();
+      dispatch(
+        setCredentials({
+          access_token: result.access_token,
+          user: { email: demoEmail },
+        }),
+      );
+    } catch (error) {
+      console.log("Demo Login error details:", error);
+      let errorMessage = t("invalid_credentials");
+
+      if (error.data?.detail) {
+        if (Array.isArray(error.data.detail)) {
+          errorMessage = error.data.detail.map((err) => err.msg).join(", ");
+        } else {
+          errorMessage = error.data.detail;
+        }
+      } else if (error.error) {
+        errorMessage = t("network_server_error");
+      } else if (error.status === "FETCH_ERROR") {
+        errorMessage = t("server_unreachable");
+      }
+
+      showAlert({
+        title: t("login_failed"),
+        message: errorMessage,
+        type: "error",
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
@@ -258,6 +296,15 @@ const LoginScreen = ({ navigation }) => {
                 </TouchableOpacity>
               )}
             </View>
+
+            <TouchableOpacity
+              style={[styles.demoButton, isLoading && { opacity: 0.8 }]}
+              onPress={handleDemoLogin}
+              disabled={isLoading}
+            >
+              <User color={colors.primary} size={20} style={styles.demoIcon} />
+              <Text style={styles.demoButtonText}>{t("demo_login")}</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.footer}>

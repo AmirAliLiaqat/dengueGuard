@@ -70,6 +70,28 @@ async def startup_event():
         admin_user.role = "user"
         await admin_user.save()
 
+    # Seed a default play store tester user for Google/Apple review bypass
+    tester_email = "tester@dengueguard.com"
+    tester_password = "Tester123!"
+    tester_hashed = security.get_password_hash(tester_password)
+    configured_tester = await User.find_one(User.email == tester_email)
+    if not configured_tester:
+        configured_tester = User(
+            email=tester_email,
+            hashed_password=tester_hashed,
+            full_name="Google Play Tester",
+            role="user",
+            is_active=True,
+            is_verified=True,
+        )
+        await configured_tester.insert()
+    else:
+        configured_tester.is_verified = True
+        configured_tester.is_active = True
+        configured_tester.role = "user"
+        configured_tester.hashed_password = tester_hashed
+        await configured_tester.save()
+
     # Seed a baseline doctor directory (idempotent by name).
     default_doctors = [
         {

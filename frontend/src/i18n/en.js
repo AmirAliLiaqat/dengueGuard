@@ -25,6 +25,7 @@ export const en = {
   login: "Log In",
   login_btn: "Log In",
   signup_btn: "Sign Up",
+  demo_login: "Demo Login",
   full_name: "Full Name",
   phone_number: "Phone Number",
   confirm_password: "Confirm Password",

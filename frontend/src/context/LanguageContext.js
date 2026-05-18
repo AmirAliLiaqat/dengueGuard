@@ -59,7 +59,7 @@ export const LanguageProvider = ({ children }) => {
   }, [translations]);
 
   const t = (key) => {
-    return translations[language][key] || key;
+    return translations[language]?.[key] || translations['en']?.[key] || key;
   };
 
   const changeLanguage = async (lang) => {

@@ -132,6 +132,27 @@ export const createStyles = (theme, isRTL) => {
       marginLeft: isRTL ? 0 : spacing.m,
       marginRight: isRTL ? spacing.m : 0,
     },
+    demoButton: {
+      flexDirection,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.card,
+      borderWidth: 1.5,
+      borderColor: colors.primary,
+      borderRadius: 16,
+      height: 56,
+      marginTop: spacing.l,
+      width: '100%',
+    },
+    demoButtonText: {
+      color: colors.primary,
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+    demoIcon: {
+      marginRight: isRTL ? 0 : spacing.s,
+      marginLeft: isRTL ? spacing.s : 0,
+    },
     footer: {
       flexDirection,
       justifyContent: 'center',
