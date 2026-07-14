@@ -102,6 +102,10 @@ Prerequisites: Python 3.12+ installed.
    Email: admin@dengueguard.com
    Password: Admin123!
 
+9. **Tester Login Creds**:
+   Email: tester@dengueguard.com
+   Password: Tester123!
+
 ### 2. Frontend Setup (Local)
 
 Prerequisites: Node.js 18+ and Expo Go app (on mobile).
